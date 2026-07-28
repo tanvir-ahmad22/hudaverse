@@ -1,0 +1,310 @@
+@import "tailwindcss";
+
+/* ============================================
+   HudaVerse Global Design System
+============================================ */
+
+:root {
+  /* Colors */
+
+  --background: #faf8f3;
+  --foreground: #154d40;
+
+  --emerald-primary: #154d40;
+  --emerald-dark: #062b23;
+
+  --gold-primary: #d4af37;
+  --gold-light: #fbbf24;
+
+  --surface: #ffffff;
+
+  /* Typography */
+
+  --font-body: var(--font-inter);
+  --font-heading: var(--font-heading);
+  --font-arabic: var(--font-arabic);
+  --font-bangla: var(--font-bangla);
+}
+
+/* ============================================
+   Tailwind Theme
+============================================ */
+
+@theme inline {
+  --color-background: var(--background);
+
+  --color-foreground: var(--foreground);
+
+  /* HudaVerse Fonts */
+
+  --font-sans: var(--font-inter);
+
+  --font-heading: var(--font-heading);
+
+  --font-arabic: var(--font-arabic);
+
+  --font-bangla: var(--font-bangla);
+}
+
+/* ============================================
+   Global Reset
+============================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+
+  min-height: 100%;
+
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--background);
+
+  color: var(--foreground);
+
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Typography Utilities
+============================================ */
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-arabic {
+  font-family: var(--font-arabic);
+}
+
+.font-bangla {
+  font-family: var(--font-bangla);
+}
+
+.quran-text {
+  font-family: var(--font-arabic);
+
+  line-height: 2.2;
+
+  direction: rtl;
+}
+
+/* ============================================
+   Links
+============================================ */
+
+a {
+  text-decoration: none;
+}
+
+/* ============================================
+   HudaVerse Animations
+============================================ */
+
+/* Floating Ornament */
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-4deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(4deg) translateY(-6px);
+  }
+}
+
+.animate-sway {
+  animation: sway 4s ease-in-out infinite;
+
+  transform-origin: top center;
+}
+
+/* Floating Cards */
+
+@keyframes float-card {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float-card {
+  animation: float-card 4.5s ease-in-out infinite;
+}
+
+/* Glow Pulse */
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+
+    transform: scale(1.05);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Avatar Glow */
+
+@keyframes avatar-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(251, 191, 36, 0);
+  }
+}
+
+.animate-avatar-glow {
+  animation: avatar-glow 2.2s ease-in-out infinite;
+}
+
+/* Slide Fade */
+
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slide-up-fade 0.5s ease-out forwards;
+}
+
+/* ============================================
+   Utility Effects
+============================================ */
+
+.glass {
+  background: rgba(255, 255, 255, 0.06);
+
+  backdrop-filter: blur(20px);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gold-glow {
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+}
+
+/* ============================================
+   Text Selection
+============================================ */
+
+::selection {
+  background: var(--gold-primary);
+
+  color: var(--emerald-dark);
+}
+/* ============================================
+   HudaVerse Typography Scale
+============================================ */
+
+@theme inline {
+  /* Font Family */
+
+  --font-sans: var(--font-inter);
+
+  --font-heading: var(--font-heading);
+
+  --font-arabic: var(--font-arabic);
+
+  --font-bangla: var(--font-bangla);
+
+  /* Typography Sizes */
+
+  --text-hero: 4.5rem;
+
+  --text-section: 3rem;
+
+  --text-card: 1.125rem;
+}
+
+/* ============================================
+   HudaVerse Typography Utilities
+============================================ */
+
+.hv-hero {
+  font-family: var(--font-heading);
+
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+
+  line-height: 1.1;
+
+  font-weight: 700;
+}
+
+.hv-section-title {
+  font-family: var(--font-heading);
+
+  font-size: clamp(2rem, 4vw, 3rem);
+
+  line-height: 1.2;
+
+  font-weight: 700;
+}
+
+.hv-card-title {
+  font-family: var(--font-heading);
+
+  font-size: 1.125rem;
+
+  font-weight: 600;
+}
+
+.hv-body {
+  font-family: var(--font-inter);
+
+  font-size: 1rem;
+
+  line-height: 1.7;
+
+  color: rgba(21, 77, 64, 0.65);
+}
+
+.hv-small {
+  font-family: var(--font-inter);
+
+  font-size: 0.875rem;
+}

@@ -1,5 +1,4 @@
 "use client";
-
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -7,9 +6,84 @@ import {
   ArrowRight,
   Smartphone,
   CheckCircle2,
-  Star,
   Heart,
 } from "lucide-react";
+
+// Static particle configuration - generated once outside component
+const CTA_PARTICLES = [
+  {
+    x: "12%",
+    y: "20%",
+    duration: 9,
+    delay: 1,
+  },
+  {
+    x: "35%",
+    y: "70%",
+    duration: 11,
+    delay: 2,
+  },
+  {
+    x: "78%",
+    y: "30%",
+    duration: 8,
+    delay: 0.5,
+  },
+  {
+    x: "5%",
+    y: "85%",
+    duration: 10,
+    delay: 3.2,
+  },
+  {
+    x: "92%",
+    y: "65%",
+    duration: 12,
+    delay: 0.8,
+  },
+  {
+    x: "45%",
+    y: "15%",
+    duration: 9.5,
+    delay: 2.5,
+  },
+  {
+    x: "60%",
+    y: "90%",
+    duration: 8.5,
+    delay: 1.8,
+  },
+  {
+    x: "20%",
+    y: "45%",
+    duration: 10.5,
+    delay: 3.5,
+  },
+  {
+    x: "85%",
+    y: "10%",
+    duration: 11.5,
+    delay: 0.3,
+  },
+  {
+    x: "50%",
+    y: "50%",
+    duration: 9.2,
+    delay: 2.2,
+  },
+  {
+    x: "15%",
+    y: "95%",
+    duration: 10.8,
+    delay: 1.5,
+  },
+  {
+    x: "70%",
+    y: "40%",
+    duration: 8.8,
+    delay: 2.8,
+  },
+];
 
 // =================================
 // Component
@@ -85,23 +159,23 @@ left-[-100px]
 
       {/* Gold Particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(12)].map((_, i) => (
+        {CTA_PARTICLES.map((particle, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 rounded-full bg-[#D4AF37]/20"
             initial={{
-              x: Math.random() * 100 + "%",
-              y: Math.random() * 100 + "%",
+              x: particle.x,
+              y: particle.y,
             }}
             animate={{
               y: [null, "-30%", null],
               opacity: [0.1, 0.4, 0.1],
             }}
             transition={{
-              duration: 8 + Math.random() * 4,
+              duration: particle.duration,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: Math.random() * 4,
+              delay: particle.delay,
             }}
           />
         ))}

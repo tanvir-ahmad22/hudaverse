@@ -27,6 +27,7 @@ import {
   Award,
   Database,
 } from "lucide-react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // ===============================
 // IMPORTS END
@@ -37,61 +38,24 @@ import {
 // ===============================
 
 const features = [
-  {
-    icon: BookOpen,
-    title: "Quran Guided",
-    desc: "Verses with meanings",
-  },
-  {
-    icon: ScrollText,
-    title: "Hadith Verified",
-    desc: "Authentic sources",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Trusted Sources",
-    desc: "Reference based",
-  },
-  {
-    icon: Sparkles,
-    title: "AI Intelligence",
-    desc: "Smart understanding",
-  },
-];
+  { icon: BookOpen, title: "Quran Guided", desc: "Verses with meanings" },
+  { icon: ScrollText, title: "Hadith Verified", desc: "Authentic sources" },
+  { icon: ShieldCheck, title: "Trusted Sources", desc: "Reference based" },
+  { icon: Sparkles, title: "AI Intelligence", desc: "Smart understanding" },
+] as const;
 
 const stats = [
-  {
-    value: "6,236+",
-    label: "Quran Verses",
-  },
-  {
-    value: "40K+",
-    label: "Hadith",
-  },
-  {
-    value: "99.8%",
-    label: "Accuracy",
-  },
-];
+  { value: "6,236+", label: "Quran Verses" },
+  { value: "40K+", label: "Hadith" },
+  { value: "99.8%", label: "Accuracy" },
+] as const;
 
 const quickActions = [
-  {
-    icon: Search,
-    label: "Explain",
-  },
-  {
-    icon: ScrollText,
-    label: "Hadith",
-  },
-  {
-    icon: BookOpen,
-    label: "Tafsir",
-  },
-  {
-    icon: AudioLines,
-    label: "Audio",
-  },
-];
+  { icon: Search, label: "Explain" },
+  { icon: ScrollText, label: "Hadith" },
+  { icon: BookOpen, label: "Tafsir" },
+  { icon: AudioLines, label: "Audio" },
+] as const;
 
 // ===============================
 // DATA END
@@ -161,16 +125,12 @@ function StatCard({ value, label }: { value: string; label: string }) {
 // ===============================
 
 function AIChatPreview() {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <motion.div
-      animate={{
-        y: [0, -8, 0],
-      }}
-      transition={{
-        duration: 8,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
+      animate={prefersReducedMotion ? undefined : { y: [0, -8, 0] }}
+      transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       className="relative"
     >
       <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-100/30 bg-white/80 backdrop-blur-xl shadow-2xl shadow-emerald-900/10">
@@ -179,22 +139,20 @@ function AIChatPreview() {
 
         {/* Animated Background Glow */}
         <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          animate={
+            prefersReducedMotion
+              ? undefined
+              : { scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }
+          }
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-amber-200/20 blur-3xl"
         />
         <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
+          animate={
+            prefersReducedMotion
+              ? undefined
+              : { scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }
+          }
           transition={{
             duration: 12,
             repeat: Infinity,
@@ -373,6 +331,7 @@ function AIChatPreview() {
             {quickActions.map((item) => (
               <motion.button
                 key={item.label}
+                type="button"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 className="flex items-center gap-1.5 rounded-full border border-emerald-100/30 bg-white/60 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-emerald-800 transition-all hover:bg-white hover:shadow-md"
@@ -393,35 +352,42 @@ function AIChatPreview() {
         ================================ */}
 
         <div className="px-5 pb-5">
-          <motion.div
-            whileFocusWithin={{
-              boxShadow: "0 0 0 3px rgba(16, 185, 129, 0.1)",
-            }}
-            className="flex items-center gap-2 rounded-full border border-emerald-200/50 bg-white/60 backdrop-blur-sm px-3 py-1.5 transition-all hover:border-emerald-300"
-          >
+          <div className="flex items-center gap-2 rounded-full border border-emerald-200/50 bg-white/60 backdrop-blur-sm px-3 py-1.5 transition-all hover:border-emerald-300 focus-within:border-emerald-300 focus-within:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]">
             <MessageCircle className="h-4 w-4 text-emerald-400" />
 
             <input
+              type="text"
+              disabled
+              aria-disabled="true"
+              aria-label="Chat preview — not an interactive input"
               placeholder="Ask Quran, Hadith or Islamic questions..."
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-emerald-400/60"
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-emerald-400/60 disabled:cursor-not-allowed"
             />
 
             <motion.button
+              type="button"
+              disabled
+              aria-disabled="true"
+              aria-label="Voice input — not available in preview"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900 text-white transition-all hover:bg-emerald-800"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900 text-white transition-all hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Mic className="h-3.5 w-3.5" />
             </motion.button>
 
             <motion.button
+              type="button"
+              disabled
+              aria-disabled="true"
+              aria-label="Send message — not available in preview"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-emerald-950 shadow-lg shadow-amber-400/30 transition-all hover:shadow-amber-400/50"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-emerald-950 shadow-lg shadow-amber-400/30 transition-all hover:shadow-amber-400/50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Send className="h-3.5 w-3.5" />
             </motion.button>
-          </motion.div>
+          </div>
         </div>
 
         {/* ===============================
@@ -466,11 +432,12 @@ function AIChatPreview() {
 // ===============================
 
 export default function AiAssistantShowcase() {
-  const sectionRef = useRef(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, {
     once: true,
     amount: 0.1,
   });
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <section
@@ -482,22 +449,20 @@ export default function AiAssistantShowcase() {
       ================================ */}
 
       <motion.div
-        animate={{
-          scale: [1, 1.1, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 15,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+        animate={
+          prefersReducedMotion
+            ? undefined
+            : { scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }
+        }
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
         className="pointer-events-none absolute -left-40 top-0 h-[600px] w-[600px] rounded-full bg-emerald-200/10 blur-3xl"
       />
       <motion.div
-        animate={{
-          scale: [1, 1.15, 1],
-          opacity: [0.2, 0.4, 0.2],
-        }}
+        animate={
+          prefersReducedMotion
+            ? undefined
+            : { scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }
+        }
         transition={{
           duration: 18,
           repeat: Infinity,
@@ -592,6 +557,7 @@ export default function AiAssistantShowcase() {
               </Link>
 
               <motion.button
+                type="button"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-2 rounded-full border border-emerald-200/50 bg-white/60 backdrop-blur-sm px-5 py-3 text-sm font-semibold text-emerald-800 transition-all hover:bg-white hover:shadow-md"

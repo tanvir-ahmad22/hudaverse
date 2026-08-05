@@ -1,8 +1,14 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  type Variants,
+  type TargetAndTransition,
+  type Easing,
+} from "framer-motion";
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   BookMarked,
   Bookmark,
@@ -13,7 +19,6 @@ import {
   Search,
   Headphones,
   ArrowRight,
-  Clock,
   Flame,
   Sparkles,
   ChevronRight,
@@ -31,23 +36,32 @@ import {
 } from "lucide-react";
 
 // ================================
-// Animation Variants
+// Animation Variants with Proper Types
 // ================================
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+const easeInOut: Easing = "easeInOut";
+
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+  },
 };
 
-const fadeInScale = {
-  initial: { opacity: 0, scale: 0.96 },
-  animate: { opacity: 1, scale: 1 },
-  transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+const fadeInScale: Variants = {
+  hidden: { opacity: 0, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+  },
 };
 
-const staggerContainer = {
-  animate: {
+const staggerContainer: Variants = {
+  hidden: {},
+  visible: {
     transition: {
       staggerChildren: 0.06,
       delayChildren: 0.08,
@@ -55,41 +69,22 @@ const staggerContainer = {
   },
 };
 
-const floatAnimation = (delay = 0, yOffset = 8) => ({
-  initial: { y: 0 },
-  animate: {
-    y: [0, -yOffset, 0],
-    transition: {
-      duration: 3 + Math.random() * 1.5,
-      repeat: Infinity,
-      ease: "easeInOut",
-      delay,
-    },
-  },
-});
-
-const glowPulse = {
-  initial: { opacity: 0.15 },
-  animate: {
-    opacity: [0.15, 0.3, 0.15],
-    transition: {
-      duration: 3,
-      repeat: Infinity,
-      ease: "easeInOut",
-    },
+const glowPulse: TargetAndTransition = {
+  opacity: [0.15, 0.3, 0.15],
+  transition: {
+    duration: 3,
+    repeat: Infinity,
+    ease: easeInOut,
   },
 };
 
-const slowDrift = {
-  initial: { x: 0, y: 0 },
-  animate: {
-    x: [0, 10, 0, -10, 0],
-    y: [0, -5, 0, 5, 0],
-    transition: {
-      duration: 20,
-      repeat: Infinity,
-      ease: "easeInOut",
-    },
+const slowDrift: TargetAndTransition = {
+  x: [0, 10, 0, -10, 0],
+  y: [0, -5, 0, 5, 0],
+  transition: {
+    duration: 20,
+    repeat: Infinity,
+    ease: easeInOut,
   },
 };
 
@@ -134,7 +129,7 @@ const AYAH_DATA = [
   },
 ];
 
-const features = [
+const FEATURES = [
   {
     icon: Search,
     title: "Powerful Search",
@@ -157,7 +152,7 @@ const features = [
   },
 ];
 
-const stats = [
+const STATS = [
   { value: 114, label: "Surahs", icon: BookMarked },
   { value: 6236, label: "Verses", icon: Layers },
   { value: 30, label: "Juz", icon: Star },
@@ -182,14 +177,21 @@ const Badge = ({
   </span>
 );
 
-const GlowOrb = ({ className = "" }: { className?: string }) => (
+const GlowOrb = ({
+  className = "",
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) => (
   <div
     className={`pointer-events-none absolute rounded-full blur-3xl ${className}`}
+    style={style}
   />
 );
 
 const GlassDivider = () => (
-  <div className="my-3 h-px bg-gradient-to-r from-transparent via-emerald-900/8 to-transparent" />
+  <div className="my-3 h-px bg-linear-to-r from-transparent via-emerald-900/8 to-transparent" />
 );
 
 // ================================
@@ -208,26 +210,41 @@ const FloatingBadge = ({
   delay?: number;
   className?: string;
   yOffset?: number;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 15, scale: 0.9 }}
-    whileInView={{ opacity: 1, y: 0, scale: 1 }}
-    viewport={{ once: true }}
-    transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    variants={floatAnimation(delay * 0.3, yOffset)}
-    whileHover={{ scale: 1.05, y: -4 }}
-    className={`absolute z-20 flex items-center gap-2 rounded-xl border border-emerald-900/5 bg-white/80 px-3 py-1.5 shadow-lg backdrop-blur-xl transition-shadow duration-300 hover:shadow-xl ${className}`}
-  >
-    <div className="rounded-full bg-gradient-to-br from-emerald-50 to-emerald-100/70 p-1">
-      <Icon className="h-3 w-3 text-emerald-700" />
-    </div>
-    <span className="text-[10px] font-medium text-emerald-950">{label}</span>
+}) => {
+  const floatAnimation = useMemo(
+    () => ({
+      y: [0, -yOffset, 0],
+      transition: {
+        duration: 4,
+        repeat: Infinity,
+        ease: easeInOut,
+        delay,
+      },
+    }),
+    [yOffset, delay],
+  );
+
+  return (
     <motion.div
-      variants={glowPulse}
-      className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-500/5 to-amber-500/5 opacity-0 transition-opacity duration-300 hover:opacity-100"
-    />
-  </motion.div>
-);
+      initial={{ opacity: 0, y: 15, scale: 0.9 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.05, y: -4 }}
+      animate={floatAnimation}
+      className={`absolute z-20 flex items-center gap-2 rounded-xl border border-emerald-900/5 bg-white/80 px-3 py-1.5 shadow-lg backdrop-blur-xl transition-shadow duration-300 hover:shadow-xl ${className}`}
+    >
+      <div className="rounded-full bg-linear-to-br from-emerald-50 to-emerald-100/70 p-1">
+        <Icon className="h-3 w-3 text-emerald-700" />
+      </div>
+      <span className="text-[10px] font-medium text-emerald-950">{label}</span>
+      <motion.div
+        animate={glowPulse}
+        className="absolute inset-0 rounded-xl bg-linear-to-r from-emerald-500/5 to-amber-500/5 opacity-0 transition-opacity duration-300 hover:opacity-100"
+      />
+    </motion.div>
+  );
+};
 
 // ================================
 // StatCard
@@ -323,9 +340,13 @@ const InteractiveButton = ({
   isActive?: boolean;
   activeColor?: string;
 }) => {
-  const [ripples, setRipples] = useState<
-    { id: number; x: number; y: number }[]
-  >([]);
+  type Ripple = {
+    id: number;
+    x: number;
+    y: number;
+  };
+
+  const [ripples, setRipples] = useState<Ripple[]>([]);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -362,7 +383,7 @@ const InteractiveButton = ({
             key={ripple.id}
             initial={{ scale: 0, opacity: 0.5 }}
             animate={{ scale: 3, opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: easeInOut }}
             className="absolute inset-0 rounded-full bg-emerald-400/30"
             style={{
               left: ripple.x - 12,
@@ -403,13 +424,13 @@ const AudioPlayer = () => {
   }, [isPlaying, duration]);
 
   return (
-    <div className="rounded-lg bg-gradient-to-br from-emerald-50/40 to-emerald-100/20 p-2.5">
+    <div className="rounded-lg bg-linear-to-br from-emerald-50/40 to-emerald-100/20 p-2.5">
       <div className="flex items-center gap-2.5">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsPlaying(!isPlaying)}
-          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-700 to-emerald-950 text-white shadow-md shadow-emerald-900/20"
+          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-700 to-emerald-950 text-white shadow-md shadow-emerald-900/20"
         >
           <div className="absolute inset-0 rounded-full bg-emerald-400/20 blur-sm" />
           {isPlaying ? (
@@ -435,7 +456,7 @@ const AudioPlayer = () => {
               initial={{ width: 0 }}
               animate={{ width: `${(currentTime / duration) * 100}%` }}
               transition={{ duration: 0.1 }}
-              className="h-full rounded-full bg-gradient-to-r from-amber-400 to-emerald-500"
+              className="h-full rounded-full bg-linear-to-r from-amber-400 to-emerald-500"
             />
           </div>
           <div className="mt-0.5 flex items-center gap-2">
@@ -482,9 +503,8 @@ const AudioPlayer = () => {
 const IslamicPattern = () => {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* Primary geometric pattern - centered behind Quran card */}
       <motion.div
-        variants={slowDrift}
+        animate={slowDrift}
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
       >
         <svg
@@ -495,25 +515,19 @@ const IslamicPattern = () => {
           xmlns="http://www.w3.org/2000/svg"
           className="opacity-[0.04]"
         >
-          {/* Eight-pointed star pattern */}
           <g>
-            {/* Outer star */}
             <path
               d="M300 30L337.5 97.5L412.5 67.5L390 142.5L465 150L427.5 217.5L502.5 247.5L450 300L502.5 352.5L427.5 382.5L465 450L390 457.5L412.5 532.5L337.5 502.5L300 570L262.5 502.5L187.5 532.5L210 457.5L135 450L172.5 382.5L97.5 352.5L150 300L97.5 247.5L172.5 217.5L135 150L210 142.5L187.5 67.5L262.5 97.5L300 30Z"
               stroke="#D4AF37"
               strokeWidth="1.5"
               opacity="0.6"
             />
-
-            {/* Inner star */}
             <path
               d="M300 90L325 142.5L382.5 127.5L367.5 187.5L427.5 195L402.5 247.5L457.5 277.5L412.5 300L457.5 322.5L402.5 352.5L427.5 405L367.5 412.5L382.5 472.5L325 457.5L300 510L275 457.5L217.5 472.5L232.5 412.5L172.5 405L197.5 352.5L142.5 322.5L187.5 300L142.5 277.5L197.5 247.5L172.5 195L232.5 187.5L217.5 127.5L275 142.5L300 90Z"
               stroke="#154D40"
               strokeWidth="1.2"
               opacity="0.4"
             />
-
-            {/* Diamond patterns */}
             {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
               const rad = (angle * Math.PI) / 180;
               const r = 200;
@@ -544,8 +558,6 @@ const IslamicPattern = () => {
                 </g>
               );
             })}
-
-            {/* Concentric circles */}
             <circle
               cx="300"
               cy="300"
@@ -564,8 +576,6 @@ const IslamicPattern = () => {
               opacity="0.1"
               strokeDasharray="2 12"
             />
-
-            {/* Corner arabesque elements */}
             {[
               { x: 20, y: 20 },
               { x: 580, y: 20 },
@@ -593,9 +603,8 @@ const IslamicPattern = () => {
         </svg>
       </motion.div>
 
-      {/* Secondary pattern - subtle mesh overlay */}
       <motion.div
-        variants={slowDrift}
+        animate={slowDrift}
         className="absolute inset-0"
         style={{ animationDelay: "-5s" }}
       >
@@ -638,16 +647,15 @@ const IslamicPattern = () => {
         </svg>
       </motion.div>
 
-      {/* Light sweep effect */}
       <motion.div
         initial={{ x: "-100%" }}
         animate={{ x: "200%" }}
         transition={{
           duration: 15,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: easeInOut,
         }}
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12"
+        className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent skew-x-12"
       />
     </div>
   );
@@ -661,10 +669,6 @@ const QuranCard = () => {
   const [hoveredAyah, setHoveredAyah] = useState<number | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
   const [showBookmarkConfirm, setShowBookmarkConfirm] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(28);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const duration = 128;
 
   const handleBookmark = () => {
     setBookmarked(!bookmarked);
@@ -672,38 +676,27 @@ const QuranCard = () => {
     setTimeout(() => setShowBookmarkConfirm(false), 2000);
   };
 
-  useEffect(() => {
-    if (isPlaying) {
-      const timer = setInterval(() => {
-        setCurrentTime((prev) => (prev >= duration ? 0 : prev + 1));
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [isPlaying, duration]);
-
   return (
     <motion.div
-      ref={cardRef}
       variants={fadeInScale}
-      className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-emerald-900/5 bg-white/80 shadow-[0_20px_50px_-12px_rgba(6,78,59,0.12)] backdrop-blur-xl hover:shadow-[0_25px_60px_-12px_rgba(6,78,59,0.18)] transition-shadow duration-500"
+      initial="hidden"
+      animate="visible"
+      className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-emerald-900/5 bg-white/80 shadow-[0_20px_50px_-12px_rgba(6,78,59,0.12)] backdrop-blur-xl transition-shadow duration-500 hover:shadow-[0_25px_60px_-12px_rgba(6,78,59,0.18)]"
     >
-      {/* Card glow */}
       <div className="absolute -top-16 -right-16 h-32 w-32 rounded-full bg-amber-500/5 blur-2xl" />
       <div className="absolute -bottom-16 -left-16 h-32 w-32 rounded-full bg-emerald-500/5 blur-2xl" />
       <motion.div
-        variants={glowPulse}
+        animate={glowPulse}
         className="absolute top-1/2 left-1/2 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400/5 blur-3xl"
       />
 
       <div className="relative p-5">
-        {/* ================================
-        Card Header
-        ================================ */}
+        {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2.5">
             <motion.div whileHover={{ scale: 1.05 }} className="relative">
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-emerald-700 to-emerald-950 blur-sm opacity-30" />
-              <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-700 to-emerald-950 text-amber-300 shadow-md shadow-emerald-900/20">
+              <div className="absolute inset-0 rounded-lg bg-linear-to-br from-emerald-700 to-emerald-950 blur-sm opacity-30" />
+              <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-emerald-700 to-emerald-950 text-amber-300 shadow-md shadow-emerald-900/20">
                 <BookMarked className="h-4 w-4" />
               </div>
             </motion.div>
@@ -734,13 +727,7 @@ const QuranCard = () => {
               isActive={bookmarked}
               activeColor="text-amber-500"
             />
-            <InteractiveButton
-              icon={isPlaying ? Pause : Play}
-              label={isPlaying ? "Pause" : "Play"}
-              onClick={() => setIsPlaying(!isPlaying)}
-              isActive={isPlaying}
-              activeColor="text-emerald-600"
-            />
+            <InteractiveButton icon={Play} label="Play" />
             <InteractiveButton icon={Share2} label="Share" />
             <InteractiveButton icon={MoreVertical} label="More" />
           </div>
@@ -766,9 +753,7 @@ const QuranCard = () => {
 
         <GlassDivider />
 
-        {/* ================================
-        Arabic Area
-        ================================ */}
+        {/* Arabic Area */}
         <div className="space-y-2.5 text-center">
           {AYAH_DATA.map((ayah, idx) => (
             <motion.div
@@ -809,7 +794,7 @@ const QuranCard = () => {
                     hoveredAyah === idx ? "rgb(6, 78, 59)" : "rgb(6, 78, 59)",
                 }}
                 transition={{ duration: 0.2 }}
-                className="font-serif text-base leading-[2] text-emerald-950 transition-all duration-300 group-hover:text-emerald-800"
+                className="font-serif text-base leading-loose text-emerald-950 transition-all duration-300 group-hover:text-emerald-800"
                 dir="rtl"
               >
                 {ayah.text}
@@ -833,19 +818,17 @@ const QuranCard = () => {
 
         <GlassDivider />
 
-        {/* ================================
-        Translation
-        ================================ */}
+        {/* Translation */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-emerald-50/60 to-emerald-100/20 px-3 py-2 text-center backdrop-blur-sm transition-all duration-300 hover:border-emerald-200/30 hover:shadow-sm"
+          className="group relative overflow-hidden rounded-lg bg-linear-to-br from-emerald-50/60 to-emerald-100/20 px-3 py-2 text-center backdrop-blur-sm transition-all duration-300 hover:border-emerald-200/30 hover:shadow-sm"
         >
           <div className="absolute inset-0 bg-emerald-200/10 blur-lg transition-opacity duration-300 group-hover:opacity-50" />
           <p className="relative text-xs font-medium leading-relaxed text-emerald-900 transition-colors duration-300 group-hover:text-emerald-800">
-            "{AYAH_DATA[1].translation}"
+            {AYAH_DATA[1].translation}
           </p>
           <div className="relative mt-1 flex items-center justify-center gap-1.5 text-[9px] text-emerald-900/40 transition-colors duration-300 group-hover:text-emerald-900/60">
             <Sparkles className="h-2.5 w-2.5" />
@@ -855,9 +838,7 @@ const QuranCard = () => {
 
         <GlassDivider />
 
-        {/* ================================
-        Reading & Audio
-        ================================ */}
+        {/* Reading & Audio */}
         <div className="space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -911,7 +892,7 @@ const QuranCard = () => {
           >
             <div className="flex items-center gap-2 text-xs">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              {bookmarked ? "✓ Saved to Bookmarks" : "✕ Removed from Bookmarks"}
+              {bookmarked ? "Saved to Bookmarks" : "Removed from Bookmarks"}
             </div>
           </motion.div>
         )}
@@ -941,19 +922,26 @@ export default function QuranShowcase() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  const glowOrbStyle1 = useMemo(
+    () => ({
+      transform: `translate(${mousePosition.x * -8}px, ${mousePosition.y * -8}px)`,
+    }),
+    [mousePosition],
+  );
+
+  const glowOrbStyle2 = useMemo(
+    () => ({
+      transform: `translate(${mousePosition.x * 8}px, ${mousePosition.y * 8}px)`,
+    }),
+    [mousePosition],
+  );
+
   return (
     <section
       ref={sectionRef}
       className="relative min-h-[80vh] overflow-hidden bg-[#f7f9f6] px-4 py-12 sm:px-6 md:py-16 lg:py-20"
     >
-      {/* ================================
-      Islamic Pattern Background
-      ================================ */}
       <IslamicPattern />
-
-      {/* ================================
-      Background Effects
-      ================================ */}
 
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.015]"
@@ -971,15 +959,11 @@ export default function QuranShowcase() {
 
       <GlowOrb
         className="left-0 top-0 h-[400px] w-[400px] -translate-x-1/4 -translate-y-1/4 bg-emerald-300/12"
-        style={{
-          transform: `translate(${mousePosition.x * -8}px, ${mousePosition.y * -8}px)`,
-        }}
+        style={glowOrbStyle1}
       />
       <GlowOrb
         className="right-0 bottom-0 h-[400px] w-[400px] translate-x-1/4 translate-y-1/4 bg-amber-200/8"
-        style={{
-          transform: `translate(${mousePosition.x * 8}px, ${mousePosition.y * 8}px)`,
-        }}
+        style={glowOrbStyle2}
       />
       <GlowOrb className="left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 bg-emerald-400/4" />
 
@@ -994,9 +978,7 @@ export default function QuranShowcase() {
 
       <div className="relative mx-auto max-w-7xl">
         <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12 xl:gap-16">
-          {/* ================================
-          Left Column - Quran Card
-          ================================ */}
+          {/* Left Column - Quran Card */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1004,7 +986,6 @@ export default function QuranShowcase() {
             transition={{ duration: 0.5 }}
             className="relative flex w-full items-center justify-center py-4"
           >
-            {/* Floating Badges */}
             <FloatingBadge
               icon={Bookmark}
               label="Bookmark Saved"
@@ -1037,9 +1018,7 @@ export default function QuranShowcase() {
             <QuranCard />
           </motion.div>
 
-          {/* ================================
-          Right Column - Content
-          ================================ */}
+          {/* Right Column - Content */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1047,7 +1026,6 @@ export default function QuranShowcase() {
             transition={{ duration: 0.5, delay: 0.05 }}
             className="flex flex-col"
           >
-            {/* Badge */}
             <motion.div
               initial={{ opacity: 0, x: -8 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -1061,7 +1039,6 @@ export default function QuranShowcase() {
               </Badge>
             </motion.div>
 
-            {/* Heading */}
             <motion.h2
               initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1070,7 +1047,7 @@ export default function QuranShowcase() {
               className="font-serif text-2xl font-bold leading-tight text-emerald-950 sm:text-3xl lg:text-4xl"
             >
               Reconnect With The{" "}
-              <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">
                 Words of Allah
               </span>
             </motion.h2>
@@ -1086,7 +1063,6 @@ export default function QuranShowcase() {
               text, trusted translations, and immersive audio recitation.
             </motion.p>
 
-            {/* CTA */}
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1101,12 +1077,12 @@ export default function QuranShowcase() {
                 >
                   <Link
                     href="/quran"
-                    className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-emerald-700 to-emerald-950 px-6 py-2.5 text-xs font-semibold text-white shadow-md shadow-emerald-900/20 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-900/30 hover:brightness-110"
+                    className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-linear-to-r from-emerald-700 to-emerald-950 px-6 py-2.5 text-xs font-semibold text-white shadow-md shadow-emerald-900/20 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-900/30 hover:brightness-110"
                   >
                     <span className="relative z-10">Start Reading Quran</span>
                     <ArrowRight className="relative z-10 h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-emerald-500/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-white/0 via-white/10 to-white/0 transition-transform duration-700 group-hover:translate-x-full" />
+                    <div className="absolute inset-0 bg-linear-to-r from-amber-500/20 to-emerald-500/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-white/0 via-white/10 to-white/0 transition-transform duration-700 group-hover:translate-x-full" />
                   </Link>
                 </motion.div>
                 <motion.div
@@ -1135,7 +1111,6 @@ export default function QuranShowcase() {
               </div>
             </motion.div>
 
-            {/* Trust Indicators */}
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1163,15 +1138,14 @@ export default function QuranShowcase() {
               ))}
             </motion.div>
 
-            {/* Stats */}
             <motion.div
               variants={staggerContainer}
-              initial="initial"
-              whileInView="animate"
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true }}
               className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4"
             >
-              {stats.map((stat, index) => (
+              {STATS.map((stat, index) => (
                 <StatCard
                   key={stat.label}
                   value={stat.value}
@@ -1182,16 +1156,20 @@ export default function QuranShowcase() {
               ))}
             </motion.div>
 
-            {/* Features */}
             <motion.div
               variants={staggerContainer}
-              initial="initial"
-              whileInView="animate"
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true }}
               className="mt-3 grid grid-cols-1 gap-0.5 sm:grid-cols-2"
             >
-              {features.map((feature) => (
-                <motion.div key={feature.title} variants={fadeInUp}>
+              {FEATURES.map((feature) => (
+                <motion.div
+                  key={feature.title}
+                  variants={fadeInUp}
+                  initial="hidden"
+                  animate="visible"
+                >
                   <div className="group flex items-start gap-3 rounded-xl border border-transparent p-2 transition-all duration-300 hover:border-emerald-200/30 hover:bg-white/40">
                     <div className="relative flex h-9 w-9 shrink-0 items-center justify-center">
                       <div className="absolute inset-0 rounded-full bg-emerald-50/50 transition-all duration-300 group-hover:scale-110 group-hover:bg-emerald-100/50" />

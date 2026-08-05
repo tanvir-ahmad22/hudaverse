@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import {
+  motion,
+  type Variants,
+  TargetAndTransition,
+  Easing,
+} from "framer-motion";
 import {
   Search,
   Bookmark,
@@ -9,7 +14,6 @@ import {
   Share2,
   BookOpen,
   ArrowRight,
-  Star,
   ShieldCheck,
   Library,
   User,
@@ -48,8 +52,10 @@ const features = [
 
 const tabs = ["All", "Sahih", "Hasan", "Bookmarks", "Recent"];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
+const containerVariants: Variants = {
+  hidden: {
+    opacity: 0,
+  },
   visible: {
     opacity: 1,
     transition: {
@@ -59,8 +65,11 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+const itemVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+  },
   visible: {
     opacity: 1,
     y: 0,
@@ -71,12 +80,61 @@ const itemVariants = {
   },
 };
 
+const floatingBadgeVariants: Variants = {
+  initial: { opacity: 0, x: -20 },
+  animate: (custom: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.5,
+      delay: custom,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  }),
+};
+
+const easeInOut: Easing = "easeInOut";
+
+const floatingYAnimation: TargetAndTransition = {
+  y: [0, -8, 0],
+  transition: {
+    duration: 4,
+    repeat: Infinity,
+    ease: easeInOut,
+  },
+};
+
+const floatingYAnimation2: TargetAndTransition = {
+  y: [0, 8, 0],
+  transition: {
+    duration: 5,
+    repeat: Infinity,
+    ease: easeInOut,
+    delay: 1,
+  },
+};
+
+const floatingYAnimation3: TargetAndTransition = {
+  y: [0, -6, 0],
+  transition: {
+    duration: 4.5,
+    repeat: Infinity,
+    ease: easeInOut,
+    delay: 0.5,
+  },
+};
+
 export default function HadithShowcase() {
   const [activeTab, setActiveTab] = useState("All");
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isShared, setIsShared] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleShare = () => {
+    setIsShared(true);
+    setTimeout(() => setIsShared(false), 2000);
+  };
 
   return (
     <section className="relative overflow-hidden bg-[#faf8f3] px-6 py-20 md:py-24">
@@ -90,7 +148,10 @@ export default function HadithShowcase() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{
+            duration: 0.6,
+            ease: [0.22, 1, 0.36, 1],
+          }}
           className="order-2 lg:order-1"
         >
           <motion.span
@@ -145,7 +206,7 @@ export default function HadithShowcase() {
             viewport={{ once: true }}
             className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2"
           >
-            {features.map((feature, index) => {
+            {features.map((feature) => {
               const Icon = feature.icon;
               return (
                 <motion.div
@@ -158,8 +219,15 @@ export default function HadithShowcase() {
                   className="group flex items-start gap-3 rounded-2xl border border-emerald-900/5 bg-white p-3.5 shadow-sm transition-all duration-300 hover:border-amber-200/30 hover:shadow-md hover:shadow-emerald-900/5"
                 >
                   <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-800 to-emerald-950 text-amber-300 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-emerald-900/20"
+                    whileHover={{
+                      scale: 1.1,
+                      rotate: 5,
+                    }}
+                    transition={{
+                      duration: 0.2,
+                      ease: "easeOut",
+                    }}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-800 to-emerald-950 text-amber-300 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-emerald-900/20"
                   >
                     <Icon className="h-5 w-5" />
                   </motion.div>
@@ -208,70 +276,63 @@ export default function HadithShowcase() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="relative order-1 mx-auto w-full max-w-md lg:order-2"
         >
-          {/* Floating Badges - Max 3 */}
+          {/* Floating Badges */}
+
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            custom={0.3}
+            variants={floatingBadgeVariants}
+            initial="initial"
+            whileInView="animate"
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="pointer-events-none absolute -left-16 top-8 z-20 hidden flex-col items-center gap-1.5 rounded-2xl border border-emerald-900/5 bg-white px-2.5 py-3 text-center shadow-lg shadow-emerald-900/10 lg:flex"
-            animate={{
-              y: [0, -8, 0],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+            className="pointer-events-none absolute -left-16 top-8 z-20 hidden lg:flex"
           >
-            <Library className="h-5 w-5 text-amber-500" />
-            <span className="text-[10px] font-medium leading-tight text-emerald-950">
-              Sahih Bukhari
-            </span>
+            <motion.div
+              animate={floatingYAnimation}
+              className="flex flex-col items-center gap-1.5 rounded-2xl border border-emerald-900/5 bg-white px-2.5 py-3 text-center shadow-lg shadow-emerald-900/10"
+            >
+              <Library className="h-5 w-5 text-amber-500" />
+              <span className="text-[10px] font-medium leading-tight text-emerald-950">
+                Sahih Bukhari
+              </span>
+            </motion.div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            custom={0.5}
+            variants={floatingBadgeVariants}
+            initial="initial"
+            whileInView="animate"
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="pointer-events-none absolute -left-12 top-36 z-20 hidden flex-col items-center gap-1.5 rounded-2xl border border-emerald-900/5 bg-white px-2.5 py-3 text-center shadow-lg shadow-emerald-900/10 lg:flex"
-            animate={{
-              y: [0, 8, 0],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
+            className="pointer-events-none absolute -left-12 top-36 z-20 hidden lg:flex"
           >
-            <Award className="h-5 w-5 text-amber-500" />
-            <span className="text-[10px] font-medium leading-tight text-emerald-950">
-              Authentic
-            </span>
+            <motion.div
+              animate={floatingYAnimation2}
+              className="flex flex-col items-center gap-1.5 rounded-2xl border border-emerald-900/5 bg-white px-2.5 py-3 text-center shadow-lg shadow-emerald-900/10"
+            >
+              <Award className="h-5 w-5 text-amber-500" />
+              <span className="text-[10px] font-medium leading-tight text-emerald-950">
+                Authentic
+              </span>
+            </motion.div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            custom={0.4}
+            variants={floatingBadgeVariants}
+            initial="initial"
+            whileInView="animate"
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="pointer-events-none absolute -right-12 top-20 z-20 hidden flex-col items-center gap-1.5 rounded-2xl border border-emerald-900/5 bg-white px-2.5 py-3 text-center shadow-lg shadow-emerald-900/10 lg:flex"
-            animate={{
-              y: [0, -6, 0],
-            }}
-            transition={{
-              duration: 4.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.5,
-            }}
+            className="pointer-events-none absolute -right-12 top-20 z-20 hidden lg:flex"
           >
-            <Layers className="h-5 w-5 text-amber-500" />
-            <span className="text-[10px] font-medium leading-tight text-emerald-950">
-              Saved Collection
-            </span>
+            <motion.div
+              animate={floatingYAnimation3}
+              className="flex flex-col items-center gap-1.5 rounded-2xl border border-emerald-900/5 bg-white px-2.5 py-3 text-center shadow-lg shadow-emerald-900/10"
+            >
+              <Layers className="h-5 w-5 text-amber-500" />
+              <span className="text-[10px] font-medium leading-tight text-emerald-950">
+                Saved Collection
+              </span>
+            </motion.div>
           </motion.div>
 
           {/* Hadith Card */}
@@ -298,9 +359,9 @@ export default function HadithShowcase() {
               <div className="flex items-center gap-2.5">
                 <motion.div
                   whileHover={{ rotate: 10, scale: 1.05 }}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-800 to-emerald-950 text-amber-300 shadow-lg shadow-emerald-900/20"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-emerald-800 to-emerald-950 text-amber-300 shadow-lg shadow-emerald-900/20"
                 >
-                  <BookOpen className="h-4.5 w-4.5" />
+                  <BookOpen className="h-4 w-4" />
                 </motion.div>
                 <div>
                   <p className="flex items-center gap-2 text-sm font-semibold text-emerald-950">
@@ -321,7 +382,7 @@ export default function HadithShowcase() {
                     transition={{
                       duration: 2,
                       repeat: Infinity,
-                      ease: "easeInOut",
+                      ease: easeInOut,
                     }}
                     className="h-1.5 w-1.5 rounded-full bg-emerald-500"
                   />
@@ -336,7 +397,7 @@ export default function HadithShowcase() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="relative mt-4 flex items-center gap-2 overflow-hidden rounded-full border border-emerald-100 bg-white px-4 py-2.5 transition-all duration-300 focus-within:border-amber-300 focus-within:shadow-md focus-within:shadow-amber-200/20"
+              className="group relative mt-4 flex items-center gap-2 overflow-hidden rounded-full border border-emerald-100 bg-white px-4 py-2.5 transition-all duration-300 focus-within:border-amber-300 focus-within:shadow-md focus-within:shadow-amber-200/20"
             >
               <Search className="h-4 w-4 text-emerald-900/40 transition-colors duration-300 group-focus-within:text-amber-500" />
               <input
@@ -390,22 +451,22 @@ export default function HadithShowcase() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.3 }}
-              className="relative mt-4 overflow-hidden rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-50/30 to-emerald-50/30 p-4 text-center transition-all duration-300 hover:border-amber-300/40"
+              className="relative mt-4 overflow-hidden rounded-2xl border border-amber-200/40 bg-linear-to-br from-amber-50/30 to-emerald-50/30 p-4 text-center transition-all duration-300 hover:border-amber-300/40"
             >
               <div className="absolute right-3 top-2 text-[10px] font-medium text-amber-500/60">
                 #42
               </div>
               <div className="relative">
                 <p
-                  className="font-serif text-xl leading-[2] text-emerald-950 md:text-2xl"
+                  className="font-serif text-xl leading-loose text-emerald-950 md:text-2xl"
                   dir="rtl"
                 >
                   إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ
                 </p>
                 <div className="my-3 flex items-center gap-3">
-                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-300/30 to-transparent" />
+                  <div className="h-px flex-1 bg-linear-to-r from-transparent via-amber-300/30 to-transparent" />
                   <span className="text-amber-400">✦</span>
-                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-300/30 to-transparent" />
+                  <div className="h-px flex-1 bg-linear-to-r from-transparent via-amber-300/30 to-transparent" />
                 </div>
                 <p className="font-serif text-sm font-semibold text-emerald-950 md:text-base">
                   &ldquo;Actions are judged by intentions.&rdquo;
@@ -514,10 +575,7 @@ export default function HadithShowcase() {
                   icon: Share2,
                   label: "Share",
                   active: isShared,
-                  onClick: () => {
-                    setIsShared(true);
-                    setTimeout(() => setIsShared(false), 2000);
-                  },
+                  onClick: handleShare,
                   activeColor: "text-emerald-500",
                 },
               ].map((item) => {
@@ -565,7 +623,7 @@ export default function HadithShowcase() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-emerald-800 to-emerald-950 py-2 text-[10px] font-semibold text-amber-300 shadow-lg shadow-emerald-900/20 transition-all duration-300 hover:shadow-emerald-900/30"
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-linear-to-br from-emerald-800 to-emerald-950 py-2 text-[10px] font-semibold text-amber-300 shadow-lg shadow-emerald-900/20 transition-all duration-300 hover:shadow-emerald-900/30"
               >
                 <BookOpen className="h-3.5 w-3.5" />
                 Read More

@@ -5,45 +5,96 @@
 ============================================ */
 
 :root {
-  /* Colors */
+  /* ============================================
+     Brand Colors
+  ============================================ */
 
-  --background: #faf8f3;
-  --foreground: #154d40;
+  --primary: #1b8e3b;
+  --primary-dark: #2e7d32;
 
-  --emerald-primary: #154d40;
-  --emerald-dark: #062b23;
+  --secondary: #0d1b2a;
 
-  --gold-primary: #d4af37;
-  --gold-light: #fbbf24;
+  --accent: #c9a84c;
 
+  --background: #f8f9fa;
   --surface: #ffffff;
 
-  /* Typography */
+  /* ============================================
+     Text Colors
+  ============================================ */
 
-  --font-body: var(--font-inter);
-  --font-heading: var(--font-heading);
-  --font-arabic: var(--font-arabic);
-  --font-bangla: var(--font-bangla);
+  --text-primary: #2d3748;
+
+  --text-secondary: #718096;
+
+  --text-muted: #a0aec0;
+
+  /* ============================================
+     Border
+  ============================================ */
+
+  --border-light: #e2e8f0;
+
+  /* ============================================
+     Typography
+  ============================================ */
+
+  --hv-font-body: var(--font-inter);
+  --hv-font-heading: var(--font-heading);
+  --hv-font-arabic: var(--font-arabic);
+  --hv-font-bangla: var(--font-bangla);
+
+  /* ============================================
+     Layout
+  ============================================ */
+
+  --container-width: 1320px;
+
+  /* ============================================
+     Radius
+  ============================================ */
+
+  --radius-card: 24px;
+
+  --radius-button: 999px;
+
+  /* ============================================
+     Shadows
+  ============================================ */
+
+  --shadow-card: 0 20px 50px rgba(0, 0, 0, 0.1);
+
+  --shadow-gold: 0 0 40px rgba(201, 168, 76, 0.25);
 }
 
 /* ============================================
-   Tailwind Theme
+   Tailwind v4 Theme
 ============================================ */
 
 @theme inline {
   --color-background: var(--background);
 
-  --color-foreground: var(--foreground);
+  --color-foreground: var(--text-primary);
 
-  /* HudaVerse Fonts */
+  --color-primary: var(--primary);
 
-  --font-sans: var(--font-inter);
+  --color-secondary: var(--secondary);
 
-  --font-heading: var(--font-heading);
+  --color-accent: var(--accent);
 
-  --font-arabic: var(--font-arabic);
+  --font-sans: var(--hv-font-body);
 
-  --font-bangla: var(--font-bangla);
+  --font-heading: var(--hv-font-heading);
+
+  --font-arabic: var(--hv-font-arabic);
+
+  --font-bangla: var(--hv-font-bangla);
+
+  --text-hero: 4.5rem;
+
+  --text-section: 3rem;
+
+  --text-card: 1.125rem;
 }
 
 /* ============================================
@@ -60,12 +111,13 @@ html {
 
 html,
 body {
-  margin: 0;
-  padding: 0;
-
   width: 100%;
 
   min-height: 100%;
+
+  margin: 0;
+
+  padding: 0;
 
   overflow-x: hidden;
 }
@@ -73,9 +125,9 @@ body {
 body {
   background: var(--background);
 
-  color: var(--foreground);
+  color: var(--text-primary);
 
-  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+  font-family: var(--hv-font-body), Arial, sans-serif;
 
   -webkit-font-smoothing: antialiased;
 
@@ -83,27 +135,81 @@ body {
 }
 
 /* ============================================
-   Typography Utilities
+   Layout Utilities
+============================================ */
+
+.hv-container {
+  width: 100%;
+
+  max-width: var(--container-width);
+
+  margin-inline: auto;
+
+  padding-inline: 1.5rem;
+}
+
+/* ============================================
+   Typography
 ============================================ */
 
 .font-heading {
-  font-family: var(--font-heading);
+  font-family: var(--hv-font-heading);
 }
 
 .font-arabic {
-  font-family: var(--font-arabic);
+  font-family: var(--hv-font-arabic);
 }
 
 .font-bangla {
-  font-family: var(--font-bangla);
+  font-family: var(--hv-font-bangla);
 }
 
 .quran-text {
-  font-family: var(--font-arabic);
+  font-family: var(--hv-font-arabic);
 
   line-height: 2.2;
 
   direction: rtl;
+}
+
+.hv-hero {
+  font-family: var(--hv-font-heading);
+
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+
+  line-height: 1.1;
+
+  font-weight: 700;
+}
+
+.hv-section-title {
+  font-family: var(--hv-font-heading);
+
+  font-size: clamp(2rem, 4vw, 3rem);
+
+  line-height: 1.2;
+
+  font-weight: 700;
+}
+
+.hv-card-title {
+  font-family: var(--hv-font-heading);
+
+  font-size: 1.125rem;
+
+  font-weight: 600;
+}
+
+.hv-body {
+  font-size: 1rem;
+
+  line-height: 1.7;
+
+  color: var(--text-secondary);
+}
+
+.hv-small {
+  font-size: 0.875rem;
 }
 
 /* ============================================
@@ -117,8 +223,6 @@ a {
 /* ============================================
    HudaVerse Animations
 ============================================ */
-
-/* Floating Ornament */
 
 @keyframes sway {
   0%,
@@ -137,8 +241,6 @@ a {
   transform-origin: top center;
 }
 
-/* Floating Cards */
-
 @keyframes float-card {
   0%,
   100% {
@@ -153,8 +255,6 @@ a {
 .animate-float-card {
   animation: float-card 4.5s ease-in-out infinite;
 }
-
-/* Glow Pulse */
 
 @keyframes glow-pulse {
   0%,
@@ -175,25 +275,6 @@ a {
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
-/* Avatar Glow */
-
-@keyframes avatar-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
-  }
-
-  50% {
-    box-shadow: 0 0 0 8px rgba(251, 191, 36, 0);
-  }
-}
-
-.animate-avatar-glow {
-  animation: avatar-glow 2.2s ease-in-out infinite;
-}
-
-/* Slide Fade */
-
 @keyframes slide-up-fade {
   from {
     opacity: 0;
@@ -213,7 +294,7 @@ a {
 }
 
 /* ============================================
-   Utility Effects
+   Effects
 ============================================ */
 
 .glass {
@@ -225,86 +306,52 @@ a {
 }
 
 .gold-glow {
-  box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+  box-shadow: var(--shadow-gold);
 }
 
 /* ============================================
-   Text Selection
+   Accessibility
+============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+
+    animation-iteration-count: 1 !important;
+
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   Selection
 ============================================ */
 
 ::selection {
-  background: var(--gold-primary);
+  background: var(--accent);
 
-  color: var(--emerald-dark);
+  color: var(--secondary);
 }
-/* ============================================
-   HudaVerse Typography Scale
-============================================ */
-
-@theme inline {
-  /* Font Family */
-
-  --font-sans: var(--font-inter);
-
-  --font-heading: var(--font-heading);
-
-  --font-arabic: var(--font-arabic);
-
-  --font-bangla: var(--font-bangla);
-
-  /* Typography Sizes */
-
-  --text-hero: 4.5rem;
-
-  --text-section: 3rem;
-
-  --text-card: 1.125rem;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* ============================================
-   HudaVerse Typography Utilities
-============================================ */
-
-.hv-hero {
-  font-family: var(--font-heading);
-
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-
-  line-height: 1.1;
-
-  font-weight: 700;
-}
-
-.hv-section-title {
-  font-family: var(--font-heading);
-
-  font-size: clamp(2rem, 4vw, 3rem);
-
-  line-height: 1.2;
-
-  font-weight: 700;
-}
-
-.hv-card-title {
-  font-family: var(--font-heading);
-
-  font-size: 1.125rem;
-
-  font-weight: 600;
-}
-
-.hv-body {
-  font-family: var(--font-inter);
-
-  font-size: 1rem;
-
-  line-height: 1.7;
-
-  color: rgba(21, 77, 64, 0.65);
-}
-
-.hv-small {
-  font-family: var(--font-inter);
-
-  font-size: 0.875rem;
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

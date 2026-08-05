@@ -1,0 +1,243 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =========================
+// ROLE (RBAC)
+// =========================
+enum Role {
+  FOUNDER
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+  USER
+}
+
+// =========================
+// USER
+// =========================
+model User {
+  id       String  @id @default(uuid())
+  email    String  @unique @db.VarChar(255)
+  password String?
+
+  // =========================
+  // AUTH SESSION
+  // =========================
+  refreshTokens RefreshToken[]
+
+  // =========================
+  // EMAIL VERIFICATION
+  // =========================
+  emailVerified            Boolean   @default(false)
+  emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+
+  // =========================
+  // PASSWORD RESET
+  // =========================
+  passwordResetTokens PasswordResetToken[]
+
+  // =========================
+  // PROFILE
+  // =========================
+  name   String? @db.VarChar(100)
+  avatar String?
+
+  // =========================
+  // STATUS
+  // =========================
+  isActive  Boolean   @default(true)
+  deletedAt DateTime?
+
+  // =========================
+  // LOGIN TRACKING
+  // =========================
+  lastLoginAt DateTime?
+
+  // =========================
+  // RELATIONS
+  // =========================
+  profile    Profile?
+  roles      UserRole[]
+  workspaces Workspace[]
+
+  // =========================
+  // TIMESTAMP
+  // =========================
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userSettings UserSettings?
+
+  @@index([isActive])
+  @@index([emailVerified])
+  @@index([createdAt])
+}
+
+// =========================
+// REFRESH TOKEN SESSION
+// =========================
+model RefreshToken {
+  id     String @id @default(uuid())
+  token  String @unique
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Device Information
+  deviceName      String? @db.VarChar(100)
+  deviceId        String?
+  browser         String? @db.VarChar(50)
+  operatingSystem String? @db.VarChar(50)
+  userAgent       String?
+
+  // Location / Network
+  ipAddress String?
+  country   String? @db.VarChar(2)
+  city      String? @db.VarChar(100)
+
+  // Security
+  isTrusted Boolean   @default(false)
+  revokedAt DateTime?
+
+  // Session Tracking
+  lastUsedAt DateTime @default(now())
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// =========================
+// PASSWORD RESET
+// =========================
+model PasswordResetToken {
+  id     String @id @default(uuid())
+  token  String @unique
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  // Security Tracking
+  ipAddress String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// =========================
+// PROFILE
+// =========================
+model Profile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bio      String?
+  language String  @default("bn") @db.VarChar(10)
+  timezone String  @default("Asia/Dhaka") @db.VarChar(50)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =========================
+// WORKSPACE
+// =========================
+model Workspace {
+  id     String @id @default(uuid())
+  name   String @default("My Workspace") @db.VarChar(100)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// =========================
+// USER ROLE (RBAC)
+// =========================
+model UserRole {
+  id String @id @default(uuid())
+
+  role Role
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, role])
+  @@index([userId])
+}
+
+// =========================
+// USER SETTINGS
+// =========================
+model UserSettings {
+  id String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Language
+  language String @default("bn") @db.VarChar(10)
+
+  // Appearance
+  theme String @default("system") @db.VarChar(20)
+
+  // Notification
+  prayerReminder      Boolean @default(true)
+  notificationEnabled Boolean @default(true)
+
+  // Quran Preferences
+  quranTranslation String? @db.VarChar(50)
+  quranFontSize    String  @default("medium") @db.VarChar(20)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =========================
+// PERMISSION
+// =========================
+model Permission {
+  id String @id @default(uuid())
+
+  key         String  @unique @db.VarChar(100)
+  description String? @db.VarChar(255)
+
+  roles RolePermission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =========================
+// ROLE PERMISSION
+// =========================
+model RolePermission {
+  id String @id @default(uuid())
+
+  role Role
+
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([role, permissionId])
+  @@index([role])
+}

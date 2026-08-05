@@ -1,104 +1,54 @@
-"use client";
+import React from 'react';
 
-import Image from "next/image";
-import Link from "next/link";
+interface LogoProps {
+  /** Shrinks the mark and hides the tagline — used on scroll and on mobile. */
+  compact?: boolean;
+  className?: string;
+}
 
-export default function Logo() {
+export const Logo = React.memo(function Logo({ compact = false, className = '' }: LogoProps) {
   return (
-    <Link
-      href="/"
-      className="
-        group
-        flex
-        items-center
-        gap-2.5
-        transition-all
-        duration-300
-      "
-    >
-      {/* Logo Icon */}
-      <div
-        className="
-          relative
-          flex
-          h-10
-          w-10
-          items-center
-          justify-center
-          rounded-xl
-          transition-all
-          duration-300
-          group-hover:scale-105
-          group-hover:drop-shadow-[0_0_12px_rgba(212,175,55,0.45)]
-        "
+    <div className={`flex items-center gap-2.5 ${className}`}>
+      <svg
+        viewBox="0 0 40 40"
+        aria-hidden="true"
+        className={`shrink-0 transition-all duration-300 ${compact ? 'h-8 w-8' : 'h-10 w-10'}`}
       >
-        <Image
-          src="/logo-icon.png"
-          alt="HudaVerse Logo"
-          width={44}
-          height={44}
-          priority
-          className="
-            h-10
-            w-10
-            object-contain
-          "
+        <path
+          d="M24 4a16 16 0 1 0 0 32 13 13 0 1 1 0-32Z"
+          fill="none"
+          stroke="url(#hudaverse-gold)"
+          strokeWidth="1.6"
         />
-      </div>
+        <path
+          d="m30 8 1.1 2.6L34 12l-2.9 1.4L30 16l-1.1-2.6L26 12l2.9-1.4L30 8Z"
+          fill="url(#hudaverse-gold)"
+        />
+        <defs>
+          <linearGradient id="hudaverse-gold" x1="0" y1="0" x2="40" y2="40">
+            <stop offset="0%" stopColor="#F3D27A" />
+            <stop offset="100%" stopColor="#C9962E" />
+          </linearGradient>
+        </defs>
+      </svg>
 
-      {/* Brand */}
-      <div
-        className="
-          flex
-          flex-col
-          leading-none
-        "
-      >
-        <div
-          className="
-            flex
-            items-center
-            tracking-tight
-          "
+      <div className="flex min-w-0 flex-col leading-none">
+        <span
+          className={`whitespace-nowrap font-serif font-bold tracking-tight transition-all duration-300 ${
+            compact ? 'text-lg' : 'text-xl'
+          }`}
         >
-          <span
-            className="
-              font-serif
-              text-xl
-              font-semibold
-              text-white
-            "
-          >
-            Huda
-          </span>
-
-          <span
-            className="
-              font-serif
-              text-xl
-              font-semibold
-              text-amber-400
-            "
-          >
+          <span className="text-emerald-50">Huda</span>
+          <span className="bg-gradient-to-b from-amber-300 to-amber-500 bg-clip-text text-transparent">
             Verse
           </span>
-        </div>
-
-        {/* Tagline */}
-        <span
-          className="
-            mt-1
-            hidden
-            text-[10px]
-            font-medium
-            tracking-[0.08em]
-            text-white/60
-            lg:block
-          "
-        >
-          Your Journey to Allah
         </span>
+        {!compact && (
+          <span className="mt-0.5 whitespace-nowrap text-[11px] font-medium text-emerald-200/60">
+            Your Journey to Allah
+          </span>
+        )}
       </div>
-    </Link>
+    </div>
   );
-}
+});

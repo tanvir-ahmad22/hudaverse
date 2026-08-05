@@ -1,19 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   Plus,
   Minus,
   HelpCircle,
   MessageCircle,
   Users,
-  Sparkles,
   Shield,
   Globe,
   BookOpen,
-  Database,
-  Award,
   ChevronRight,
   Home,
   Bot,
@@ -119,7 +116,7 @@ export default function FAQ() {
       ? faqs
       : faqs.filter((faq) => faq.category === activeCategory);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -130,7 +127,7 @@ export default function FAQ() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -240,6 +237,7 @@ export default function FAQ() {
           {categories.map((category) => (
             <button
               key={category}
+              type="button"
               onClick={() => setActiveCategory(category)}
               className={`
                 px-4 md:px-5 py-2 rounded-full text-sm font-medium transition-all duration-300
@@ -263,7 +261,7 @@ export default function FAQ() {
           viewport={{ once: true }}
           className="space-y-4 max-w-4xl mx-auto"
         >
-          {filteredFaqs.map((item, index) => {
+          {filteredFaqs.map((item) => {
             const active = open === item.id;
             const Icon = item.icon;
 
@@ -290,6 +288,7 @@ export default function FAQ() {
                   )}
 
                   <button
+                    type="button"
                     onClick={() => setOpen(active ? null : item.id)}
                     className="relative w-full flex items-center justify-between p-5 md:p-6 text-left z-10"
                     aria-expanded={active}
@@ -393,11 +392,17 @@ export default function FAQ() {
                                   transition={{ delay: 0.2 }}
                                   className="mt-4 flex flex-wrap items-center gap-3"
                                 >
-                                  <button className="text-sm text-[#D4AF37] font-semibold hover:text-white transition-colors flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    className="text-sm text-[#D4AF37] font-semibold hover:text-white transition-colors flex items-center gap-1"
+                                  >
                                     Learn more
                                     <ChevronRight size={14} />
                                   </button>
-                                  <button className="text-sm text-[#D4AF37] font-semibold hover:text-white transition-colors flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    className="text-sm text-[#D4AF37] font-semibold hover:text-white transition-colors flex items-center gap-1"
+                                  >
                                     Support us
                                     <ChevronRight size={14} />
                                   </button>
@@ -439,14 +444,20 @@ export default function FAQ() {
               </div>
 
               <div className="flex flex-wrap justify-center gap-3">
-                <button className="group px-6 py-3 bg-[#D4AF37] text-[#154D40] rounded-full font-semibold text-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center gap-2">
+                <button
+                  type="button"
+                  className="group px-6 py-3 bg-[#D4AF37] text-[#154D40] rounded-full font-semibold text-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center gap-2"
+                >
                   <MessageCircle
                     size={16}
                     className="group-hover:rotate-12 transition-transform"
                   />
                   Ask AI Assistant
                 </button>
-                <button className="group px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-full font-semibold text-sm hover:bg-white/20 transition-all duration-300 border border-white/20 flex items-center gap-2">
+                <button
+                  type="button"
+                  className="group px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-full font-semibold text-sm hover:bg-white/20 transition-all duration-300 border border-white/20 flex items-center gap-2"
+                >
                   <Users size={16} />
                   Join Community
                 </button>

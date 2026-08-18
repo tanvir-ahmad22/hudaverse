@@ -1,6 +1,6 @@
-import React from 'react';
-import { DesktopNavbar } from './DesktopNavbar';
-import { MobileNavbar } from './MobileNavbar';
+import React from "react";
+import { DesktopNavbar } from "./DesktopNavbar";
+import { MobileNavbar } from "./MobileNavbar";
 
 /**
  * Navbar
@@ -20,8 +20,6 @@ export function Navbar() {
     <>
       <DesktopNavbar />
       <MobileNavbar />
-      {/* Spacer matching the fixed header's height so page content never sits underneath it. */}
-      <div aria-hidden="true" className="h-[68px] lg:h-[92px]" />
     </>
   );
 }

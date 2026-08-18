@@ -1,63 +1,34 @@
-"use client";
-
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type RefObject,
-} from "react";
-
 /* ================================================================
-   TYPES
+   HUDAVERSE GLOBAL UI LANGUAGE SYSTEM
+   Supported UI Languages:
+   English • Bangla • Arabic • Urdu • Persian • Turkish
 ================================================================ */
 
-export interface NavChild {
-  key: string;
-  href: string;
-  label: string;
-}
+/* ================================================================
+   DEFAULT LANGUAGE
+================================================================ */
 
-export interface NavItem {
-  key: string;
-  href: string;
-  label: string;
-  children?: NavChild[];
-}
+export const DEFAULT_LANGUAGE = "en" as const;
+
+export const LANGUAGE_STORAGE_KEY = "hudaverse-language";
+
+export const LANGUAGE_CHANGE_EVENT = "hudaverse-language-change";
+
+/* ================================================================
+   LANGUAGE TYPES
+================================================================ */
 
 export interface LanguageOption {
-  code: string;
+  code: LanguageCode;
   label: string;
   nativeLabel: string;
   flag: string;
-}
-
-export type DownloadIconKey = "play" | "apple" | "android";
-
-export interface DownloadLinkItem {
-  key: "googlePlay" | "appStore" | "apk";
-  label: string;
-  subLabel: string;
-  href: string;
-  icon: DownloadIconKey;
-  badge?: string;
-  disabled?: boolean;
+  dir: "ltr" | "rtl";
 }
 
 /* ================================================================
-   LANGUAGES
+   SUPPORTED LANGUAGES
 ================================================================ */
-
-/*
- * HudaVerse supported UI languages
- *
- * en → English
- * bn → Bangla
- * ar → Arabic
- * fa → Persian / Farsi
- * ur → Urdu
- * tr → Turkish
- */
 
 export const LANGUAGES = [
   {
@@ -65,57 +36,80 @@ export const LANGUAGES = [
     label: "English",
     nativeLabel: "English",
     flag: "🇬🇧",
+    dir: "ltr",
   },
+
   {
     code: "bn",
     label: "Bangla",
     nativeLabel: "বাংলা",
     flag: "🇧🇩",
+    dir: "ltr",
   },
+
   {
     code: "ar",
     label: "Arabic",
     nativeLabel: "العربية",
     flag: "🇸🇦",
+    dir: "rtl",
   },
-  {
-    code: "fa",
-    label: "Persian",
-    nativeLabel: "فارسی",
-    flag: "🇮🇷",
-  },
+
   {
     code: "ur",
     label: "Urdu",
     nativeLabel: "اردو",
     flag: "🇵🇰",
+    dir: "rtl",
   },
+
+  {
+    code: "fa",
+    label: "Persian",
+    nativeLabel: "فارسی",
+    flag: "🇮🇷",
+    dir: "rtl",
+  },
+
   {
     code: "tr",
     label: "Turkish",
     nativeLabel: "Türkçe",
     flag: "🇹🇷",
+    dir: "ltr",
   },
 ] as const;
 
 export type LanguageCode = (typeof LANGUAGES)[number]["code"];
 
-export const DEFAULT_LANGUAGE: LanguageCode = "en";
-
-export const LANGUAGE_STORAGE_KEY = "preferred-language";
-
 /* ================================================================
-   LANGUAGE HELPERS
+   RTL LANGUAGES
 ================================================================ */
 
-export function isValidLanguage(language: string): language is LanguageCode {
+export const RTL_LANGUAGES: readonly LanguageCode[] = ["ar", "ur", "fa"];
+
+/* ================================================================
+   LANGUAGE VALIDATION
+================================================================ */
+
+export function isValidLanguage(
+  language: string | null | undefined,
+): language is LanguageCode {
+  if (!language) {
+    return false;
+  }
+
   return LANGUAGES.some((item) => item.code === language);
 }
+
+/* ================================================================
+   RESOLVE LANGUAGE
+================================================================ */
 
 export function resolveLanguage(
   language: string | null | undefined,
 ): LanguageCode {
-  if (language && isValidLanguage(language)) {
+  if (isValidLanguage(language)) {
     return language;
   }
 
@@ -123,7 +117,33 @@ export function resolveLanguage(
 }
 
 /* ================================================================
-   NAVBAR TRANSLATIONS TYPE
+   GET LANGUAGE OPTION
+================================================================ */
+
+export function getLanguageOption(language: LanguageCode): LanguageOption {
+  return LANGUAGES.find((item) => item.code === language) ?? LANGUAGES[0];
+}
+
+/* ================================================================
+   GET TEXT DIRECTION
+================================================================ */
+
+export function getLanguageDirection(language: string): "ltr" | "rtl" {
+  const resolvedLanguage = resolveLanguage(language);
+
+  return getLanguageOption(resolvedLanguage).dir;
+}
+
+/* ================================================================
+   CHECK RTL
+================================================================ */
+
+export function isRTL(language: string): boolean {
+  return getLanguageDirection(language) === "rtl";
+}
+
+/* ================================================================
+   GLOBAL NAVBAR TRANSLATIONS
 ================================================================ */
 
 export interface NavbarTranslations {
@@ -163,7 +183,7 @@ export interface NavbarTranslations {
 }
 
 /* ================================================================
-   TRANSLATIONS
+   NAVBAR TRANSLATIONS
 ================================================================ */
 
 export const NAV_TRANSLATIONS: Record<LanguageCode, NavbarTranslations> = {
@@ -288,7 +308,47 @@ export const NAV_TRANSLATIONS: Record<LanguageCode, NavbarTranslations> = {
   },
 
   /* ==============================================================
-     PERSIAN / FARSI
+     URDU
+  ============================================================== */
+
+  ur: {
+    nav: {
+      home: "ہوم",
+      features: "خصوصیات",
+      aiAssistant: "AI معاون",
+      modules: "ماڈیولز",
+      about: "ہمارے بارے میں",
+    },
+
+    modules: {
+      quran: "قرآن",
+      prayerTimes: "نماز کے اوقات",
+      hadith: "حدیث",
+      zakatCalculator: "زکوٰۃ کیلکولیٹر",
+    },
+
+    actions: {
+      signIn: "سائن اِن",
+      downloadApp: "ایپ ڈاؤن لوڈ کریں",
+      selectLanguage: "زبان منتخب کریں",
+      searchLanguage: "زبان تلاش کریں...",
+      noLanguagesFound: "کوئی زبان نہیں ملی",
+      moreLanguagesComingSoon: "مزید زبانیں جلد آ رہی ہیں...",
+    },
+
+    download: {
+      title: "HudaVerse ڈاؤن لوڈ کریں",
+      description: "آپ کا مکمل اسلامی ساتھی",
+      getItOn: "حاصل کریں",
+      downloadOnThe: "ڈاؤن لوڈ کریں",
+      downloadApk: "APK ڈاؤن لوڈ کریں",
+      comingSoon: "جلد آ رہا ہے",
+      safeTrusted: "محفوظ، قابلِ اعتماد اور لاکھوں افراد کا بھروسہ",
+    },
+  },
+
+  /* ==============================================================
+     PERSIAN
   ============================================================== */
 
   fa: {
@@ -318,52 +378,12 @@ export const NAV_TRANSLATIONS: Record<LanguageCode, NavbarTranslations> = {
 
     download: {
       title: "دانلود HudaVerse",
-      description: "همراه اسلامی همه‌جانبه شما",
+      description: "همراه جامع اسلامی شما",
       getItOn: "دریافت از",
       downloadOnThe: "دانلود از",
       downloadApk: "دانلود APK",
       comingSoon: "به‌زودی",
       safeTrusted: "امن، مطمئن و مورد اعتماد میلیون‌ها نفر",
-    },
-  },
-
-  /* ==============================================================
-     URDU
-  ============================================================== */
-
-  ur: {
-    nav: {
-      home: "ہوم",
-      features: "خصوصیات",
-      aiAssistant: "AI معاون",
-      modules: "ماڈیولز",
-      about: "ہمارے بارے میں",
-    },
-
-    modules: {
-      quran: "قرآن",
-      prayerTimes: "نماز کے اوقات",
-      hadith: "حدیث",
-      zakatCalculator: "زکوٰۃ کیلکولیٹر",
-    },
-
-    actions: {
-      signIn: "سائن اِن",
-      downloadApp: "ایپ ڈاؤن لوڈ کریں",
-      selectLanguage: "زبان منتخب کریں",
-      searchLanguage: "زبان تلاش کریں...",
-      noLanguagesFound: "کوئی زبان نہیں ملی",
-      moreLanguagesComingSoon: "مزید زبانیں جلد آرہی ہیں...",
-    },
-
-    download: {
-      title: "HudaVerse ڈاؤن لوڈ کریں",
-      description: "آپ کا مکمل اسلامی ساتھی",
-      getItOn: "یہاں سے حاصل کریں",
-      downloadOnThe: "یہاں سے ڈاؤن لوڈ کریں",
-      downloadApk: "APK ڈاؤن لوڈ کریں",
-      comingSoon: "جلد آرہا ہے",
-      safeTrusted: "محفوظ، قابلِ اعتماد اور لاکھوں افراد کا بھروسا",
     },
   },
 
@@ -375,7 +395,7 @@ export const NAV_TRANSLATIONS: Record<LanguageCode, NavbarTranslations> = {
     nav: {
       home: "Ana Sayfa",
       features: "Özellikler",
-      aiAssistant: "Yapay Zeka Asistanı",
+      aiAssistant: "Yapay Zekâ Asistanı",
       modules: "Modüller",
       about: "Hakkımızda",
     },
@@ -402,8 +422,9 @@ export const NAV_TRANSLATIONS: Record<LanguageCode, NavbarTranslations> = {
       getItOn: "Şuradan edinin",
       downloadOnThe: "Şuradan indirin",
       downloadApk: "APK İndir",
-      comingSoon: "Yakında",
-      safeTrusted: "Güvenli ve milyonlarca kişi tarafından güvenilir",
+      comingSoon: "Çok Yakında",
+      safeTrusted:
+        "Güvenli, emniyetli ve milyonlarca kişi tarafından güveniliyor",
     },
   },
 };
@@ -413,15 +434,30 @@ export const NAV_TRANSLATIONS: Record<LanguageCode, NavbarTranslations> = {
 ================================================================ */
 
 export function getNavbarTranslations(language: string): NavbarTranslations {
-  if (isValidLanguage(language)) {
-    return NAV_TRANSLATIONS[language];
-  }
+  const resolvedLanguage = resolveLanguage(language);
 
-  return NAV_TRANSLATIONS[DEFAULT_LANGUAGE];
+  return NAV_TRANSLATIONS[resolvedLanguage];
 }
 
 /* ================================================================
-   NAVIGATION
+   NAVIGATION TYPES
+================================================================ */
+
+export interface NavChild {
+  key: string;
+  href: string;
+  label: string;
+}
+
+export interface NavItem {
+  key: string;
+  href: string;
+  label: string;
+  children?: NavChild[];
+}
+
+/* ================================================================
+   NAVIGATION ITEMS
 ================================================================ */
 
 export function getNavItems(language: string): NavItem[] {
@@ -490,6 +526,22 @@ export function getNavItems(language: string): NavItem[] {
    DOWNLOAD LINKS
 ================================================================ */
 
+export type DownloadIconKey = "play" | "apple" | "android";
+
+export interface DownloadLinkItem {
+  key: "googlePlay" | "appStore" | "apk";
+  label: string;
+  subLabel: string;
+  href: string;
+  icon: DownloadIconKey;
+  badge?: string;
+  disabled?: boolean;
+}
+
+/* ================================================================
+   DOWNLOAD LINK ITEMS
+================================================================ */
+
 export function getDownloadLinks(language: string): DownloadLinkItem[] {
   const translations = getNavbarTranslations(language);
 
@@ -520,275 +572,4 @@ export function getDownloadLinks(language: string): DownloadLinkItem[] {
       disabled: true,
     },
   ];
-}
-
-/* ================================================================
-   NAVBAR CONSTANTS
-================================================================ */
-
-export const SCROLL_THRESHOLD = 24;
-
-export const SCROLL_TRANSITION_DISTANCE = 180;
-
-export const NAVBAR_HEIGHT = 86;
-
-export const NAVBAR_MAX_DARK_OPACITY = 0.82;
-
-export const NAVBAR_MAX_BORDER_OPACITY = 0;
-
-export const NAVBAR_MAX_BLUR = 18;
-
-export const DRAWER_MAX_WIDTH = 320;
-
-export const TRANSITION_DURATION = 0.3;
-
-/* ================================================================
-   SCROLL PROGRESS
-================================================================ */
-
-export function useScrollProgress(
-  start: number = SCROLL_THRESHOLD,
-  distance: number = SCROLL_TRANSITION_DISTANCE,
-): number {
-  const [progress, setProgress] = useState(0);
-
-  const ticking = useRef(false);
-
-  useEffect(() => {
-    let frame: number | null = null;
-
-    const update = () => {
-      frame = null;
-      ticking.current = false;
-
-      const scrollY = window.scrollY;
-
-      const safeDistance = Math.max(distance, 1);
-
-      const rawProgress = (scrollY - start) / safeDistance;
-
-      const nextProgress = Math.min(Math.max(rawProgress, 0), 1);
-
-      setProgress((current) => {
-        if (Math.abs(current - nextProgress) < 0.001) {
-          return current;
-        }
-
-        return nextProgress;
-      });
-    };
-
-    const handleScroll = () => {
-      if (ticking.current) {
-        return;
-      }
-
-      ticking.current = true;
-
-      frame = window.requestAnimationFrame(update);
-    };
-
-    frame = window.requestAnimationFrame(update);
-
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
-
-    window.addEventListener("resize", handleScroll, {
-      passive: true,
-    });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-
-      window.removeEventListener("resize", handleScroll);
-
-      if (frame !== null) {
-        window.cancelAnimationFrame(frame);
-      }
-
-      ticking.current = false;
-    };
-  }, [start, distance]);
-
-  return progress;
-}
-
-/* ================================================================
-   SCROLLED STATE
-================================================================ */
-
-export function useIsScrolled(threshold: number = SCROLL_THRESHOLD): boolean {
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  const ticking = useRef(false);
-
-  useEffect(() => {
-    let frame: number | null = null;
-
-    const update = () => {
-      frame = null;
-      ticking.current = false;
-
-      const next = window.scrollY > threshold;
-
-      setIsScrolled((current) => {
-        if (current === next) {
-          return current;
-        }
-
-        return next;
-      });
-    };
-
-    const handleScroll = () => {
-      if (ticking.current) {
-        return;
-      }
-
-      ticking.current = true;
-
-      frame = window.requestAnimationFrame(update);
-    };
-
-    frame = window.requestAnimationFrame(update);
-
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-
-      if (frame !== null) {
-        window.cancelAnimationFrame(frame);
-      }
-
-      ticking.current = false;
-    };
-  }, [threshold]);
-
-  return isScrolled;
-}
-
-/* ================================================================
-   OUTSIDE CLICK
-================================================================ */
-
-export function useOutsideClick(
-  ref: RefObject<HTMLElement | null>,
-  handler: () => void,
-  enabled: boolean = true,
-): void {
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    const listener = (event: PointerEvent) => {
-      const target = event.target;
-
-      if (!(target instanceof Node)) {
-        return;
-      }
-
-      const element = ref.current;
-
-      if (!element || element.contains(target)) {
-        return;
-      }
-
-      handler();
-    };
-
-    document.addEventListener("pointerdown", listener);
-
-    return () => {
-      document.removeEventListener("pointerdown", listener);
-    };
-  }, [ref, handler, enabled]);
-}
-
-/* ================================================================
-   ESCAPE
-================================================================ */
-
-export function useEscapeKey(
-  handler: () => void,
-  enabled: boolean = true,
-): void {
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    const listener = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        handler();
-      }
-    };
-
-    document.addEventListener("keydown", listener);
-
-    return () => {
-      document.removeEventListener("keydown", listener);
-    };
-  }, [handler, enabled]);
-}
-
-/* ================================================================
-   BODY SCROLL LOCK
-================================================================ */
-
-export function useLockBodyScroll(locked: boolean): void {
-  useEffect(() => {
-    if (!locked) {
-      return;
-    }
-
-    const scrollY = window.scrollY;
-
-    const body = document.body;
-
-    const previousStyle = {
-      position: body.style.position,
-      top: body.style.top,
-      width: body.style.width,
-      overflow: body.style.overflow,
-      paddingRight: body.style.paddingRight,
-    };
-
-    const scrollbarWidth =
-      window.innerWidth - document.documentElement.clientWidth;
-
-    body.style.position = "fixed";
-
-    body.style.top = `-${scrollY}px`;
-
-    body.style.width = "100%";
-
-    body.style.overflow = "hidden";
-
-    if (scrollbarWidth > 0) {
-      body.style.paddingRight = `${scrollbarWidth}px`;
-    }
-
-    return () => {
-      body.style.position = previousStyle.position;
-
-      body.style.top = previousStyle.top;
-
-      body.style.width = previousStyle.width;
-
-      body.style.overflow = previousStyle.overflow;
-
-      body.style.paddingRight = previousStyle.paddingRight;
-
-      window.scrollTo({
-        top: scrollY,
-        left: 0,
-        behavior: "auto",
-      });
-    };
-  }, [locked]);
 }

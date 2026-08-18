@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
-/* ============================================
+/* ============================================================
    HudaVerse Global Design System
-============================================ */
+   ============================================================ */
 
 :root {
-  /* ============================================
-     Brand Colors
-  ============================================ */
+  /* ==========================================================
+     BRAND
+  ========================================================== */
 
   --primary: #1b8e3b;
   --primary-dark: #2e7d32;
@@ -15,142 +15,258 @@
   --secondary: #0d1b2a;
 
   --accent: #c9a84c;
+  --accent-light: #d4af37;
+  --accent-soft: #e4c76a;
 
-  --background: #f8f9fa;
+  /* ==========================================================
+     BACKGROUND
+  ========================================================== */
+
+  --background: #00382d;
+  --background-deep: #002a22;
+  --background-dark: #031c16;
+  --background-soft: #06483a;
+
   --surface: #ffffff;
+  --surface-dark: rgba(6, 48, 38, 0.96);
+  --surface-glass: rgba(255, 255, 255, 0.06);
 
-  /* ============================================
-     Text Colors
-  ============================================ */
+  /* ==========================================================
+     TEXT
+  ========================================================== */
 
-  --text-primary: #2d3748;
+  --text-primary: #f8f9fa;
+  --text-secondary: #d7e6e1;
+  --text-muted: #9db5ae;
+  --text-dark: #2d3748;
 
-  --text-secondary: #718096;
-
-  --text-muted: #a0aec0;
-
-  /* ============================================
-     Border
-  ============================================ */
+  /* ==========================================================
+     BORDER
+  ========================================================== */
 
   --border-light: #e2e8f0;
+  --border-dark: rgba(255, 255, 255, 0.08);
+  --border-gold: rgba(201, 168, 76, 0.22);
 
-  /* ============================================
-     Typography
-  ============================================ */
+  /* ==========================================================
+     TYPOGRAPHY
+  ========================================================== */
 
   --hv-font-body: var(--font-inter);
   --hv-font-heading: var(--font-heading);
   --hv-font-arabic: var(--font-arabic);
   --hv-font-bangla: var(--font-bangla);
 
-  /* ============================================
-     Layout
-  ============================================ */
+  /* ==========================================================
+     LAYOUT
+  ========================================================== */
 
   --container-width: 1320px;
 
-  /* ============================================
-     Radius
-  ============================================ */
+  /*
+   IMPORTANT:
+   Language change must NEVER change layout direction.
+  */
+  --hv-direction: ltr;
+
+  /* ==========================================================
+     RADIUS
+  ========================================================== */
 
   --radius-card: 24px;
-
   --radius-button: 999px;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
 
-  /* ============================================
-     Shadows
-  ============================================ */
+  /* ==========================================================
+     SHADOWS
+  ========================================================== */
 
   --shadow-card: 0 20px 50px rgba(0, 0, 0, 0.1);
 
+  --shadow-dark: 0 20px 50px rgba(0, 0, 0, 0.25);
+
   --shadow-gold: 0 0 40px rgba(201, 168, 76, 0.25);
+
+  --shadow-navbar: 0 12px 32px rgba(0, 0, 0, 0.3);
+
+  /* ==========================================================
+     FOCUS
+  ========================================================== */
+
+  --focus-ring-color: rgba(201, 168, 76, 0.6);
+  --focus-ring-offset: 2px;
+  --focus-ring-width: 3px;
 }
 
-/* ============================================
-   Tailwind v4 Theme
-============================================ */
+/* ============================================================
+   TAILWIND v4 THEME
+   ============================================================ */
 
 @theme inline {
   --color-background: var(--background);
-
   --color-foreground: var(--text-primary);
 
   --color-primary: var(--primary);
-
   --color-secondary: var(--secondary);
-
   --color-accent: var(--accent);
 
   --font-sans: var(--hv-font-body);
-
   --font-heading: var(--hv-font-heading);
-
   --font-arabic: var(--hv-font-arabic);
-
   --font-bangla: var(--hv-font-bangla);
 
   --text-hero: 4.5rem;
-
   --text-section: 3rem;
-
   --text-card: 1.125rem;
 }
 
-/* ============================================
-   Global Reset
-============================================ */
+/* ============================================================
+   GLOBAL RESET
+   ============================================================ */
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html {
-  scroll-behavior: smooth;
-}
-
-html,
-body {
   width: 100%;
-
+  min-width: 0;
   min-height: 100%;
 
   margin: 0;
-
   padding: 0;
 
-  overflow-x: hidden;
+  scroll-behavior: smooth;
+
+  background: var(--background);
+
+  /*
+   IMPORTANT:
+   Never allow language switcher to change document direction.
+  */
+  direction: ltr;
 }
 
 body {
-  background: var(--background);
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+
+  margin: 0;
+  padding: 0;
+
+  overflow-x: hidden;
+
+  /*
+   IMPORTANT:
+   Global layout always stays LTR.
+  */
+  direction: ltr;
+
+  background:
+    radial-gradient(
+      circle at 50% -20%,
+      rgba(27, 142, 59, 0.12),
+      transparent 45%
+    ),
+    linear-gradient(180deg, var(--background) 0%, var(--background-deep) 100%);
 
   color: var(--text-primary);
 
   font-family: var(--hv-font-body), Arial, sans-serif;
 
   -webkit-font-smoothing: antialiased;
-
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ============================================
-   Layout Utilities
-============================================ */
+/* ============================================================
+   ROOT
+   ============================================================ */
+
+#__next,
+#root {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+
+  direction: ltr;
+}
+
+/*
+Next.js App Router normally uses a <main> / div root.
+This prevents accidental horizontal expansion.
+*/
+
+main,
+section,
+header,
+footer,
+nav {
+  min-width: 0;
+}
+
+/* ============================================================
+   GLOBAL HORIZONTAL OVERFLOW PROTECTION
+   ============================================================ */
+
+html,
+body {
+  max-width: 100%;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+/* ============================================================
+   CONTAINER
+   ============================================================ */
 
 .hv-container {
   width: 100%;
-
   max-width: var(--container-width);
 
   margin-inline: auto;
 
   padding-inline: 1.5rem;
+
+  min-width: 0;
 }
 
-/* ============================================
-   Typography
-============================================ */
+/* ============================================================
+   FULL WIDTH SECTIONS
+   ============================================================ */
+
+.hv-section {
+  position: relative;
+
+  width: 100%;
+  max-width: 100%;
+
+  min-width: 0;
+}
+
+.hv-dark-section {
+  width: 100%;
+  max-width: 100%;
+
+  background: linear-gradient(
+    180deg,
+    var(--background) 0%,
+    var(--background-deep) 100%
+  );
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
 
 .font-heading {
   font-family: var(--hv-font-heading);
@@ -164,12 +280,42 @@ body {
   font-family: var(--hv-font-bangla);
 }
 
+/*
+Arabic content only.
+
+IMPORTANT:
+This does NOT affect the whole website.
+*/
+
 .quran-text {
   font-family: var(--hv-font-arabic);
 
   line-height: 2.2;
 
   direction: rtl;
+
+  text-align: right;
+}
+
+/*
+Arabic UI text can use this class when needed,
+without changing the entire page.
+*/
+
+.hv-arabic {
+  direction: rtl;
+  text-align: right;
+
+  font-family: var(--hv-font-arabic);
+}
+
+/*
+Normal UI text always remains LTR.
+*/
+
+.hv-ui-text {
+  direction: ltr;
+  text-align: left;
 }
 
 .hv-hero {
@@ -212,17 +358,37 @@ body {
   font-size: 0.875rem;
 }
 
-/* ============================================
-   Links
-============================================ */
+/* ============================================================
+   LINKS
+   ============================================================ */
 
 a {
+  color: inherit;
   text-decoration: none;
 }
 
-/* ============================================
-   HudaVerse Animations
-============================================ */
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   IMAGES / SVG
+   ============================================================ */
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ============================================================
+   HUDA VERSE ANIMATIONS
+   ============================================================ */
 
 @keyframes sway {
   0%,
@@ -260,13 +426,11 @@ a {
   0%,
   100% {
     opacity: 0.4;
-
     transform: scale(1);
   }
 
   50% {
     opacity: 0.7;
-
     transform: scale(1.05);
   }
 }
@@ -278,13 +442,11 @@ a {
 @keyframes slide-up-fade {
   from {
     opacity: 0;
-
     transform: translateY(12px);
   }
 
   to {
     opacity: 1;
-
     transform: translateY(0);
   }
 }
@@ -293,52 +455,122 @@ a {
   animation: slide-up-fade 0.5s ease-out forwards;
 }
 
-/* ============================================
-   Effects
-============================================ */
+/* ============================================================
+   NAVBAR / GLASS
+   ============================================================ */
 
 .glass {
   background: rgba(255, 255, 255, 0.06);
 
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-dark {
+  background: rgba(3, 28, 22, 0.92);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  border-bottom: 1px solid rgba(201, 168, 76, 0.15);
 }
 
 .gold-glow {
   box-shadow: var(--shadow-gold);
 }
 
-/* ============================================
-   Accessibility
-============================================ */
+/* ============================================================
+   HERO BACKGROUND
+   ============================================================ */
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
+.hv-hero-bg {
+  position: relative;
 
-    animation-iteration-count: 1 !important;
+  width: 100%;
+  max-width: 100%;
 
-    scroll-behavior: auto !important;
-  }
+  min-width: 0;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 75% 35%,
+      rgba(27, 142, 59, 0.14),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(201, 168, 76, 0.06),
+      transparent 30%
+    ),
+    linear-gradient(180deg, #00382d 0%, #002f26 55%, #002a22 100%);
 }
 
-/* ============================================
-   Selection
-============================================ */
+/* ============================================================
+   HERO DECORATIVE GLOW
+   ============================================================ */
 
-::selection {
-  background: var(--accent);
+.hv-hero-glow {
+  position: absolute;
 
-  color: var(--secondary);
+  pointer-events: none;
+
+  width: 500px;
+  height: 500px;
+
+  max-width: 100vw;
+  max-height: 100vw;
+
+  border-radius: 999px;
+
+  background: radial-gradient(
+    circle,
+    rgba(27, 142, 59, 0.16) 0%,
+    rgba(27, 142, 59, 0.05) 40%,
+    transparent 70%
+  );
+
+  filter: blur(20px);
 }
+
+/* ============================================================
+   GOLD TEXT
+   ============================================================ */
+
+.text-gold {
+  color: var(--accent);
+}
+
+.text-gold-gradient {
+  background: linear-gradient(90deg, #c9a84c, #f0d477, #c9a84c);
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+/* ============================================================
+   GOLD BORDER
+   ============================================================ */
+
+.border-gold {
+  border-color: var(--border-gold);
+}
+
+/* ============================================================
+   FADE ANIMATIONS
+   ============================================================ */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -350,8 +582,193 @@ a {
     opacity: 0;
     transform: translateY(-8px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.25s ease-out both;
+}
+
+/* ============================================================
+   FOCUS
+   ============================================================ */
+
+.focus-visible\:outline-none:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-visible\:ring-2:focus-visible {
+  box-shadow:
+    0 0 0 var(--tw-ring-offset-width, 0)
+      var(--tw-ring-offset-color, transparent),
+    0 0 0 calc(2px + var(--tw-ring-offset-width, 0px))
+      var(--tw-ring-color, rgba(201, 168, 76, 0.7));
+}
+
+.focus-visible\:ring-gold:focus-visible {
+  --tw-ring-color: rgba(201, 168, 76, 0.7);
+}
+
+.focus-visible\:ring-offset-2:focus-visible {
+  --tw-ring-offset-width: 2px;
+}
+
+.focus-visible\:ring-offset-background:focus-visible {
+  --tw-ring-offset-color: var(--background);
+}
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid rgba(201, 168, 76, 0.7);
+  outline-offset: 2px;
+}
+
+/*
+Do not disable focus indicators.
+*/
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   SELECTION
+   ============================================================ */
+
+::selection {
+  background: var(--accent);
+  color: var(--secondary);
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 640px) {
+  .hv-container {
+    padding-inline: 1rem;
+  }
+}
+
+/* ============================================================
+   EXTRA SMALL DEVICES
+   ============================================================ */
+
+@media (max-width: 380px) {
+  .hv-container {
+    padding-inline: 0.875rem;
+  }
+}
+
+/* ============================================================
+   IMPORTANT — LANGUAGE SAFETY
+   ============================================================ */
+
+/*
+   HudaVerse language switching is UI TRANSLATION ONLY.
+
+   NEVER do this globally:
+
+      html.dir = "rtl"
+      body.dir = "rtl"
+      document.documentElement.dir = "rtl"
+
+   Arabic UI must NOT flip the entire website.
+
+   Only content that is genuinely Arabic, such as Quran text,
+   Hadith Arabic text, Dua Arabic text, etc., should use:
+
+      direction: rtl;
+      text-align: right;
+
+   through their own module/class.
+
+   Therefore:
+
+      English  → same layout
+      Bangla   → same layout
+      Arabic   → same layout
+      French   → same layout
+      Turkish  → same layout
+
+   Only the words change.
+*/
+
+/* ============================================================
+   FORCE LTR APPLICATION SHELL
+   ============================================================ */
+
+.hv-app {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  direction: ltr;
+}
+
+/* ============================================================
+   FORCE LTR NAVIGATION
+   ============================================================ */
+
+.hv-navbar,
+.hv-navbar * {
+  direction: ltr;
+}
+
+/* ============================================================
+   FORCE LTR HERO
+   ============================================================ */
+
+.hv-hero-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  direction: ltr;
+}
+
+/* ============================================================
+   RTL ONLY FOR REAL ARABIC CONTENT
+   ============================================================ */
+
+.hv-content-arabic {
+  direction: rtl;
+  text-align: right;
+
+  font-family: var(--hv-font-arabic);
+}
+
+/* ============================================================
+   LTR CONTENT
+   ============================================================ */
+
+.hv-content-ltr {
+  direction: ltr;
+  text-align: left;
 }

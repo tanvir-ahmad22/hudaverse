@@ -196,11 +196,6 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
      OPEN DRAWER
   ============================================================== */
 
-  const openDrawer = useCallback(() => {
-    setIsDrawerOpen(true);
-    setOpenSubmenu(null);
-  }, []);
-
   /* ==============================================================
      TOGGLE DRAWER
   ============================================================== */
@@ -357,12 +352,13 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
             : "0 0 0 rgba(0,0,0,0)",
 
           backdropFilter: isScrolled ? "blur(18px)" : "blur(0px)",
-
-          WebkitBackdropFilter: isScrolled ? "blur(18px)" : "blur(0px)",
         }}
         transition={{
           duration: 0.3,
           ease: [0.22, 1, 0.36, 1],
+        }}
+        style={{
+          WebkitBackdropFilter: isScrolled ? "blur(18px)" : "blur(0px)",
         }}
         className="
           pointer-events-auto

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import {
   Search,
   HelpCircle,
@@ -29,9 +29,6 @@ import {
   Layers,
   Star,
   TrendingUp,
-  Globe,
-  Crown,
-  Gem,
 } from "lucide-react";
 
 // ============================================================
@@ -47,7 +44,7 @@ const categories = [
   "Marriage",
   "Business",
   "Family",
-];
+] as const;
 
 const features = [
   {
@@ -176,7 +173,7 @@ const questions = [
     references: ["Surah Al-Ma'idah, 5:2", "Fatwa - Islamic Fiqh Academy"],
     category: "Business",
   },
-];
+] as const;
 
 const stats = [
   { value: "12,000+", label: "Questions", icon: HelpCircle },
@@ -193,10 +190,19 @@ const trustIndicators = [
 ];
 
 // ============================================================
+// TYPES
+// ============================================================
+
+type FloatingCardData = (typeof floatingCards)[number];
+type QuestionData = (typeof questions)[number];
+type FeatureData = (typeof features)[number];
+type StatData = (typeof stats)[number];
+
+// ============================================================
 // CUSTOM HOOKS
 // ============================================================
 
-const useTypewriter = (words: string[], speed = 50) => {
+const useTypewriter = (words: readonly string[], speed = 50) => {
   const [currentWord, setCurrentWord] = useState(0);
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -208,10 +214,15 @@ const useTypewriter = (words: string[], speed = 50) => {
     const timeout = setTimeout(
       () => {
         const word = words[currentWord];
+
+        if (!word) return;
+
         if (!isDeleting) {
           setCurrentText(word.substring(0, currentText.length + 1));
+
           if (currentText.length === word.length) {
             setIsPaused(true);
+
             setTimeout(() => {
               setIsPaused(false);
               setIsDeleting(true);
@@ -219,6 +230,7 @@ const useTypewriter = (words: string[], speed = 50) => {
           }
         } else {
           setCurrentText(word.substring(0, currentText.length - 1));
+
           if (currentText.length === 0) {
             setIsDeleting(false);
             setCurrentWord((currentWord + 1) % words.length);
@@ -239,7 +251,13 @@ const useTypewriter = (words: string[], speed = 50) => {
 // ============================================================
 
 // Floating Card
-const FloatingCard = ({ data, index }: { data: any; index: number }) => {
+const FloatingCard = ({
+  data,
+  index,
+}: {
+  data: FloatingCardData;
+  index: number;
+}) => {
   const Icon = data.icon;
 
   return (
@@ -265,9 +283,11 @@ const FloatingCard = ({ data, index }: { data: any; index: number }) => {
       >
         <div className="relative">
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400/30 to-amber-400/30 blur-md" />
+
           <Icon className={`relative h-5 w-5 ${data.color}`} />
         </div>
       </motion.div>
+
       <span className="text-[9px] font-medium leading-tight text-emerald-950">
         {data.label}
       </span>
@@ -281,7 +301,7 @@ const QuestionCard = ({
   isExpanded,
   onToggle,
 }: {
-  question: any;
+  question: QuestionData;
   isExpanded: boolean;
   onToggle: () => void;
 }) => {
@@ -302,16 +322,20 @@ const QuestionCard = ({
           >
             <HelpCircle className="h-3 w-3" />
           </motion.span>
+
           <div>
             <p className="text-[9px] font-semibold uppercase tracking-wide text-emerald-700">
               Question
             </p>
+
             <p className="text-sm font-semibold text-emerald-950">
               {question.question}
             </p>
           </div>
         </div>
+
         <motion.button
+          type="button"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           className="shrink-0 text-emerald-900/30 transition-colors hover:text-emerald-600"
@@ -340,6 +364,7 @@ const QuestionCard = ({
             <p className="mt-3 text-[9px] font-semibold uppercase tracking-wide text-emerald-900/50">
               Answer Preview
             </p>
+
             <p className="mt-1.5 text-xs leading-relaxed text-emerald-900/60">
               {question.answer}
             </p>
@@ -349,9 +374,10 @@ const QuestionCard = ({
                 <p className="text-[9px] font-semibold uppercase tracking-wide text-emerald-700">
                   References
                 </p>
-                {question.references.map((ref: string, i: number) => (
+
+                {question.references.map((ref) => (
                   <div
-                    key={i}
+                    key={ref}
                     className="flex items-center gap-1.5 text-[10px] text-emerald-700/60"
                   >
                     <Quote className="h-3 w-3" />
@@ -362,7 +388,7 @@ const QuestionCard = ({
             )}
 
             <div className="mt-3 flex flex-wrap gap-2">
-              {question.tags.map((tag: string) => (
+              {question.tags.map((tag) => (
                 <span
                   key={tag}
                   className="flex items-center gap-1 rounded-full border border-emerald-100 bg-white/80 px-2.5 py-1 text-[10px] text-emerald-900/60 backdrop-blur-sm"
@@ -382,14 +408,17 @@ const QuestionCard = ({
                 <Clock className="h-3 w-3" />
                 {question.time}
               </span>
+
               <span className="flex items-center gap-1">
                 <Eye className="h-3 w-3" />
                 {question.views} views
               </span>
+
               <span className="flex items-center gap-1">
                 <Bookmark className="h-3 w-3" />
                 {question.bookmarks} saved
               </span>
+
               <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] text-emerald-700">
                 <ShieldCheck className="h-3 w-3" />
                 {question.authenticity}
@@ -405,9 +434,11 @@ const QuestionCard = ({
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-[9px] font-semibold text-white">
                   {question.scholar.charAt(0)}
                 </div>
+
                 <span className="text-[10px] text-emerald-700/70">
                   {question.scholar}
                 </span>
+
                 <span className="ml-auto text-[9px] text-emerald-600/50">
                   ✓ Verified
                 </span>
@@ -420,10 +451,16 @@ const QuestionCard = ({
   );
 };
 
-// Feature Card (Right Side)
-const FeatureCard = ({ feature, index }: { feature: any; index: number }) => {
+// Feature Card
+const FeatureCard = ({
+  feature,
+  index,
+}: {
+  feature: FeatureData;
+  index: number;
+}) => {
   const Icon = feature.icon;
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
   return (
@@ -449,16 +486,18 @@ const FeatureCard = ({ feature, index }: { feature: any; index: number }) => {
           <Icon className="h-4.5 w-4.5" />
         </motion.div>
 
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-emerald-950 truncate">
+            <p className="truncate text-sm font-semibold text-emerald-950">
               {feature.title}
             </p>
-            <span className="text-[10px] font-medium text-emerald-600/50 shrink-0">
+
+            <span className="shrink-0 text-[10px] font-medium text-emerald-600/50">
               {feature.stat}
             </span>
           </div>
-          <p className="mt-0.5 text-xs leading-relaxed text-emerald-900/50 line-clamp-2">
+
+          <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-emerald-900/50">
             {feature.description}
           </p>
         </div>
@@ -473,35 +512,33 @@ const StatCounter = ({
   label,
   icon: Icon,
   index,
-}: {
-  value: string;
-  label: string;
-  icon: any;
-  index: number;
-}) => {
-  const ref = useRef(null);
+}: StatData & { index: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.5 });
   const [count, setCount] = useState(0);
-  const target = parseInt(value.replace(/[^0-9]/g, ""));
+
+  const target = parseInt(value.replace(/[^0-9]/g, ""), 10);
 
   useEffect(() => {
-    if (isInView && target > 0) {
-      let start = 0;
-      const duration = 2000;
-      const increment = target / (duration / 16);
+    if (!isInView || target <= 0) return;
 
-      const timer = setInterval(() => {
-        start += increment;
-        if (start >= target) {
-          setCount(target);
-          clearInterval(timer);
-        } else {
-          setCount(Math.floor(start));
-        }
-      }, 16);
+    let start = 0;
 
-      return () => clearInterval(timer);
-    }
+    const duration = 2000;
+    const increment = target / (duration / 16);
+
+    const timer = setInterval(() => {
+      start += increment;
+
+      if (start >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
+
+    return () => clearInterval(timer);
   }, [isInView, target]);
 
   return (
@@ -509,17 +546,23 @@ const StatCounter = ({
       ref={ref}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={isInView ? { opacity: 1, scale: 1 } : {}}
-      transition={{ delay: index * 0.1, duration: 0.5, type: "spring" }}
+      transition={{
+        delay: index * 0.1,
+        duration: 0.5,
+        type: "spring",
+      }}
       className="flex flex-col items-center text-center"
     >
       <div className="flex items-center gap-1.5">
         <Icon className="h-3.5 w-3.5 text-emerald-400" />
+
         <div className="text-lg font-bold text-emerald-950">
           {isInView ? count.toLocaleString() : "0"}
           {value.includes("+") && "+"}
           {value.includes("%") && "%"}
         </div>
       </div>
+
       <div className="mt-0.5 text-[10px] text-emerald-600/60">{label}</div>
     </motion.div>
   );
@@ -530,38 +573,51 @@ const StatCounter = ({
 // ============================================================
 
 export default function FiqhShowcase() {
-  const [mounted, setMounted] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [filteredQuestions, setFilteredQuestions] = useState(questions);
+  const [activeCategory, setActiveCategory] =
+    useState<(typeof categories)[number]>("All");
 
   const typedText = useTypewriter(searchQueries, 45);
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
-  useEffect(() => setMounted(true), []);
-
-  useEffect(() => {
-    let filtered = questions;
+  const filteredQuestions = useMemo(() => {
+    let filtered: readonly QuestionData[] = questions;
 
     if (activeCategory !== "All") {
-      filtered = filtered.filter((q) => q.category === activeCategory);
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter((q) =>
-        q.question.toLowerCase().includes(searchQuery.toLowerCase()),
+      filtered = filtered.filter(
+        (question) => question.category === activeCategory,
       );
     }
 
-    setFilteredQuestions(filtered);
+    if (searchQuery.trim()) {
+      const normalizedQuery = searchQuery.toLowerCase();
+
+      filtered = filtered.filter((question) =>
+        question.question.toLowerCase().includes(normalizedQuery),
+      );
+    }
+
+    return filtered;
   }, [searchQuery, activeCategory]);
 
-  const toggleQuestion = (id: number) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, i) => ({
+        id: i,
+        width: 1 + ((i * 17) % 30) / 10,
+        height: 1 + ((i * 23) % 30) / 10,
+        top: (i * 37 + 11) % 100,
+        left: (i * 61 + 7) % 100,
+        xOffset: ((i * 43) % 100) - 50,
+        duration: 15 + ((i * 29) % 20),
+      })),
+    [],
+  );
 
-  if (!mounted) return null;
+  const toggleQuestion = (id: number) => {
+    setExpandedId((currentId) => (currentId === id ? null : id));
+  };
 
   return (
     <section
@@ -571,46 +627,61 @@ export default function FiqhShowcase() {
       {/* ===== BACKGROUND LAYERS ===== */}
 
       <div className="pointer-events-none absolute left-1/4 top-10 h-96 w-96 rounded-full bg-emerald-200/15 blur-3xl" />
-      <div className="pointer-events-none absolute right-1/4 bottom-10 h-96 w-96 rounded-full bg-amber-200/15 blur-3xl" />
+
+      <div className="pointer-events-none absolute bottom-10 right-1/4 h-96 w-96 rounded-full bg-amber-200/15 blur-3xl" />
 
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.015]"
         style={{
           backgroundImage: `
-            repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(16,185,129,0.08) 40px, rgba(16,185,129,0.08) 41px),
-            repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(16,185,129,0.08) 40px, rgba(16,185,129,0.08) 41px)
+            repeating-linear-gradient(
+              45deg,
+              transparent,
+              transparent 40px,
+              rgba(16,185,129,0.08) 40px,
+              rgba(16,185,129,0.08) 41px
+            ),
+            repeating-linear-gradient(
+              -45deg,
+              transparent,
+              transparent 40px,
+              rgba(16,185,129,0.08) 40px,
+              rgba(16,185,129,0.08) 41px
+            )
           `,
         }}
       />
 
       {/* Particles */}
-      {[...Array(12)].map((_, i) => (
+      {particles.map((particle) => (
         <motion.div
-          key={i}
+          key={particle.id}
           className="absolute rounded-full"
           style={{
-            width: Math.random() * 3 + 1,
-            height: Math.random() * 3 + 1,
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
+            width: particle.width,
+            height: particle.height,
+            top: `${particle.top}%`,
+            left: `${particle.left}%`,
             background:
-              i % 2 === 0 ? "rgba(16,185,129,0.15)" : "rgba(251,191,36,0.15)",
+              particle.id % 2 === 0
+                ? "rgba(16,185,129,0.15)"
+                : "rgba(251,191,36,0.15)",
           }}
           animate={{
             y: [-30, -120, -30],
-            x: [0, Math.random() * 100 - 50, 0],
+            x: [0, particle.xOffset, 0],
             opacity: [0, 0.5, 0],
           }}
           transition={{
-            duration: Math.random() * 20 + 15,
+            duration: particle.duration,
             repeat: Infinity,
-            delay: i * 0.3,
+            delay: particle.id * 0.3,
             ease: "easeInOut",
           }}
         />
       ))}
 
-      {/* ===== MAIN GRID - সমান সাইজ ===== */}
+      {/* ===== MAIN GRID ===== */}
 
       <div className="relative mx-auto max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
@@ -636,7 +707,9 @@ export default function FiqhShowcase() {
               >
                 {/* Decorative Blurs */}
                 <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-200/20 blur-2xl" />
+
                 <div className="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-emerald-200/20 blur-2xl" />
+
                 <div className="pointer-events-none absolute -inset-px rounded-[2rem] bg-gradient-to-br from-emerald-400/10 via-transparent to-amber-400/10" />
 
                 <div className="relative">
@@ -649,10 +722,12 @@ export default function FiqhShowcase() {
                       >
                         <BookOpen className="h-5 w-5" />
                       </motion.div>
+
                       <div>
                         <p className="text-sm font-semibold text-emerald-950">
                           Fiqh Guide
                         </p>
+
                         <motion.p
                           whileHover={{ scale: 1.02 }}
                           className="flex items-center gap-1 text-xs text-emerald-700"
@@ -662,7 +737,9 @@ export default function FiqhShowcase() {
                         </motion.p>
                       </div>
                     </div>
+
                     <motion.button
+                      type="button"
                       whileHover={{ rotate: 90 }}
                       transition={{ duration: 0.3 }}
                       className="rounded-lg p-1.5 text-emerald-900/40 transition-colors hover:bg-emerald-100/50"
@@ -678,6 +755,7 @@ export default function FiqhShowcase() {
                   >
                     <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2.5 shadow-sm transition-all focus-within:shadow-md focus-within:ring-2 focus-within:ring-emerald-200">
                       <Search className="h-4 w-4 text-emerald-900/40" />
+
                       <input
                         type="text"
                         value={searchQuery}
@@ -685,9 +763,13 @@ export default function FiqhShowcase() {
                         placeholder={typedText}
                         className="w-full bg-transparent text-xs text-emerald-900/80 placeholder:text-emerald-900/40 focus:outline-none"
                       />
+
                       <motion.div
                         animate={{ opacity: [1, 0] }}
-                        transition={{ duration: 0.5, repeat: Infinity }}
+                        transition={{
+                          duration: 0.5,
+                          repeat: Infinity,
+                        }}
                         className="h-4 w-0.5 bg-emerald-400"
                       />
                     </div>
@@ -698,6 +780,7 @@ export default function FiqhShowcase() {
                     {categories.map((cat) => (
                       <motion.button
                         key={cat}
+                        type="button"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setActiveCategory(cat)}
@@ -713,7 +796,7 @@ export default function FiqhShowcase() {
                   </div>
 
                   {/* Questions */}
-                  <div className="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-emerald-200">
+                  <div className="mt-4 max-h-[300px] space-y-3 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-emerald-200">
                     {filteredQuestions.map((q) => (
                       <QuestionCard
                         key={q.id}
@@ -739,6 +822,7 @@ export default function FiqhShowcase() {
                   {/* Action Buttons */}
                   <div className="relative mt-4 grid grid-cols-3 gap-2">
                     <motion.button
+                      type="button"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-emerald-800 to-emerald-950 py-2.5 text-[10px] font-semibold text-amber-300 shadow-md transition hover:shadow-lg"
@@ -746,16 +830,26 @@ export default function FiqhShowcase() {
                       <BookOpen className="h-3.5 w-3.5" />
                       Read Full
                     </motion.button>
+
                     <motion.button
-                      whileHover={{ scale: 1.02, backgroundColor: "#f0fdf4" }}
+                      type="button"
+                      whileHover={{
+                        scale: 1.02,
+                        backgroundColor: "#f0fdf4",
+                      }}
                       whileTap={{ scale: 0.98 }}
                       className="flex items-center justify-center gap-1 rounded-xl border border-emerald-100 py-2.5 text-[10px] text-emerald-900/60 transition hover:bg-emerald-50"
                     >
                       <Bookmark className="h-3.5 w-3.5" />
                       Save
                     </motion.button>
+
                     <motion.button
-                      whileHover={{ scale: 1.02, backgroundColor: "#f0fdf4" }}
+                      type="button"
+                      whileHover={{
+                        scale: 1.02,
+                        backgroundColor: "#f0fdf4",
+                      }}
                       whileTap={{ scale: 0.98 }}
                       className="flex items-center justify-center gap-1 rounded-xl border border-emerald-100 py-2.5 text-[10px] text-emerald-900/60 transition hover:bg-emerald-50"
                     >
@@ -768,7 +862,7 @@ export default function FiqhShowcase() {
             </div>
           </motion.div>
 
-          {/* ===== RIGHT: CONTENT (সমান সাইজ) ===== */}
+          {/* ===== RIGHT: CONTENT ===== */}
 
           <div className="flex flex-col justify-center space-y-5">
             {/* Badge */}
@@ -776,7 +870,7 @@ export default function FiqhShowcase() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-emerald-50 to-amber-50 px-4 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm border border-emerald-200/30"
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200/30 bg-gradient-to-r from-emerald-50 to-amber-50 px-4 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm"
             >
               <Sparkles className="h-3.5 w-3.5 text-amber-400" />
               Fiqh Guide
@@ -793,7 +887,11 @@ export default function FiqhShowcase() {
               <motion.span
                 initial={{ backgroundSize: "0% 100%" }}
                 animate={{ backgroundSize: "100% 100%" }}
-                transition={{ delay: 0.8, duration: 0.8, ease: "easeInOut" }}
+                transition={{
+                  delay: 0.8,
+                  duration: 0.8,
+                  ease: "easeInOut",
+                }}
                 className="bg-gradient-to-r from-amber-400 to-amber-500 bg-no-repeat pb-0.5 text-amber-500"
                 style={{
                   backgroundImage:
@@ -842,20 +940,28 @@ export default function FiqhShowcase() {
               className="rounded-2xl border border-emerald-200/20 bg-white/80 p-3 backdrop-blur-sm"
             >
               <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-                {trustIndicators.map((item, i) => (
-                  <motion.div
-                    key={item.label}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.9 + i * 0.05, duration: 0.3 }}
-                    className="flex items-center gap-1.5"
-                  >
-                    <item.icon className="h-3 w-3 text-emerald-500" />
-                    <span className="text-[11px] text-emerald-700/60">
-                      {item.label}
-                    </span>
-                  </motion.div>
-                ))}
+                {trustIndicators.map((item, i) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <motion.div
+                      key={item.label}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        delay: 0.9 + i * 0.05,
+                        duration: 0.3,
+                      }}
+                      className="flex items-center gap-1.5"
+                    >
+                      <Icon className="h-3 w-3 text-emerald-500" />
+
+                      <span className="text-[11px] text-emerald-700/60">
+                        {item.label}
+                      </span>
+                    </motion.div>
+                  );
+                })}
               </div>
             </motion.div>
 
@@ -870,6 +976,7 @@ export default function FiqhShowcase() {
                 className="group inline-block w-full sm:w-auto"
               >
                 <motion.button
+                  type="button"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="relative w-full overflow-hidden rounded-full bg-gradient-to-r from-emerald-700 to-emerald-900 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/30 transition-all hover:shadow-xl hover:shadow-emerald-900/40 sm:w-auto"
@@ -878,11 +985,15 @@ export default function FiqhShowcase() {
                     className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-emerald-400/20 opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-100"
                     initial={false}
                   />
+
                   <span className="relative flex items-center justify-center gap-2">
                     Explore Fiqh
                     <motion.span
                       animate={{ x: [0, 4, 0] }}
-                      transition={{ duration: 1.2, repeat: Infinity }}
+                      transition={{
+                        duration: 1.2,
+                        repeat: Infinity,
+                      }}
                     >
                       <ArrowRight className="h-4 w-4" />
                     </motion.span>

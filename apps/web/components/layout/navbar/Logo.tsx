@@ -64,7 +64,7 @@ export const Logo = React.memo(function Logo({
   className = "",
 }: LogoProps) {
   const [typedText, setTypedText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [, setIsTyping] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

@@ -59,19 +59,6 @@ export default function LanguageSwitcher({
     });
   }, [query, availableLanguages]);
 
-  /* ================================================================
-     OPEN
-  ================================================================= */
-
-  const openSwitcher = useCallback(() => {
-    setIsOpen(true);
-    setQuery("");
-  }, []);
-
-  /* ================================================================
-     CLOSE
-  ================================================================= */
-
   const closeSwitcher = useCallback(() => {
     setIsOpen(false);
     setQuery("");

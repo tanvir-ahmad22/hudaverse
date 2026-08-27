@@ -8,7 +8,6 @@ import {
   MessageCircle,
   BookOpen,
   GraduationCap,
-  HeartHandshake,
   ArrowRight,
 } from "lucide-react";
 

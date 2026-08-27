@@ -6,7 +6,6 @@ import {
   Clock3,
   MapPin,
   Bell,
-  Navigation,
   ArrowRight,
   CheckCircle2,
   Circle,
@@ -315,7 +314,7 @@ export default function PrayerTimes() {
                 whileInView="visible"
                 className="mt-5 space-y-1.5"
               >
-                {prayers.map((prayer, index) => {
+                {prayers.map((prayer) => {
                   const Icon = prayer.icon;
                   return (
                     <motion.div

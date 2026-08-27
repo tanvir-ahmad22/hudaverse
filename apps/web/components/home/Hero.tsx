@@ -51,6 +51,7 @@ function TrustUsers() {
         <p className="text-[11px] uppercase tracking-wider text-white/50">
           Built For
         </p>
+
         <p className="text-sm font-semibold text-white">Muslims Worldwide</p>
       </div>
     </div>
@@ -65,11 +66,24 @@ function PhoneMockup({ className = "" }: { className?: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50, scale: 0.92 }}
-      animate={{ opacity: 1, y: [0, -12, 0], scale: 1 }}
+      animate={{
+        opacity: 1,
+        y: [0, -12, 0],
+        scale: 1,
+      }}
       transition={{
-        opacity: { duration: 0.8 },
-        scale: { duration: 0.8, ease: "easeOut" },
-        y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+        opacity: {
+          duration: 0.8,
+        },
+        scale: {
+          duration: 0.8,
+          ease: "easeOut",
+        },
+        y: {
+          duration: 5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        },
       }}
       whileHover={{ y: -18 }}
       className={`${className} drop-shadow-[0_25px_45px_rgba(0,0,0,0.45)]`}
@@ -81,6 +95,7 @@ function PhoneMockup({ className = "" }: { className?: string }) {
         alt="HudaVerse App Preview"
         fill
         priority
+        sizes="(min-width: 1280px) 21vw, (min-width: 768px) 240px, 230px"
         className="object-contain"
       />
     </motion.div>
@@ -153,6 +168,8 @@ export default function Hero() {
               alt="HudaVerse Islamic Knowledge Ecosystem"
               fill
               priority
+              loading="eager"
+              sizes="(min-width: 1280px) 50vw, 0px"
               className="object-cover object-[48%_center]"
             />
           </motion.div>
@@ -179,7 +196,7 @@ export default function Hero() {
           Tablet
       ================================ */}
 
-      <div className="hidden md:flex xl:hidden relative min-h-[850px] items-center justify-center overflow-hidden">
+      <div className="hidden md:flex relative min-h-[850px] items-center justify-center overflow-hidden xl:hidden">
         {/* Background */}
 
         <motion.div
@@ -195,6 +212,7 @@ export default function Hero() {
             src="/hero-mosque.png"
             alt="HudaVerse Islamic Knowledge Ecosystem"
             fill
+            sizes="(min-width: 768px) 100vw, 0px"
             className="object-cover object-center opacity-40"
           />
         </motion.div>
@@ -263,6 +281,7 @@ export default function Hero() {
             src="/hero-mosque.png"
             alt="HudaVerse Islamic Knowledge Ecosystem"
             fill
+            sizes="100vw"
             className="object-cover object-center opacity-25"
           />
         </motion.div>

@@ -60,7 +60,11 @@ import trNavbar from "../../../locales/tr/navbar";
    TYPES
 ================================================================ */
 
-type NavbarLocale = typeof enNavbar;
+type Localized<T> = {
+  readonly [K in keyof T]: T[K] extends object ? Localized<T[K]> : string;
+};
+
+type NavbarLocale = Localized<typeof enNavbar>;
 
 /* ================================================================
    NAVBAR LOCALE MAP

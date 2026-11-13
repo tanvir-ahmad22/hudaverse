@@ -1,0 +1,89 @@
+/* Copied from apps/web/app/globals.css (GLOBAL LAYOUT, RESPONSIVE CONTAINER) on 2026-11-10. Keep in sync until moved to packages/ui. */
+
+/* =========================================================
+   GLOBAL LAYOUT
+   ========================================================= */
+
+.hv-container {
+  width: 100%;
+  max-width: var(--container-width);
+
+  margin-inline: auto;
+
+  padding-inline: var(--container-padding-desktop);
+
+  min-width: 0;
+}
+
+.hv-section {
+  position: relative;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding-block: var(--section-space-block);
+  font-family: var(--hv-font-body);
+}
+
+.hv-section :is(h2) {
+  font-family: var(--hv-font-heading);
+  font-size: var(--type-h2);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.hv-section :is(h3, h4, h5, h6) {
+  font-family: var(--hv-font-subheading);
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+.hv-section h3 { font-size: var(--type-h3); line-height: 1.3; }
+.hv-section h4 { font-size: var(--type-h4); line-height: 1.35; }
+.hv-section h5 { font-size: var(--type-h5); line-height: 1.4; }
+.hv-section h6 { font-size: var(--type-h6); line-height: 1.4; }
+
+.hv-section :is(.font-bangla, [lang="bn"]) :is(h2, h3, h4, h5, h6),
+.hv-section :is(h2, h3, h4, h5, h6).font-bangla { font-family: var(--hv-font-bangla); }
+.hv-section :is(.font-arabic, [lang="ar"]) :is(h2, h3, h4, h5, h6),
+.hv-section :is(h2, h3, h4, h5, h6).font-arabic { font-family: var(--hv-font-arabic); }
+.hv-section :is(.font-urdu, [lang="ur"]) :is(h2, h3, h4, h5, h6),
+.hv-section :is(h2, h3, h4, h5, h6).font-urdu { font-family: var(--hv-font-urdu); }
+.hv-section :is(.font-persian, [lang="fa"]) :is(h2, h3, h4, h5, h6),
+.hv-section :is(h2, h3, h4, h5, h6).font-persian { font-family: var(--hv-font-persian); }
+
+.hv-app {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* =========================================================
+   RESPONSIVE CONTAINER
+   ========================================================= */
+
+@media (min-width: 1280px) {
+  .hv-container {
+    padding-inline: var(--container-padding-xl);
+  }
+}
+
+@media (min-width: 1536px) {
+  .hv-container {
+    padding-inline: var(--container-padding-2xl);
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .hv-container {
+    padding-inline: var(--container-padding-mobile-sm);
+  }
+}
+
+@media (max-width: 639px) {
+  .hv-container {
+    padding-inline: var(--container-padding-mobile);
+  }
+}

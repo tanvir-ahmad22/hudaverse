@@ -1,0 +1,342 @@
+/* Copied from apps/web/app/globals.css (typography sections) on 2026-11-10. Keep in sync until moved to packages/ui. */
+
+/* =========================================================
+   GLOBAL TEXT COLORS
+   ========================================================= */
+
+.text-dark {
+  color: var(--text-dark);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-light {
+  color: var(--text-on-dark);
+}
+
+.text-light-muted {
+  color: var(--text-on-dark-muted);
+}
+
+.text-gold {
+  color: var(--accent);
+}
+
+/* =========================================================
+   TYPOGRAPHY — FONT HELPERS
+   ========================================================= */
+
+.font-heading {
+  font-family: var(--hv-font-heading);
+}
+
+.font-subheading {
+  font-family: var(--hv-font-subheading);
+}
+
+.font-body {
+  font-family: var(--hv-font-body);
+}
+
+.font-arabic {
+  font-family: var(--hv-font-arabic);
+}
+
+.font-quran {
+  font-family: var(--hv-font-quran);
+}
+
+.font-hadith {
+  font-family: var(--hv-font-hadith);
+}
+
+.font-bangla {
+  font-family: var(--hv-font-bangla);
+}
+
+.font-hindi {
+  font-family: var(--hv-font-hindi);
+}
+
+.font-urdu {
+  font-family: var(--hv-font-urdu);
+}
+
+.font-persian {
+  font-family: var(--hv-font-persian);
+}
+
+/* =========================================================
+   DISPLAY / HEADING SYSTEM
+   ========================================================= */
+
+.hv-h1,
+.hv-h2 {
+  margin: 0;
+
+  font-family: var(--hv-font-heading);
+  font-weight: 600;
+
+  color: var(--text-dark);
+
+  text-wrap: balance;
+}
+
+.hv-h1 {
+  font-size: var(--type-h1);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.hv-h2 {
+  font-size: var(--type-h2);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+/* =========================================================
+   H3 — H6
+   ========================================================= */
+
+.hv-h3,
+.hv-h4,
+.hv-h5,
+.hv-h6 {
+  margin: 0;
+
+  font-family: var(--hv-font-subheading);
+  font-weight: 600;
+
+  color: var(--text-dark);
+
+  text-wrap: balance;
+}
+
+.hv-h3 {
+  font-size: var(--type-h3);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.hv-h4 {
+  font-size: var(--type-h4);
+  line-height: 1.35;
+}
+
+.hv-h5 {
+  font-size: var(--type-h5);
+  line-height: 1.4;
+}
+
+.hv-h6 {
+  font-size: var(--type-h6);
+  line-height: 1.4;
+}
+
+/* =========================================================
+   BODY TEXT
+   ========================================================= */
+
+.hv-body-lg,
+.hv-body,
+.hv-body-sm,
+.hv-caption,
+.hv-muted,
+.hv-overline {
+  margin: 0;
+}
+
+.hv-body-lg {
+  font-family: var(--hv-font-body);
+
+  font-size: var(--type-body-lg);
+  line-height: 1.7;
+  font-weight: 400;
+
+  color: var(--text-dark);
+
+  text-wrap: pretty;
+}
+
+.hv-body {
+  font-family: var(--hv-font-body);
+
+  font-size: var(--type-body);
+  line-height: 1.7;
+  font-weight: 400;
+
+  color: var(--text-dark);
+
+  text-wrap: pretty;
+}
+
+.hv-body-sm {
+  font-family: var(--hv-font-body);
+
+  font-size: var(--type-body-sm);
+  line-height: 1.6;
+  font-weight: 400;
+
+  color: var(--text-dark);
+
+  text-wrap: pretty;
+}
+
+.hv-caption {
+  font-family: var(--hv-font-body);
+
+  font-size: var(--type-caption);
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: var(--text-muted);
+}
+
+.hv-muted {
+  font-family: var(--hv-font-body);
+
+  font-size: 15px;
+  line-height: 1.6;
+  font-weight: 400;
+
+  color: var(--text-muted);
+
+  text-wrap: pretty;
+}
+
+.hv-overline {
+  font-family: var(--hv-font-body);
+
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 500;
+
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   TAGLINES
+   ========================================================= */
+
+.hv-tagline,
+.hv-tagline-soft {
+  margin: 0;
+
+  font-family: var(--hv-font-subheading);
+
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 500;
+
+  text-transform: uppercase;
+}
+
+.hv-tagline {
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.hv-tagline-soft {
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+/* =========================================================
+   ARABIC / ISLAMIC CONTENT
+   ========================================================= */
+
+.quran-text {
+  font-family: var(--hv-font-quran);
+
+  line-height: 2.2;
+
+  direction: rtl;
+  text-align: right;
+}
+
+.hv-hadith-arabic {
+  font-family: var(--hv-font-hadith);
+
+  line-height: 2;
+
+  direction: rtl;
+  text-align: right;
+}
+
+.hv-arabic {
+  direction: rtl;
+  text-align: right;
+
+  font-family: var(--hv-font-arabic);
+}
+
+.hv-urdu {
+  direction: rtl;
+  text-align: right;
+
+  font-family: var(--hv-font-urdu);
+}
+
+.hv-persian {
+  direction: rtl;
+  text-align: right;
+
+  font-family: var(--hv-font-persian);
+}
+
+.hv-ui-text {
+  direction: ltr;
+  text-align: left;
+}
+
+.hv-content-arabic {
+  direction: rtl;
+  text-align: right;
+
+  font-family: var(--hv-font-quran);
+}
+
+.hv-content-ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* =========================================================
+   RESPONSIVE TYPOGRAPHY
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .hv-h1 {
+    font-size: var(--type-h1);
+  }
+
+  .hv-h2 {
+    font-size: var(--type-h2);
+  }
+
+  .hv-h3 {
+    font-size: var(--type-h3);
+  }
+
+  .hv-h4 {
+    font-size: var(--type-h4);
+  }
+
+  .hv-h5 {
+    font-size: var(--type-h5);
+  }
+
+  .hv-h6 {
+    font-size: var(--type-h6);
+  }
+
+  .hv-body-lg {
+    font-size: var(--type-body-lg);
+  }
+
+  .hv-body {
+    font-size: var(--type-body);
+  }
+}

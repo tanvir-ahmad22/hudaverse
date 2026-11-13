@@ -1,0 +1,350 @@
+/* Copied from apps/web/app/styles/cards.css on 2026-11-10. Keep in sync until moved to packages/ui. */
+/* HudaVerse card foundation and reusable semantic states. */
+@layer components {
+.hv-card {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  padding: var(--space-6);
+  overflow-wrap: anywhere;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text-dark);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.hv-card:hover:not(.hv-card--locked) {
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border-light));
+  box-shadow: var(--shadow-card);
+}
+
+.hv-card--interactive {
+  cursor: pointer;
+}
+
+.hv-card--interactive:hover {
+  transform: translateY(-2px);
+}
+
+.hv-card--interactive:active {
+  transform: translateY(-1px) scale(0.995);
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--border-light));
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--primary) 42%, var(--border-light));
+}
+
+.hv-card:focus-visible,
+.hv-card:has(:focus-visible) {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--focus-ring-color);
+}
+
+.hv-card :is(a, button, select, textarea, [role="button"], [role="link"]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.hv-card--dark {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--text-on-dark);
+}
+
+/* Approved semantic card treatments share the same shape and type foundation. */
+.hv-card--primary { border-color: var(--primary); }
+.hv-card--secondary { background: var(--background); }
+.hv-card--information { border-inline-start: 3px solid var(--accent); }
+.hv-card--feature { padding: var(--space-8); }
+
+.hv-card--dark:hover:not(.hv-card--locked) {
+  border-color: var(--primary-soft);
+  background: var(--primary-soft);
+  box-shadow: var(--shadow-dark);
+}
+
+.hv-card--dark.hv-card--interactive:active {
+  border-color: var(--primary-dark);
+  background: var(--primary-dark);
+  box-shadow: none;
+}
+
+.hv-card--dark:focus-visible,
+.hv-card--dark:has(:focus-visible) {
+  outline-color: var(--accent-light);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-light) 30%, transparent);
+}
+
+.hv-card--dark :is(a, button, select, textarea, [role="button"], [role="link"]):focus-visible {
+  outline-color: var(--accent-light);
+}
+
+.hv-card--selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary), var(--shadow-card);
+}
+
+.hv-card--dark.hv-card--selected {
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 1px var(--accent-light), var(--shadow-dark);
+}
+
+.hv-card--context,
+.hv-card--complete {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.hv-card--current {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.hv-card--playing {
+  border-color: var(--primary-soft);
+  box-shadow: 0 0 0 1px var(--primary-soft);
+}
+
+.hv-card--expanded {
+  border-color: var(--primary-soft);
+  background: var(--surface);
+}
+.hv-card[aria-expanded="true"] { border-color: var(--accent); }
+
+.hv-card--locked {
+  border-style: dashed;
+  background: var(--background);
+  cursor: not-allowed;
+}
+
+.hv-card--locked:is(:hover, :active) {
+  transform: none;
+  border-color: var(--border-light);
+  box-shadow: none;
+}
+
+.hv-card--locked :is(h1, h2, h3, h4, h5, h6, p) {
+  color: var(--text-muted);
+}
+
+.hv-card--offline {
+  background: var(--background);
+}
+
+.hv-card--empty {
+  border-style: dashed;
+  background: transparent;
+  text-align: center;
+}
+
+.hv-card--loading {
+  pointer-events: none;
+  animation: hv-card-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes hv-card-loading {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* A stretched link keeps the real anchor as the accessible control. */
+.hv-card-link {
+  position: relative;
+}
+
+.hv-card-link::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: inherit;
+  content: "";
+}
+
+.hv-card :is(a, button, [role="button"], [role="link"]):not(.hv-card-link) {
+  position: relative;
+  z-index: 2;
+}
+
+.hv-card__eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--text-muted);
+  font-family: var(--hv-font-subheading);
+  font-size: var(--type-caption);
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.hv-card--dark .hv-card__eyebrow {
+  color: var(--accent);
+}
+
+.hv-card__title {
+  margin: 0 0 var(--space-2);
+  color: var(--text-dark);
+  font-family: var(--hv-font-subheading);
+  font-size: var(--type-h5);
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.hv-card__title--large {
+  font-size: var(--type-h4);
+}
+
+.hv-card--dark .hv-card__title {
+  color: var(--text-on-dark);
+}
+
+.hv-card__description {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--hv-font-body);
+  font-size: var(--type-body-sm);
+  font-weight: 400;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.hv-card--dark .hv-card__description {
+  color: color-mix(in srgb, var(--text-on-dark) 76%, transparent);
+}
+
+.hv-card__caption {
+  color: var(--text-muted);
+  font-family: var(--hv-font-body);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.hv-card--dark .hv-card__caption {
+  color: color-mix(in srgb, var(--text-on-dark) 68%, transparent);
+}
+
+.hv-card__arabic {
+  color: var(--primary);
+  direction: rtl;
+  font-family: var(--hv-font-quran);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 2;
+  text-align: right;
+}
+
+.hv-card--dark .hv-card__arabic {
+  color: var(--text-on-dark);
+}
+
+.hv-card__metadata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.hv-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  color: var(--primary);
+  font-family: var(--hv-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.hv-card--dark .hv-card__action {
+  color: var(--text-on-dark);
+}
+
+.hv-card__action-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  transition: translate var(--transition-fast);
+}
+
+.hv-card__action:hover .hv-card__action-icon {
+  translate: 3px 0;
+}
+
+[dir="rtl"] .hv-card__action:hover .hv-card__action-icon {
+  translate: -3px 0;
+}
+
+.hv-card__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 1px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-family: var(--hv-font-subheading);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.hv-card__badge--primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--text-on-dark);
+}
+
+.hv-card__badge--gold {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--primary-dark);
+}
+
+.hv-card--dark .hv-card__badge {
+  border-color: color-mix(in srgb, var(--text-on-dark) 25%, transparent);
+  background: transparent;
+  color: color-mix(in srgb, var(--text-on-dark) 82%, transparent);
+}
+
+@media (pointer: coarse) {
+  .hv-card :is(a, button, select, textarea, [role="button"], [role="link"]) {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hv-card,
+  .hv-card::before,
+  .hv-card::after,
+  .hv-card__action-icon {
+    transition-duration: 0.01ms !important;
+  }
+
+  .hv-card--interactive:hover,
+  .hv-card--interactive:active {
+    transform: none;
+  }
+
+  .hv-card--loading {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}
+}

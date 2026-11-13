@@ -1,0 +1,193 @@
+/* HudaVerse platform design tokens.
+   Source: apps/web/app/globals.css (ROOT DESIGN TOKENS, TAILWIND THEME, RESPONSIVE TYPOGRAPHY :root overrides).
+   Copied: 2026-11-12.
+   Do not edit values here; token changes go through the design system first. */
+
+/* =========================================================
+   ROOT DESIGN TOKENS
+   ========================================================= */
+
+:root {
+  /* =======================================================
+     BRAND COLORS — LOCKED
+     ======================================================= */
+
+  --primary: #00302a;
+  --primary-dark: #001f1a;
+  --primary-soft: #003d35;
+
+  --secondary: var(--accent);
+
+  --accent: #e5a72f;
+  --accent-light: #f2c45b;
+
+  --background: #f9f5ee;
+  --surface: #ffffff;
+  --surface-warm: var(--background);
+
+  --text-dark: #10201e;
+  --text-muted: #5f6866;
+
+  --text-on-dark: var(--surface);
+  --text-on-dark-muted: color-mix(in srgb, var(--surface) 78%, transparent);
+
+  --border-light: #e5e8e5;
+  --border-dark: rgba(255, 255, 255, 0.08);
+  --border-gold: rgba(229, 167, 47, 0.28);
+
+  /* Semantic status colors retained from the current web token source. */
+  --status-success: #1a7a3c;
+  --status-error: #8a2f2f;
+
+  /* =======================================================
+     TYPOGRAPHY
+     ======================================================= */
+
+  --hv-font-body: var(--font-inter);
+  --hv-font-heading: var(--font-heading);
+  --hv-font-subheading: var(--font-subheading);
+
+  --hv-font-quran: var(--font-quran);
+  --hv-font-hadith: var(--font-naskh);
+  --hv-font-arabic: var(--font-arabic);
+
+  --hv-font-bangla: var(--font-bangla);
+  --hv-font-hindi: var(--font-hindi);
+  --hv-font-urdu: var(--font-urdu);
+  --hv-font-persian: var(--font-persian);
+
+  /* =======================================================
+     LAYOUT
+     ======================================================= */
+
+  --container-width: 1200px;
+
+  --container-padding-desktop: 1.5rem;
+  --container-padding-xl: 2.5rem;
+  --container-padding-2xl: 3rem;
+  --container-padding-mobile: 0.75rem;
+  --container-padding-mobile-sm: 1.25rem;
+
+  /* Shared layout and type scale. Component styles consume these values. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --section-space-block: clamp(80px, 7vw, 120px);
+  --type-h1: 56px;
+  --type-h2: 42px;
+  --type-h3: 28px;
+  --type-h4: 22px;
+  --type-h5: 18px;
+  --type-h6: 16px;
+  --type-body-lg: 18px;
+  --type-body: 16px;
+  --type-body-sm: 14px;
+  --type-caption: 13px;
+  --type-overline: 12px;
+
+  /* =======================================================
+     RADII — LOCKED
+     ======================================================= */
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --radius-button: 8px;
+  --radius-card: 12px;
+
+  /* =======================================================
+     SHADOWS — LOCKED
+     ======================================================= */
+
+  --shadow-card: 0 20px 50px rgba(16, 32, 30, 0.08);
+
+  --shadow-dark: 0 20px 50px rgba(0, 0, 0, 0.25);
+
+  --shadow-gold: 0 0 40px rgba(229, 167, 47, 0.25);
+
+  --shadow-navbar: 0 12px 32px rgba(0, 0, 0, 0.15);
+
+  /* =======================================================
+     FOCUS
+     ======================================================= */
+
+  --focus-ring-color: rgba(229, 167, 47, 0.6);
+  --focus-ring-offset: 2px;
+  --focus-ring-width: 3px;
+
+  /* =======================================================
+     BUTTON SYSTEM — LOCKED
+     ======================================================= */
+
+  --button-height-sm: 38px;
+  --button-height-md: 44px;
+  --button-height-lg: 50px;
+
+  --button-padding-x-sm: 16px;
+  --button-padding-x-md: 20px;
+  --button-padding-x-lg: 24px;
+
+  --button-transition:
+    color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease, transform 0.2s ease;
+
+  /* =======================================================
+     MOTION
+     ======================================================= */
+
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+
+  --motion-distance-sm: 2px;
+  --motion-distance-md: 8px;
+}
+
+/* =========================================================
+   TAILWIND THEME
+   ========================================================= */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--text-dark);
+
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+
+  --font-sans: var(--hv-font-body);
+  --font-heading: var(--hv-font-heading);
+  --font-subheading: var(--hv-font-subheading);
+
+  --font-arabic: var(--hv-font-arabic);
+  --font-quran: var(--hv-font-quran);
+  --font-hadith: var(--hv-font-hadith);
+
+  --font-bangla: var(--hv-font-bangla);
+  --font-hindi: var(--hv-font-hindi);
+  --font-urdu: var(--hv-font-urdu);
+  --font-persian: var(--hv-font-persian);
+}
+
+/* =========================================================
+   RESPONSIVE TYPOGRAPHY
+   ========================================================= */
+
+@media (max-width: 768px) {
+  :root {
+    --type-h1: 36px;
+    --type-h2: 30px;
+    --type-h3: 24px;
+    --type-h4: 20px;
+    --type-h5: 17px;
+    --type-h6: 15px;
+    --type-body-lg: 17px;
+    --type-body: 15px;
+  }
+}

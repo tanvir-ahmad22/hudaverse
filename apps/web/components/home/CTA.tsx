@@ -1,376 +1,158 @@
 "use client";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import {
-  Sparkles,
-  ArrowRight,
-  Smartphone,
-  CheckCircle2,
-  Heart,
-} from "lucide-react";
 
-// Static particle configuration - generated once outside component
-const CTA_PARTICLES = [
-  {
-    x: "12%",
-    y: "20%",
-    duration: 9,
-    delay: 1,
-  },
-  {
-    x: "35%",
-    y: "70%",
-    duration: 11,
-    delay: 2,
-  },
-  {
-    x: "78%",
-    y: "30%",
-    duration: 8,
-    delay: 0.5,
-  },
-  {
-    x: "5%",
-    y: "85%",
-    duration: 10,
-    delay: 3.2,
-  },
-  {
-    x: "92%",
-    y: "65%",
-    duration: 12,
-    delay: 0.8,
-  },
-  {
-    x: "45%",
-    y: "15%",
-    duration: 9.5,
-    delay: 2.5,
-  },
-  {
-    x: "60%",
-    y: "90%",
-    duration: 8.5,
-    delay: 1.8,
-  },
-  {
-    x: "20%",
-    y: "45%",
-    duration: 10.5,
-    delay: 3.5,
-  },
-  {
-    x: "85%",
-    y: "10%",
-    duration: 11.5,
-    delay: 0.3,
-  },
-  {
-    x: "50%",
-    y: "50%",
-    duration: 9.2,
-    delay: 2.2,
-  },
-  {
-    x: "15%",
-    y: "95%",
-    duration: 10.8,
-    delay: 1.5,
-  },
-  {
-    x: "70%",
-    y: "40%",
-    duration: 8.8,
-    delay: 2.8,
-  },
-];
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
-// =================================
-// Component
-// =================================
+import { Button } from "@/components/ui/Button";
+import { useLanguage } from "@/hooks/useLanguage";
+import { isRTL } from "@/lib/language";
+import { landing as en } from "@/locales/en/landing";
+import { landing as bn } from "@/locales/bn/landing";
+import { landing as ar } from "@/locales/ar/landing";
+import { landing as ur } from "@/locales/ur/landing";
+import { landing as fa } from "@/locales/fa/landing";
+import { landing as tr } from "@/locales/tr/landing";
+
+type Language = "en" | "bn" | "ar" | "ur" | "fa" | "tr";
+type CtaCopy = {
+  badge: string;
+  title: { line1: string; highlight: string; line2: string };
+  description: string;
+  primaryButton: string;
+  secondaryButton: string;
+  tagline: string;
+};
+
+const localeMap: Record<Language, { cta: CtaCopy }> = {
+  en,
+  bn,
+  ar,
+  ur,
+  fa,
+  tr,
+};
+
+function FolioSeal() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute end-0 top-1/2 hidden h-[min(29vw,340px)] w-[min(29vw,340px)] -translate-y-1/2 items-center justify-center lg:flex"
+    >
+      <svg viewBox="0 0 360 360" className="absolute inset-0 h-full w-full">
+        <path
+          d="M180 12 213 111 312 48 249 147 348 180 249 213 312 312 213 249 180 348 147 249 48 312 111 213 12 180 111 147 48 48 147 111Z"
+          fill="none"
+          stroke="var(--accent)"
+          strokeOpacity=".42"
+          strokeWidth="1.2"
+        />
+        <path
+          d="M180 50 310 180 180 310 50 180Z M180 91 269 180 180 269 91 180Z"
+          fill="none"
+          stroke="var(--accent-light)"
+          strokeOpacity=".32"
+          strokeWidth="1"
+        />
+      </svg>
+      <span className="font-heading text-[clamp(5rem,10vw,8rem)] leading-none text-[var(--accent-light)]/70">
+        05
+      </span>
+    </div>
+  );
+}
 
 export default function CTA() {
+  const { currentLang } = useLanguage();
+  const lang: Language = currentLang in localeMap ? currentLang : "en";
+  const cta = localeMap[lang].cta;
+  const rtl = isRTL(lang);
+  const reducedMotion = useReducedMotion() ?? false;
+  const font =
+    lang === "bn"
+      ? "font-bangla"
+      : lang === "ar"
+        ? "font-arabic"
+        : lang === "ur"
+          ? "font-urdu"
+          : lang === "fa"
+            ? "font-persian"
+            : "";
+
   return (
     <section
-      className="
-relative
-py-28
-bg-[#0F2E26]
-overflow-hidden
-"
+      dir={rtl ? "rtl" : "ltr"}
+      aria-labelledby="cta-heading"
+      className="hv-section relative overflow-hidden border-b border-[var(--accent)]/25 bg-[var(--primary-dark)] text-white"
     >
-      {/* Background Pattern & Glows */}
-
-      {/* Islamic Geometric Pattern */}
-      <div
-        className="
-absolute
-inset-0
-opacity-[0.03]
-bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48cGF0aCBkPSJNMzAgMTBMNTAgMzAgMzAgNTAgMTAgMzBMMzAgMTB6IiBmaWxsPSJub25lIiBzdHJva2U9IiNENEJGMzciIHN0cm9rZS13aWR0aD0iMC41Ii8+PHBhdGggZD0iTTMwIDBMMzAgNjBNMCAzMEw2MCAzME0wIDBMNjAgNjBNNjAgMEwwIDYwIiBzdHJva2U9IiNENEJGMzciIHN0cm9rZS13aWR0aD0iMC4yIi8+PC9zdmc+')]
-bg-repeat
-"
-      />
-
-      {/* Soft Glowing Orbs */}
-      <motion.div
-        className="
-absolute
-w-[600px]
-h-[600px]
-rounded-full
-bg-[#D4AF37]/10
-blur-3xl
-top-[-300px]
-right-[-200px]
-"
-        animate={{
-          x: [0, 30, 0],
-          y: [0, -30, 0],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      <motion.div
-        className="
-absolute
-w-[400px]
-h-[400px]
-rounded-full
-bg-[#D4AF37]/5
-blur-3xl
-bottom-[-200px]
-left-[-100px]
-"
-        animate={{
-          x: [0, -20, 0],
-          y: [0, 20, 0],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      {/* Gold Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {CTA_PARTICLES.map((particle, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 rounded-full bg-[#D4AF37]/20"
-            initial={{
-              x: particle.x,
-              y: particle.y,
-            }}
-            animate={{
-              y: [null, "-30%", null],
-              opacity: [0.1, 0.4, 0.1],
-            }}
-            transition={{
-              duration: particle.duration,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: particle.delay,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+      <div className="hv-container">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={reducedMotion ? false : { opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          viewport={{ once: true }}
+          transition={{ duration: reducedMotion ? 0 : 0.45, ease: "easeOut" }}
+          viewport={{ once: true, amount: 0.2 }}
+          className={font}
         >
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] font-medium text-sm backdrop-blur-sm border border-[#D4AF37]/10"
-          >
-            <Sparkles size={16} className="text-[#D4AF37]" />
-            Begin Your Spiritual Journey
-          </motion.div>
+          <div className="relative min-h-0 lg:min-h-[340px]">
+            <FolioSeal />
 
-          {/* Heading */}
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="mt-8 text-4xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight"
-          >
-            Your Journey Of Faith,
-            <br />
-            <span className="bg-gradient-to-r from-[#D4AF37] via-[#e5c15a] to-[#D4AF37] bg-clip-text text-transparent">
-              Knowledge & Growth
-            </span>{" "}
-            Starts Here
-          </motion.h2>
+            <header className="relative z-10 max-w-[780px] py-2 sm:py-8 lg:w-[66%]">
+              <div className="mb-5 flex items-center gap-3 text-[var(--accent-light)]">
+                <span className="h-px w-8 bg-[var(--accent)]" aria-hidden="true" />
+                <span
+                  className={`${font || "font-subheading"} text-xs font-semibold uppercase tracking-[0.16em]`}
+                >
+                  {cta.badge}
+                </span>
+                <span className="font-subheading text-[10px] tabular-nums text-white/45 lg:hidden">
+                  05
+                </span>
+              </div>
 
-          {/* Ecosystem Identity */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="mt-6 flex flex-wrap justify-center gap-3 md:gap-5 text-white/50 text-sm font-medium tracking-wide"
-          >
-            <span>Quran</span>
-            <span className="text-[#D4AF37]/30">•</span>
-            <span>Hadith</span>
-            <span className="text-[#D4AF37]/30">•</span>
-            <span>AI Assistant</span>
-            <span className="text-[#D4AF37]/30">•</span>
-            <span>Prayer</span>
-            <span className="text-[#D4AF37]/30">•</span>
-            <span>Learning</span>
-            <span className="text-[#D4AF37]/30">•</span>
-            <span>Community</span>
-          </motion.div>
-
-          {/* Description */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            viewport={{ once: true }}
-            className="mt-6 text-white/60 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
-          >
-            Explore the beauty of Islam through an integrated ecosystem designed
-            to deepen your connection with faith and knowledge.
-          </motion.p>
-
-          {/* Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="mt-10 flex flex-col sm:flex-row justify-center gap-5"
-          >
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link
-                href="/quran"
-                className="
-flex
-items-center
-justify-center
-gap-2.5
-px-10
-py-4.5
-rounded-full
-bg-gradient-to-r
-from-[#D4AF37]
-to-[#e5c15a]
-text-[#0F2E26]
-font-bold
-text-base
-shadow-lg
-shadow-[#D4AF37]/20
-hover:shadow-[#D4AF37]/40
-transition-all
-duration-300
-"
+              <h2
+                id="cta-heading"
+                className={`${font || "font-heading"} max-w-[760px] text-4xl font-semibold leading-[1.08] text-white sm:text-5xl lg:text-6xl ${rtl ? "" : "tracking-[-0.03em]"}`}
               >
-                Start Exploring
-                <ArrowRight
-                  size={18}
-                  className="transition-transform group-hover:translate-x-1"
-                />
-              </Link>
-            </motion.div>
+                <span className="block">{cta.title.line1}</span>
+                <span className="block text-[var(--accent-light)]">
+                  {cta.title.highlight}
+                </span>
+                <span className="block text-white/85">{cta.title.line2}</span>
+              </h2>
+            </header>
+          </div>
 
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link
-                href="/download"
-                className="
-flex
-items-center
-justify-center
-gap-2.5
-px-10
-py-4.5
-rounded-full
-border
-border-white/20
-text-white
-font-semibold
-hover:bg-white/10
-hover:border-white/40
-transition-all
-duration-300
-backdrop-blur-sm
-bg-white/5
-"
+          <div className="mt-7 grid gap-6 border-t border-white/15 pt-6 sm:mt-9 sm:pt-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12">
+            <p
+              className={`${font || "font-sans"} max-w-2xl text-base leading-7 text-white/70 sm:text-lg sm:leading-8`}
+            >
+              {cta.description}
+            </p>
+
+            <div className="flex flex-col items-start gap-4 lg:items-end">
+              <p
+                className={`${font || "font-heading"} text-lg text-[var(--accent-light)] sm:text-xl`}
               >
-                <Smartphone size={18} />
-                Download App
-              </Link>
-            </motion.div>
-          </motion.div>
-
-          {/* Trust Indicators */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            viewport={{ once: true }}
-            className="mt-12 flex flex-wrap justify-center items-center gap-6 text-white/50 text-sm"
-          >
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.55 }}
-              className="flex items-center gap-2"
-            >
-              <CheckCircle2 size={16} className="text-[#D4AF37]" />
-              Free Forever
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="flex items-center gap-2"
-            >
-              <CheckCircle2 size={16} className="text-[#D4AF37]" />
-              No Advertisements
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.65 }}
-              className="flex items-center gap-2"
-            >
-              <CheckCircle2 size={16} className="text-[#D4AF37]" />
-              Built For Ummah
-            </motion.div>
-          </motion.div>
-
-          {/* Inspirational Line */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            viewport={{ once: true }}
-            className="mt-8 flex items-center justify-center gap-3 text-white/30 text-sm tracking-widest uppercase"
-          >
-            <span className="w-8 h-px bg-gradient-to-r from-transparent to-[#D4AF37]/30" />
-            <span className="flex items-center gap-2">
-              <Heart size={12} className="text-[#D4AF37]/40" />
-              Knowledge. Faith. Connection.
-              <Heart size={12} className="text-[#D4AF37]/40" />
-            </span>
-            <span className="w-8 h-px bg-gradient-to-l from-transparent to-[#D4AF37]/30" />
-          </motion.div>
+                {cta.tagline}
+              </p>
+              <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                <Button href="/explore" variant="primary" scale="lg">
+                  {cta.primaryButton}
+                  <ArrowRight
+                    size={18}
+                    className={`hv-btn-arrow ${rtl ? "rotate-180" : ""}`}
+                    aria-hidden="true"
+                  />
+                </Button>
+                <Button
+                  href="/#faq-heading"
+                  variant="secondary-outline"
+                  scale="lg"
+                >
+                  {cta.secondaryButton}
+                </Button>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

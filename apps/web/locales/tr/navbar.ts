@@ -1,76 +1,86 @@
 /* ================================================================
    HUDAVERSE — NAVBAR TURKISH TRANSLATIONS
-   Language: Turkish (Türkçe)
 ================================================================ */
 
-export const navbar = {
-  // Main navigation
-  home: "Ana Sayfa",
-  features: "Özellikler",
-  aiAssistant: "Yapay Zekâ Asistanı",
-  modules: "Modüller",
-  about: "Hakkında",
+import type { NavbarTranslations } from "../en/navbar";
 
-  // Module submenu
-  quran: "Kur'an",
-  prayerTimes: "Namaz Vakitleri",
-  hadith: "Hadis",
-  zakatCalculator: "Zekât Hesaplayıcı",
-
-  // Language
-  selectLanguage: "Dil Seçin",
-  searchLanguage: "Dil ara...",
-  noLanguagesFound: "Hiçbir dil bulunamadı",
-  moreLanguagesComingSoon: "Daha fazla dil yakında eklenecek...",
-
-  // Actions
-  actions: {
-    selectLanguage: "Dil Seçin",
-    signIn: "Giriş Yap",
-    downloadApp: "Uygulamayı İndir",
+export const navbar: NavbarTranslations = {
+  nav: {
+    home: "Ana Sayfa",
+    explore: "Keşfet",
+    ecosystem: "Ekosistem",
+    about: "Hakkında",
+  },
+  explore: {
+    intro: "Başlamadan önce eksiksiz HudaVerse ekosistemini görün.",
+    ctaLabel: "Her Şeyi Keşfet",
+    sections: {
+      ecosystem: {
+        label: "Ekosistem",
+        description: "Bilgi, öğrenme, zekâ ve daha fazlası tek yerde",
+      },
+      ai: {
+        label: "Yapay Zeka Asistanı",
+        description: "Soru sorun, kaynaklı yanıtlar alın",
+      },
+      learning: {
+        label: "Öğrenme",
+        description: "Rehberli öğrenme nasıl çalışır",
+      },
+      knowledge: {
+        label: "Bilgi",
+        description: "Kur'an, Hadis ve diğer bilgi alanlarına göz atın",
+      },
+      personalSpace: {
+        label: "Kişisel Alan",
+        description: "Profiliniz ve kaydettiğiniz içerikler",
+      },
+      trust: {
+        label: "Güven ve Kaynaklar",
+        description: "Her kaynağı nasıl doğruluyoruz",
+      },
+      aDay: {
+        label: "HudaVerse ile Bir Gün",
+        description: "Gerçek bir kullanım örneği görün",
+      },
+    },
   },
 
-  // Mobile navbar
+
+
+
+  ecosystem: {
+    sections: {
+      quran: { title: "Kur'an", description: "Kur'an'ı ve çevirilerini okuyun" },
+      hadith: { title: "Hadis", description: "Hadis koleksiyonlarını ve rivayetleri inceleyin" },
+      prayer: { title: "Namaz", description: "Namaz vakitlerini ve rehberini inceleyin" },
+      dua: { title: "Dua", description: "Günlük yaşam için dualar bulun" },
+      ai: { title: "Yapay Zekâ Asistanı", description: "Kaynaklı yanıtlar için soru sorun" },
+      learning: { title: "Öğrenme Merkezi", description: "Yapılandırılmış öğrenme yollarını izleyin" },
+      community: { title: "Topluluk", description: "Ortak öğrenme için bağlantı kurun" },
+      tools: { title: "İslami Araçlar", description: "Günlük ibadet için pratik araçları kullanın" },
+      profile: { title: "Profil", description: "Hesabınızı ve tercihlerinizi yönetin" },
+      bookmarks: { title: "Yer İmleri ve Notlar", description: "Kaydedilen metinlere ve notlara dönün" },
+      settings: { title: "Ayarlar ve Kişiselleştirme", description: "Deneyiminizi ve ayarlarınızı düzenleyin" },
+    },
+  },
+
+  actions: {
+    search: "Ara",
+    selectLanguage: "Dil Seç",
+    searchLanguage: "Dil ara...",
+    noLanguagesFound: "Dil bulunamadı",
+    moreLanguagesComingSoon: "Daha fazla dil yakında...",
+    signIn: "Giriş Yap",
+    getStarted: "Başla",
+  },
+
   mobile: {
     openMenu: "Menüyü aç",
     closeMenu: "Menüyü kapat",
-    home: "Ana gezinme",
+    navLabel: "Ana gezinme",
+    menuTitle: "Menü",
   },
-
-  // Account
-  signIn: "Giriş Yap",
-
-  // Download
-  download: {
-    button: "Uygulamayı İndir",
-    title: "HudaVerse'i Edinin",
-    description: "Tercih ettiğiniz platformu seçin.",
-    safeTrusted: "Güvenli ve güvenilir indirme",
-    close: "İndirme penceresini kapat",
-    ariaLabel: "HudaVerse'i İndir",
-  },
-
-  downloadApp: "Uygulamayı İndir",
-  downloadHudaVerse: "HudaVerse'i İndir",
-  allInOneIslamicCompanion: "Hepsi bir arada İslami yardımcınız",
-
-  // Download platforms
-  getItOn: "Şuradan edinin",
-  googlePlay: "Google Play",
-  downloadOnThe: "Şuradan indirin",
-  appStore: "App Store",
-  downloadApk: "APK İndir",
-  comingSoon: "Yakında",
-  new: "Yeni",
-
-  // Trust
-  safeSecureTrusted: "Güvenli ve güvenilir indirme",
-
-  // Kept for backward compatibility with any old flat references
-  ariaLabel: "HudaVerse'i İndir",
-  closeDownload: "İndirme penceresini kapat",
-} as const;
-
-export type NavbarTranslations = typeof navbar;
+};
 
 export default navbar;

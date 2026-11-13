@@ -1,72 +1,86 @@
 /* ================================================================
    HUDAVERSE — NAVBAR URDU TRANSLATIONS
-   Language: Urdu (اردو)
 ================================================================ */
 
-export const navbar = {
-  // Main navigation
-  home: "ہوم",
-  features: "خصوصیات",
-  aiAssistant: "AI اسسٹنٹ",
-  modules: "ماڈیولز",
-  about: "HudaVerse کے بارے میں",
+import type { NavbarTranslations } from "../en/navbar";
 
-  // Module submenu
-  quran: "قرآن",
-  prayerTimes: "نماز کے اوقات",
-  hadith: "حدیث",
-  zakatCalculator: "زکوٰۃ کیلکولیٹر",
-
-  // Language
-  selectLanguage: "زبان منتخب کریں",
-  searchLanguage: "زبان تلاش کریں...",
-  noLanguagesFound: "کوئی زبان نہیں ملی",
-  moreLanguagesComingSoon: "مزید زبانیں جلد شامل کی جائیں گی...",
-
-  // Actions
-  actions: {
-    selectLanguage: "زبان منتخب کریں",
-    signIn: "سائن اِن",
-    downloadApp: "ایپ ڈاؤن لوڈ کریں",
+export const navbar: NavbarTranslations = {
+  nav: {
+    home: "ہوم",
+    explore: "دریافت کریں",
+    ecosystem: "ایکو سسٹم",
+    about: "ہمارے بارے میں",
+  },
+  explore: {
+    intro: "شروع کرنے سے پہلے مکمل HudaVerse ایکو سسٹم دیکھیں۔",
+    ctaLabel: "سب کچھ دریافت کریں",
+    sections: {
+      ecosystem: {
+        label: "ایکو سسٹم",
+        description: "علم، تعلیم، ذہانت اور مزید ایک ہی جگہ",
+      },
+      ai: {
+        label: "AI معاون",
+        description: "سوالات پوچھیں، حوالوں کے ساتھ جوابات پائیں",
+      },
+      learning: {
+        label: "سیکھنا",
+        description: "گائیڈڈ لرننگ کیسے کام کرتی ہے",
+      },
+      knowledge: {
+        label: "علم",
+        description: "قرآن، حدیث اور علم کے دیگر شعبے دیکھیں",
+      },
+      personalSpace: {
+        label: "ذاتی جگہ",
+        description: "آپ کی پروفائل اور محفوظ علم",
+      },
+      trust: {
+        label: "اعتماد اور ماخذ",
+        description: "ہم ہر ماخذ کی تصدیق کیسے کرتے ہیں",
+      },
+      aDay: {
+        label: "HudaVerse کے ساتھ ایک دن",
+        description: "ایک حقیقی مثال دیکھیں",
+      },
+    },
   },
 
-  // Mobile navbar
+
+
+
+  ecosystem: {
+    sections: {
+      quran: { title: "قرآن", description: "قرآن اور اس کے تراجم پڑھیں" },
+      hadith: { title: "حدیث", description: "حدیث کے مجموعے اور روایات دیکھیں" },
+      prayer: { title: "نماز", description: "نماز کے اوقات اور رہنمائی دیکھیں" },
+      dua: { title: "دعا", description: "روزمرہ زندگی کی دعائیں تلاش کریں" },
+      ai: { title: "AI معاون", description: "حوالوں کے ساتھ جواب پانے کے لیے سوال کریں" },
+      learning: { title: "تعلیمی مرکز", description: "منظم تعلیمی راستوں پر چلیں" },
+      community: { title: "کمیونٹی", description: "مشترکہ سیکھنے کے لیے جڑیں" },
+      tools: { title: "اسلامی ٹولز", description: "روزمرہ عبادت کے عملی وسائل استعمال کریں" },
+      profile: { title: "پروفائل", description: "اپنا اکاؤنٹ اور ترجیحات سنبھالیں" },
+      bookmarks: { title: "بک مارکس اور نوٹس", description: "محفوظ متون اور نوٹس پر واپس جائیں" },
+      settings: { title: "ترتیبات اور شخصی سازی", description: "اپنا تجربہ اور ترتیبات بدلیں" },
+    },
+  },
+
+  actions: {
+    search: "تلاش کریں",
+    selectLanguage: "زبان منتخب کریں",
+    searchLanguage: "زبان تلاش کریں...",
+    noLanguagesFound: "کوئی زبان نہیں ملی",
+    moreLanguagesComingSoon: "مزید زبانیں جلد آرہی ہیں...",
+    signIn: "سائن ان",
+    getStarted: "شروع کریں",
+  },
+
   mobile: {
     openMenu: "مینو کھولیں",
     closeMenu: "مینو بند کریں",
-    home: "مرکزی نیویگیشن",
+    navLabel: "مرکزی نیویگیشن",
+    menuTitle: "مینو",
   },
-
-  // Account
-  signIn: "سائن اِن",
-
-  // Download
-  download: {
-    button: "ایپ ڈاؤن لوڈ کریں",
-    title: "HudaVerse حاصل کریں",
-    description: "اپنا پسندیدہ پلیٹ فارم منتخب کریں۔",
-    safeTrusted: "محفوظ اور قابلِ اعتماد ڈاؤن لوڈ",
-    close: "ڈاؤن لوڈ ونڈو بند کریں",
-    ariaLabel: "HudaVerse ڈاؤن لوڈ کریں",
-  },
-
-  downloadApp: "ایپ ڈاؤن لوڈ کریں",
-  downloadHudaVerse: "HudaVerse ڈاؤن لوڈ کریں",
-  allInOneIslamicCompanion: "آپ کا جامع اسلامی ساتھی",
-
-  // Download platforms
-  getItOn: "یہاں سے حاصل کریں",
-  googlePlay: "Google Play",
-  downloadOnThe: "یہاں سے ڈاؤن لوڈ کریں",
-  appStore: "App Store",
-  downloadApk: "APK ڈاؤن لوڈ کریں",
-  comingSoon: "جلد آرہا ہے",
-  new: "نیا",
-
-  // Trust
-  safeSecureTrusted: "محفوظ، قابلِ اعتماد اور لاکھوں افراد کا بھروسا",
-} as const;
-
-export type NavbarTranslations = typeof navbar;
+};
 
 export default navbar;

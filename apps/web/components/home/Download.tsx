@@ -47,12 +47,7 @@ overflow-hidden
 "
     >
       <div
-        className="
-max-w-[1400px]
-mx-auto
-px-6
-
-grid
+        className="hv-container grid
 
 lg:grid-cols-2
 

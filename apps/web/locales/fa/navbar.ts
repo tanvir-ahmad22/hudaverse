@@ -1,72 +1,86 @@
 /* ================================================================
    HUDAVERSE — NAVBAR PERSIAN TRANSLATIONS
-   Language: Persian (فارسی)
 ================================================================ */
 
-export const navbar = {
-  // Main navigation
-  home: "خانه",
-  features: "ویژگی‌ها",
-  aiAssistant: "دستیار هوش مصنوعی",
-  modules: "ماژول‌ها",
-  about: "درباره ما",
+import type { NavbarTranslations } from "../en/navbar";
 
-  // Module submenu
-  quran: "قرآن",
-  prayerTimes: "اوقات نماز",
-  hadith: "حدیث",
-  zakatCalculator: "محاسبه زکات",
-
-  // Language
-  selectLanguage: "انتخاب زبان",
-  searchLanguage: "جستجوی زبان...",
-  noLanguagesFound: "هیچ زبانی یافت نشد",
-  moreLanguagesComingSoon: "زبان‌های بیشتری به‌زودی اضافه خواهند شد...",
-
-  // Actions
-  actions: {
-    selectLanguage: "انتخاب زبان",
-    signIn: "ورود",
-    downloadApp: "دانلود برنامه",
+export const navbar: NavbarTranslations = {
+  nav: {
+    home: "خانه",
+    explore: "کاوش",
+    ecosystem: "اکوسیستم",
+    about: "درباره",
+  },
+  explore: {
+    intro: "پیش از شروع، اکوسیستم کامل HudaVerse را ببینید.",
+    ctaLabel: "همه را کاوش کنید",
+    sections: {
+      ecosystem: {
+        label: "اکوسیستم",
+        description: "دانش، یادگیری، هوش مصنوعی و بیشتر در یک‌جا",
+      },
+      ai: {
+        label: "دستیار هوشمند",
+        description: "سؤال بپرسید، پاسخ مستند دریافت کنید",
+      },
+      learning: {
+        label: "یادگیری",
+        description: "یادگیری هدایت‌شده چگونه کار می‌کند",
+      },
+      knowledge: {
+        label: "دانش",
+        description: "قرآن، حدیث و دیگر حوزه‌های دانش را مرور کنید",
+      },
+      personalSpace: {
+        label: "فضای شخصی",
+        description: "نمایه و دانش ذخیره‌شده شما",
+      },
+      trust: {
+        label: "اعتماد و منابع",
+        description: "چگونه هر منبع را تأیید می‌کنیم",
+      },
+      aDay: {
+        label: "یک روز با HudaVerse",
+        description: "یک کاربرد واقعی را ببینید",
+      },
+    },
   },
 
-  // Mobile navbar
+
+
+
+  ecosystem: {
+    sections: {
+      quran: { title: "قرآن", description: "قرآن و ترجمه‌های آن را بخوانید" },
+      hadith: { title: "حدیث", description: "مجموعه‌ها و روایت‌های حدیث را ببینید" },
+      prayer: { title: "نماز", description: "اوقات و راهنمای نماز را ببینید" },
+      dua: { title: "دعا", description: "دعاهای روزمره را پیدا کنید" },
+      ai: { title: "دستیار هوشمند", description: "پرسش کنید و پاسخ مستند بگیرید" },
+      learning: { title: "مرکز یادگیری", description: "مسیرهای آموزشی منظم را دنبال کنید" },
+      community: { title: "جامعه", description: "برای یادگیری مشترک ارتباط بگیرید" },
+      tools: { title: "ابزارهای اسلامی", description: "از ابزارهای کاربردی عبادت روزانه استفاده کنید" },
+      profile: { title: "نمایه", description: "حساب و ترجیحات خود را مدیریت کنید" },
+      bookmarks: { title: "نشانک‌ها و یادداشت‌ها", description: "به متن‌ها و یادداشت‌های ذخیره‌شده برگردید" },
+      settings: { title: "تنظیمات و شخصی‌سازی", description: "تنظیمات و تجربه خود را تغییر دهید" },
+    },
+  },
+
+  actions: {
+    search: "جستجو",
+    selectLanguage: "انتخاب زبان",
+    searchLanguage: "جستجوی زبان...",
+    noLanguagesFound: "زبانی پیدا نشد",
+    moreLanguagesComingSoon: "زبان‌های بیشتری به‌زودی اضافه می‌شوند...",
+    signIn: "ورود",
+    getStarted: "شروع کنید",
+  },
+
   mobile: {
     openMenu: "باز کردن منو",
     closeMenu: "بستن منو",
-    home: "پیمایش اصلی",
+    navLabel: "ناوبری اصلی",
+    menuTitle: "منو",
   },
-
-  // Account
-  signIn: "ورود",
-
-  // Download
-  download: {
-    button: "دانلود برنامه",
-    title: "HudaVerse را دریافت کنید",
-    description: "پلتفرم مورد نظر خود را انتخاب کنید.",
-    safeTrusted: "دانلود امن و مطمئن",
-    close: "بستن پنجره دانلود",
-    ariaLabel: "دانلود HudaVerse",
-  },
-
-  // Download information
-  downloadHudaVerse: "دانلود HudaVerse",
-  allInOneIslamicCompanion: "همراه جامع اسلامی شما",
-
-  // Download platforms
-  getItOn: "دریافت از",
-  googlePlay: "Google Play",
-  downloadOnThe: "دانلود از",
-  appStore: "App Store",
-  downloadApk: "دانلود APK",
-  comingSoon: "به‌زودی",
-  new: "جدید",
-
-  // Trust
-  safeSecureTrusted: "امن، مطمئن و مورد اعتماد میلیون‌ها نفر",
-} as const;
-
-export type NavbarTranslations = typeof navbar;
+};
 
 export default navbar;

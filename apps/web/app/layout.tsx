@@ -2,23 +2,15 @@ import type { Metadata } from "next";
 
 import Navbar from "@/components/layout/navbar/Navbar";
 import Footer from "@/components/layout/Footer";
+import { fontVariableClasses } from "./fonts";
 
 import "./globals.css";
 
-// =================================
-// HudaVerse Metadata
-// =================================
-
 export const metadata: Metadata = {
   title: "HudaVerse — Your Journey to Allah",
-
   description:
     "AI-powered Islamic ecosystem — Quran, Hadith, Dua, Prayer, and more, all in one place.",
 };
-
-// =================================
-// Root Layout
-// =================================
 
 export default function RootLayout({
   children,
@@ -26,15 +18,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`h-full antialiased ${fontVariableClasses}`}
+    >
       <body className="min-h-full flex flex-col font-sans">
-        {/* Global Navbar */}
         <Navbar />
-
-        {/* Page Content */}
         <main className="flex-1">{children}</main>
-
-        {/* Global Footer */}
         <Footer />
       </body>
     </html>

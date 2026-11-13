@@ -1,645 +1,827 @@
 "use client";
 
-// ===============================
-// IMPORTS START
-// ===============================
-
-import Link from "next/link";
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
 import {
-  Sparkles,
-  BookOpen,
-  ShieldCheck,
   ArrowRight,
-  Mic,
-  Send,
-  User,
-  Bot,
+  BookOpen,
+  BookMarked,
+  Headphones,
   MessageCircle,
   Search,
-  AudioLines,
   ScrollText,
-  Lock,
-  CheckCheck,
-  Clock,
-  CheckCircle,
-  Award,
-  Database,
+  Sparkles,
+  type LucideIcon,
 } from "lucide-react";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-// ===============================
-// IMPORTS END
-// ===============================
+import { useLanguage } from "@/hooks/useLanguage";
+import { Button } from "@/components/ui/Button";
+import { getEcosystemModuleHref } from "@/lib/ecosystem-navigation";
+import { landing as en } from "@/locales/en/landing";
+import { landing as bn } from "@/locales/bn/landing";
+import { landing as ar } from "@/locales/ar/landing";
+import { landing as ur } from "@/locales/ur/landing";
+import { landing as fa } from "@/locales/fa/landing";
+import { landing as tr } from "@/locales/tr/landing";
 
-// ===============================
-// DATA START
-// ===============================
+type Language = "en" | "bn" | "ar" | "ur" | "fa" | "tr";
 
-const features = [
-  { icon: BookOpen, title: "Quran Guided", desc: "Verses with meanings" },
-  { icon: ScrollText, title: "Hadith Verified", desc: "Authentic sources" },
-  { icon: ShieldCheck, title: "Trusted Sources", desc: "Reference based" },
-  { icon: Sparkles, title: "AI Intelligence", desc: "Smart understanding" },
-] as const;
+type DemoAction = "explain" | "hadith" | "tafsir" | "audio";
 
-const stats = [
-  { value: "6,236+", label: "Quran Verses" },
-  { value: "40K+", label: "Hadith" },
-  { value: "99.8%", label: "Accuracy" },
-] as const;
+type SourceKind = "quran" | "hadith" | "tafsir";
 
-const quickActions = [
-  { icon: Search, label: "Explain" },
-  { icon: ScrollText, label: "Hadith" },
-  { icon: BookOpen, label: "Tafsir" },
-  { icon: AudioLines, label: "Audio" },
-] as const;
+type DemoSource = {
+  kind: SourceKind;
+  type: string;
+  title: string;
+  reference: string;
+  excerpt?: string;
+};
 
-// ===============================
-// DATA END
-// ===============================
+type DemoConversation = {
+  question: string;
+  answer: string;
+  sources: readonly DemoSource[];
+};
 
-// ===============================
-// FEATURE CARD START
-// ===============================
+type AiAssistantLocale = {
+  eyebrow: string;
+  title: string;
+  titleHighlight: string;
+  description: string;
 
-function FeatureCard({ item }: { item: (typeof features)[number] }) {
-  const Icon = item.icon;
+  previewBadge: string;
+  previewTitle: string;
+  previewDescription: string;
+  audioUnavailable: string;
+
+  actions: {
+    explain: string;
+    hadith: string;
+    tafsir: string;
+    audio: string;
+  };
+
+  thinking: string;
+  answer: string;
+  sources: string;
+
+  you: string;
+  quran: string;
+
+  tryAnother: string;
+  openAssistant: string;
+
+  trust: {
+    title: string;
+    item1: string;
+    item2: string;
+    item3: string;
+  };
+
+  conversations: readonly DemoConversation[];
+};
+
+type LandingLocale = { aiAssistant: AiAssistantLocale };
+
+const localeMap: Record<Language, LandingLocale> = {
+  en,
+  bn,
+  ar,
+  ur,
+  fa,
+  tr,
+};
+
+function getFontClasses(language: Language) {
+  switch (language) {
+    case "bn":
+      return {
+        heading: "font-bangla",
+        body: "font-bangla",
+        sub: "font-bangla",
+        isRTL: false,
+      };
+
+    case "ar":
+      return {
+        heading: "font-arabic",
+        body: "font-arabic",
+        sub: "font-arabic",
+        isRTL: true,
+      };
+
+    case "ur":
+      return {
+        heading: "font-urdu",
+        body: "font-urdu",
+        sub: "font-urdu",
+        isRTL: true,
+      };
+
+    case "fa":
+      return {
+        heading: "font-persian",
+        body: "font-persian",
+        sub: "font-persian",
+        isRTL: true,
+      };
+
+    case "tr":
+    case "en":
+    default:
+      return {
+        heading: "font-heading",
+        body: "font-sans",
+        sub: "font-subheading",
+        isRTL: false,
+      };
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Typewriter                                                                  */
+/* -------------------------------------------------------------------------- */
+
+function useTypewriter(text: string, enabled: boolean, speed = 18) {
+  const [progress, setProgress] = useState({ text: "", value: "" });
+  const graphemes = useMemo(
+    () =>
+      Array.from(
+        new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text),
+        ({ segment }) => segment,
+      ),
+    [text],
+  );
+
+  useEffect(() => {
+    if (!enabled || speed <= 0) return;
+
+    let index = 0;
+
+    const interval = window.setInterval(() => {
+      index += 1;
+      setProgress({ text, value: graphemes.slice(0, index).join("") });
+
+      if (index >= graphemes.length) {
+        window.clearInterval(interval);
+      }
+    }, speed);
+
+    return () => window.clearInterval(interval);
+  }, [text, enabled, speed, graphemes]);
+
+  if (!enabled || speed <= 0) return text;
+  return progress.text === text ? progress.value : "";
+}
+
+/* -------------------------------------------------------------------------- */
+/* Source Icon                                                                 */
+/* -------------------------------------------------------------------------- */
+
+function SourceIcon({ kind }: { kind: SourceKind }) {
+  const icons: Record<SourceKind, LucideIcon> = {
+    quran: BookOpen,
+    hadith: ScrollText,
+    tafsir: BookMarked,
+  };
+
+  const Icon = icons[kind];
 
   return (
-    <motion.div
-      whileHover={{
-        y: -4,
-        boxShadow: "0 20px 25px -5px rgba(0,0,0,0.05)",
-      }}
-      transition={{ duration: 0.2 }}
-      className="group relative overflow-hidden rounded-xl border border-emerald-100/30 bg-white/80 backdrop-blur-sm p-4 transition-all hover:border-emerald-200 hover:bg-white"
-    >
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-900 to-emerald-800 shadow-lg shadow-emerald-900/10 transition-all group-hover:shadow-emerald-900/20 group-hover:shadow-xl">
-          <Icon className="h-4 w-4 text-amber-300 transition-all group-hover:text-amber-200 group-hover:scale-110" />
-        </div>
-
-        <div>
-          <h4 className="text-xs font-bold text-emerald-950 tracking-tight">
-            {item.title}
-          </h4>
-          <p className="mt-0.5 text-[11px] text-emerald-900/50 font-medium">
-            {item.desc}
-          </p>
-        </div>
-      </div>
-    </motion.div>
+    <Icon
+      className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary-soft)]"
+      strokeWidth={1.7}
+      aria-hidden="true"
+    />
   );
 }
 
-// ===============================
-// FEATURE CARD END
-// ===============================
+/* -------------------------------------------------------------------------- */
+/* Source Card                                                                 */
+/* -------------------------------------------------------------------------- */
 
-// ===============================
-// STAT CARD START
-// ===============================
-
-function StatCard({ value, label }: { value: string; label: string }) {
+function SourceCard({
+  source,
+  fonts,
+}: {
+  source: DemoSource;
+  fonts: ReturnType<typeof getFontClasses>;
+}) {
   return (
-    <div className="rounded-xl border border-emerald-100/30 bg-white/60 backdrop-blur-sm px-5 py-4 transition-all hover:bg-white/80 hover:shadow-lg hover:shadow-emerald-900/5">
-      <p className="text-lg font-bold text-emerald-950 tracking-tight">
-        {value}
-      </p>
-      <p className="text-[10px] font-medium text-emerald-900/50 uppercase tracking-wider">
-        {label}
-      </p>
+    <div
+      className={`flex min-w-0 items-start gap-2.5 border-t border-[var(--border-light)] py-2.5 ${
+        fonts.isRTL ? "text-right" : "text-left"
+      }`}
+      dir={fonts.isRTL ? "rtl" : "ltr"}
+    >
+      <SourceIcon kind={source.kind} />
+
+      <div className="min-w-0 flex-1">
+        <div
+          className={`mb-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--primary-soft)] ${fonts.sub}`}
+        >
+          {source.type}
+        </div>
+
+        <div
+          className={`break-words text-sm font-semibold text-[var(--text-dark)] ${fonts.body}`}
+        >
+          {source.title}
+        </div>
+
+        <div
+          className={`mt-0.5 break-words text-xs text-[var(--text-muted)] ${fonts.body}`}
+        >
+          {source.reference}
+        </div>
+      </div>
     </div>
   );
 }
 
-// ===============================
-// STAT CARD END
-// ===============================
+/* -------------------------------------------------------------------------- */
+/* Processing Pipeline                                                         */
+/* -------------------------------------------------------------------------- */
 
-// ===============================
-// AI CHAT PREVIEW START
-// ===============================
-
-function AIChatPreview() {
-  const prefersReducedMotion = useReducedMotion();
+function ProcessingPipeline({
+  previewLabel,
+  isRTL,
+}: {
+  previewLabel: string;
+  isRTL: boolean;
+}) {
+  const stages = [Search, BookOpen, Sparkles];
 
   return (
-    <motion.div
-      animate={prefersReducedMotion ? undefined : { y: [0, -8, 0] }}
-      transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      className="relative"
+    <div
+      className="flex items-center gap-3 py-1"
+      dir={isRTL ? "rtl" : "ltr"}
     >
-      <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-100/30 bg-white/80 backdrop-blur-xl shadow-2xl shadow-emerald-900/10">
-        {/* Premium Glass Gradient Border */}
-        <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-emerald-400/10 via-amber-400/5 to-emerald-400/10 pointer-events-none" />
+      <span className="shrink-0 text-[10px] font-semibold text-[var(--text-muted)]">
+        {previewLabel}
+      </span>
 
-        {/* Animated Background Glow */}
-        <motion.div
-          animate={
-            prefersReducedMotion
-              ? undefined
-              : { scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }
-          }
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-amber-200/20 blur-3xl"
-        />
-        <motion.div
-          animate={
-            prefersReducedMotion
-              ? undefined
-              : { scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }
-          }
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-          className="absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-emerald-200/20 blur-3xl"
-        />
-
-        {/* ===============================
-            AI HEADER START
-        ================================ */}
-
-        <div className="relative flex items-center justify-between border-b border-emerald-100/30 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-emerald-400/20 blur-xl animate-pulse" />
-              <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-800 to-emerald-900 shadow-lg shadow-emerald-900/20">
-                <Sparkles className="h-5 w-5 text-amber-300" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-emerald-950">
-                  HudaVerse AI
-                </h3>
-                <span className="rounded-full bg-emerald-100/50 backdrop-blur-sm px-2 py-0.5 text-[9px] font-semibold text-emerald-700">
-                  Verified
-                </span>
-              </div>
-
-              <div className="mt-1 flex items-center gap-2 text-[11px] text-emerald-600">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                </span>
-                Online
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-full bg-emerald-50/50 backdrop-blur-sm border border-emerald-100/30 px-3 py-1.5">
-            <Award className="h-3.5 w-3.5 text-amber-500" />
-            <span className="text-xs font-bold text-emerald-950">99.8%</span>
-          </div>
-        </div>
-
-        {/* ===============================
-            AI HEADER END
-        ================================ */}
-
-        {/* ===============================
-            CHAT BODY START
-        ================================ */}
-
-        <div className="relative space-y-4 p-5">
-          {/* AI Knowledge Badge */}
-          <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50/50 backdrop-blur-sm border border-emerald-100/30 px-3 py-1">
-              <Database className="h-3 w-3 text-emerald-600" />
-              <span className="text-[10px] font-medium text-emerald-700">
-                AI Powered by Quran + Hadith Knowledge
-              </span>
-            </div>
-          </div>
-
-          {/* USER MESSAGE */}
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex justify-end"
-          >
-            <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-gradient-to-br from-emerald-800 to-emerald-900 px-4 py-3 text-white shadow-lg shadow-emerald-900/20">
-              <div className="mb-1.5 flex items-center justify-end gap-1.5 text-[10px] text-emerald-200/80">
-                <User className="h-3 w-3" />
-                You
-              </div>
-
-              <p className="text-sm leading-6">
-                What does Islam teach about patience?
-              </p>
-
-              <div className="mt-2 flex items-center justify-end gap-1.5 text-[9px] text-emerald-200/60">
-                <Clock className="h-2.5 w-2.5" />
-                <span>12:45 PM</span>
-                <CheckCheck className="h-3 w-3 text-emerald-300" />
-              </div>
-            </div>
-          </motion.div>
-
-          {/* AI RESPONSE */}
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex gap-3"
-          >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-800 to-emerald-900 shadow-lg shadow-emerald-900/20">
-              <Bot className="h-4 w-4 text-amber-300" />
-            </div>
-
-            <div className="flex-1">
-              <div className="mb-2 flex items-center gap-2">
-                <h4 className="text-sm font-bold text-emerald-950">
-                  HudaVerse AI
-                </h4>
-                <span className="rounded-full bg-amber-50/50 backdrop-blur-sm border border-amber-200/30 px-2 py-0.5 text-[9px] text-amber-700 font-medium">
-                  Trusted Source
-                </span>
-              </div>
-
-              <div className="rounded-2xl border border-emerald-100/30 bg-gradient-to-br from-[#fafdfb] to-white/80 backdrop-blur-sm px-4 py-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-emerald-600">
-                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-[10px] font-medium">
-                      AI is typing...
-                    </span>
-                  </div>
-                  <p className="text-sm leading-6 text-emerald-900/70">
-                    Islam teaches that patience (Sabr) gives strength during
-                    difficulties. Allah is with those who remain patient and
-                    steadfast.
-                  </p>
-                </div>
-
-                {/* Verified Sources */}
-
-                <div className="mt-4 rounded-xl bg-emerald-50/50 backdrop-blur-sm border border-emerald-100/30 p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                    <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
-                      Verified Sources
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <div className="flex items-center gap-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-100/50 px-3 py-1">
-                      <CheckCircle className="h-3 w-3 text-emerald-500" />
-                      <span className="text-[10px] font-medium text-emerald-800">
-                        Quran 2:153
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-amber-100/50 px-3 py-1">
-                      <CheckCircle className="h-3 w-3 text-amber-500" />
-                      <span className="text-[10px] font-medium text-amber-800">
-                        Sahih Muslim
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-100/50 px-3 py-1">
-                      <CheckCircle className="h-3 w-3 text-emerald-500" />
-                      <span className="text-[10px] font-medium text-emerald-800">
-                        Tafsir Ibn Kathir
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* ===============================
-            CHAT BODY END
-        ================================ */}
-
-        {/* ===============================
-            QUICK ACTION START
-        ================================ */}
-
-        <div className="border-t border-emerald-100/30 px-5 py-3">
-          <div className="flex flex-wrap gap-2">
-            {quickActions.map((item) => (
-              <motion.button
-                key={item.label}
-                type="button"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-1.5 rounded-full border border-emerald-100/30 bg-white/60 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-emerald-800 transition-all hover:bg-white hover:shadow-md"
-              >
-                <item.icon className="h-3.5 w-3.5" />
-                {item.label}
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        {/* ===============================
-            QUICK ACTION END
-        ================================ */}
-
-        {/* ===============================
-            INPUT BAR START
-        ================================ */}
-
-        <div className="px-5 pb-5">
-          <div className="flex items-center gap-2 rounded-full border border-emerald-200/50 bg-white/60 backdrop-blur-sm px-3 py-1.5 transition-all hover:border-emerald-300 focus-within:border-emerald-300 focus-within:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]">
-            <MessageCircle className="h-4 w-4 text-emerald-400" />
-
-            <input
-              type="text"
-              disabled
-              aria-disabled="true"
-              aria-label="Chat preview — not an interactive input"
-              placeholder="Ask Quran, Hadith or Islamic questions..."
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-emerald-400/60 disabled:cursor-not-allowed"
-            />
-
-            <motion.button
-              type="button"
-              disabled
-              aria-disabled="true"
-              aria-label="Voice input — not available in preview"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900 text-white transition-all hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <Mic className="h-3.5 w-3.5" />
-            </motion.button>
-
-            <motion.button
-              type="button"
-              disabled
-              aria-disabled="true"
-              aria-label="Send message — not available in preview"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-emerald-950 shadow-lg shadow-amber-400/30 transition-all hover:shadow-amber-400/50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <Send className="h-3.5 w-3.5" />
-            </motion.button>
-          </div>
-        </div>
-
-        {/* ===============================
-            INPUT BAR END
-        ================================ */}
-
-        {/* ===============================
-            TRUST FOOTER START
-        ================================ */}
-
-        <div className="flex justify-center gap-6 border-t border-emerald-100/30 px-5 py-3 text-[10px] text-emerald-600/60">
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck className="h-3 w-3 text-emerald-500" />
-            Verified
+      <div className="flex items-center gap-2 text-[var(--primary-soft)]" aria-hidden="true">
+        {stages.map((Icon, index) => (
+          <span key={index} className="flex items-center gap-2">
+            <Icon className="h-3.5 w-3.5" />
+            {index < stages.length - 1 && (
+              <span className="h-px w-4 bg-[var(--border-light)]" />
+            )}
           </span>
-
-          <span className="flex items-center gap-1.5">
-            <Lock className="h-3 w-3 text-emerald-500" />
-            Secure
-          </span>
-
-          <span className="flex items-center gap-1.5">
-            <BookOpen className="h-3 w-3 text-emerald-500" />
-            Quran
-          </span>
-        </div>
-
-        {/* ===============================
-            TRUST FOOTER END
-        ================================ */}
+        ))}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-// ===============================
-// AI CHAT PREVIEW END
-// ===============================
+/* -------------------------------------------------------------------------- */
+/* AI Chat Preview                                                             */
+/* -------------------------------------------------------------------------- */
 
-// ===============================
-// MAIN SECTION START
-// ===============================
+function AIChatPreview({
+  data,
+  fonts,
+}: {
+  data: AiAssistantLocale;
+  fonts: ReturnType<typeof getFontClasses>;
+}) {
+  const reducedMotion = useReducedMotion();
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [action, setAction] = useState<DemoAction>("explain");
+  const [revealedIndex, setRevealedIndex] = useState<number | null>(null);
+  const [actionNotice, setActionNotice] = useState("");
+  const showAnswer = revealedIndex === activeIndex;
+
+  const current = data.conversations[activeIndex];
+
+  const typedAnswer = useTypewriter(
+    current.answer,
+    showAnswer,
+    reducedMotion ? 0 : 14,
+  );
+
+  /* ---------------------------------------------------------------------- */
+  /* Auto rotation                                                          */
+  /* ---------------------------------------------------------------------- */
+
+  useEffect(() => {
+    if (reducedMotion || action !== "explain") {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setActiveIndex((previous) => (previous + 1) % data.conversations.length);
+    }, 8500);
+
+    return () => window.clearInterval(timer);
+  }, [action, data.conversations.length, reducedMotion]);
+
+  /* ---------------------------------------------------------------------- */
+  /* Reveal the sample answer after a short pause                           */
+  /* ---------------------------------------------------------------------- */
+
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setRevealedIndex(activeIndex),
+      reducedMotion ? 0 : 650,
+    );
+
+    return () => window.clearTimeout(timer);
+  }, [activeIndex, reducedMotion]);
+
+  const handleAction = (nextAction: DemoAction) => {
+    setAction(nextAction);
+    setActionNotice("");
+
+    if (nextAction === "audio") {
+      setActionNotice(data.audioUnavailable);
+      return;
+    }
+
+    if (nextAction === "explain") {
+      setActiveIndex((previous) => {
+        return (previous + 1) % data.conversations.length;
+      });
+      setRevealedIndex(null);
+      return;
+    }
+
+    if (nextAction === "hadith") {
+      const index = data.conversations.findIndex((conversation) =>
+        conversation.sources.some((source) => source.kind === "hadith"),
+      );
+
+      if (index >= 0) {
+        setActiveIndex(index);
+        setRevealedIndex(index);
+      }
+      return;
+    }
+
+    if (nextAction === "tafsir") {
+      const index = data.conversations.findIndex((conversation) =>
+        conversation.sources.some((source) => source.kind === "tafsir"),
+      );
+
+      if (index >= 0) {
+        setActiveIndex(index);
+        setRevealedIndex(index);
+      }
+      return;
+    }
+  };
+
+  return (
+    <div
+      id="ai-demo"
+      className="relative w-full"
+      dir={fonts.isRTL ? "rtl" : "ltr"}
+    >
+      {/* -------------------------------------------------------------- */}
+      {/* FIXED CHAT CARD                                                */}
+      {/* -------------------------------------------------------------- */}
+
+      <div
+        className="
+          relative
+          flex
+          min-h-0
+          w-full
+          flex-col
+          overflow-hidden
+          rounded-[18px]
+          border
+          border-[var(--border-light)]
+          bg-white
+          shadow-[0_18px_44px_rgba(0,48,42,0.08)]
+          min-[1200px]:min-h-[500px]
+        "
+      >
+        {/* ------------------------------------------------------------ */}
+        {/* CARD HEADER                                                  */}
+        {/* ------------------------------------------------------------ */}
+
+        <div className="shrink-0 border-b border-[var(--border-light)] bg-white px-4 py-3.5 sm:px-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--background)] text-[var(--primary)]">
+                <BookOpen className="h-4 w-4" aria-hidden="true" />
+              </div>
+
+              <div className="min-w-0">
+                <div
+                  className={`break-words text-sm font-bold leading-5 text-[var(--text-dark)] ${fonts.sub}`}
+                >
+                  {data.previewTitle}
+                </div>
+
+                <div
+                  className={`mt-0.5 break-words text-xs leading-4 text-[var(--text-muted)] ${fonts.body}`}
+                >
+                  {data.previewDescription}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center rounded-full border border-[var(--border-light)] bg-[var(--background)] px-2.5 py-1.5">
+              <span
+                className={`text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] ${fonts.sub}`}
+              >
+                {data.previewBadge}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ------------------------------------------------------------ */}
+        {/* CHAT BODY                                                    */}
+        {/* ------------------------------------------------------------ */}
+
+        <div className="flex-1 bg-[var(--background)]/55">
+          <div className="px-4 py-4 sm:px-5 sm:py-5">
+            <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+              {/* ------------------------------------------------------ */}
+              {/* USER MESSAGE                                           */}
+              {/* ------------------------------------------------------ */}
+
+              <div
+                className={`flex ${
+                  fonts.isRTL ? "justify-start" : "justify-end"
+                }`}
+              >
+                <div
+                  className={`max-w-[88%] rounded-xl bg-[var(--primary)]/5 px-3.5 py-2.5 text-sm leading-6 text-[var(--text-dark)] sm:max-w-[82%] ${fonts.body}`}
+                >
+                  <div
+                    className={`mb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--primary-soft)] ${fonts.sub}`}
+                  >
+                    {data.you}
+                  </div>
+
+                  <p className="break-words">{current.question}</p>
+                </div>
+              </div>
+
+              {/* ------------------------------------------------------ */}
+              {/* PROCESSING                                             */}
+              {/* ------------------------------------------------------ */}
+
+              <AnimatePresence mode="wait">
+                {!showAnswer && (
+                  <motion.div
+                    key="processing"
+                    initial={{
+                      opacity: 0,
+                      y: 6,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -4,
+                    }}
+                    transition={{ duration: reducedMotion ? 0 : 0.2 }}
+                  >
+                    <ProcessingPipeline
+                      previewLabel={data.previewBadge}
+                      isRTL={fonts.isRTL}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* ------------------------------------------------------ */}
+              {/* AI ANSWER                                              */}
+              {/* ------------------------------------------------------ */}
+
+              <AnimatePresence mode="wait">
+                {showAnswer && (
+                  <motion.div
+                    key={`${activeIndex}-${action}`}
+                    initial={{
+                      opacity: 0,
+                      y: 8,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    transition={{
+                      duration: reducedMotion ? 0 : 0.35,
+                    }}
+                  >
+                    <div className="min-w-0">
+                      <div
+                        className={`mb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--primary-soft)] ${fonts.sub}`}
+                      >
+                        {data.answer}
+                      </div>
+
+                      <p
+                        className={`min-h-20 break-words whitespace-pre-line text-sm leading-[1.65] text-[var(--text-dark)] ${fonts.body}`}
+                      >
+                        {typedAnswer}
+                      </p>
+                    </div>
+
+                    {/* ------------------------------------------------ */}
+                    {/* SOURCES                                           */}
+                    {/* ------------------------------------------------ */}
+
+                    <div className="mt-3">
+                      <div
+                        className={`mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)] ${fonts.sub}`}
+                      >
+                        {data.sources}
+                      </div>
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {current.sources.slice(0, 2).map((source) => (
+                          <SourceCard
+                            key={`${source.kind}-${source.reference}`}
+                            source={source}
+                            fonts={fonts}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+
+        {/* ------------------------------------------------------------ */}
+        {/* CARD FOOTER                                                  */}
+        {/* ------------------------------------------------------------ */}
+
+        <div className="shrink-0 border-t border-[var(--primary)]/8 bg-white p-3.5 sm:px-5 sm:py-3">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            {(
+              [
+                {
+                  key: "explain",
+                  icon: Sparkles,
+                  label: data.actions.explain,
+                },
+                {
+                  key: "hadith",
+                  icon: ScrollText,
+                  label: data.actions.hadith,
+                },
+                {
+                  key: "tafsir",
+                  icon: BookMarked,
+                  label: data.actions.tafsir,
+                },
+                {
+                  key: "audio",
+                  icon: Headphones,
+                  label: data.actions.audio,
+                },
+              ] satisfies Array<{
+                key: DemoAction;
+                icon: LucideIcon;
+                label: string;
+              }>
+            ).map((item) => {
+              const Icon = item.icon;
+              const selected = action === item.key;
+
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => handleAction(item.key)}
+                  aria-pressed={selected}
+                  aria-label={item.label}
+                  className={`flex h-8 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-semibold transition-colors duration-200 sm:px-3 sm:text-xs ${
+                    selected
+                      ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm"
+                      : "border-transparent bg-transparent text-[var(--text-muted)] hover:border-[var(--border-light)] hover:bg-[var(--background)] hover:text-[var(--primary)]"
+                  } ${fonts.sub}`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          {actionNotice && (
+            <p
+              role="status"
+              className={`mt-2 text-xs leading-5 text-[var(--text-muted)] ${fonts.body}`}
+            >
+              {actionNotice}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* -------------------------------------------------------------- */}
+      {/* DECORATIVE BACKDROP                                            */}
+      {/* -------------------------------------------------------------- */}
+
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Main Component                                                              */
+/* -------------------------------------------------------------------------- */
 
 export default function AiAssistantShowcase() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const { currentLang } = useLanguage();
+  const currentLanguage: Language = currentLang;
+
+  const locale = localeMap[currentLanguage];
+
+  /**
+   * IMPORTANT:
+   * All multilingual copy comes from locales/{lang}/landing.ts.
+   * This component only owns layout, animation and interaction.
+   */
+
+  const ai = locale.aiAssistant as AiAssistantLocale;
+
+  const fonts = useMemo(
+    () => getFontClasses(currentLanguage),
+    [currentLanguage],
+  );
+  const trustPoints = [
+    { label: ai.trust.item1, Icon: BookOpen },
+    { label: ai.trust.item2, Icon: ScrollText },
+    { label: ai.trust.item3, Icon: BookMarked },
+  ];
+
+  const sectionRef = useRef<HTMLElement | null>(null);
+
   const isInView = useInView(sectionRef, {
     once: true,
-    amount: 0.1,
+    amount: 0.15,
   });
-  const prefersReducedMotion = useReducedMotion();
+
+  const reducedMotion = useReducedMotion();
 
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-gradient-to-b from-[#faf8f3] via-white to-[#faf8f3] px-5 py-20 sm:px-6 lg:py-32"
+      className="hv-section relative overflow-hidden bg-[var(--background)]"
     >
-      {/* ===============================
-          BACKGROUND DECORATION START
-      ================================ */}
+      <div className="hv-container relative">
+        <div className="grid items-center gap-8 min-[1200px]:grid-cols-[0.42fr_0.58fr] min-[1200px]:gap-12">
+          {/* ============================================================ */}
+          {/* LEFT CONTENT                                                 */}
+          {/* ============================================================ */}
 
-      <motion.div
-        animate={
-          prefersReducedMotion
-            ? undefined
-            : { scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }
-        }
-        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        className="pointer-events-none absolute -left-40 top-0 h-[600px] w-[600px] rounded-full bg-emerald-200/10 blur-3xl"
-      />
-      <motion.div
-        animate={
-          prefersReducedMotion
-            ? undefined
-            : { scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }
-        }
-        transition={{
-          duration: 18,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 2,
-        }}
-        className="pointer-events-none absolute -right-40 bottom-0 h-[600px] w-[600px] rounded-full bg-amber-200/10 blur-3xl"
-      />
+          <motion.div
+            initial={
+              reducedMotion
+                ? false
+                : {
+                    opacity: 0,
+                    x: -20,
+                  }
+            }
+            animate={
+              isInView
+                ? {
+                    opacity: 1,
+                    x: 0,
+                  }
+                : undefined
+            }
+            transition={{
+              duration: reducedMotion ? 0 : 0.65,
+              ease: "easeOut",
+            }}
+            className={fonts.isRTL ? "text-right" : "text-left"}
+            dir={fonts.isRTL ? "rtl" : "ltr"}
+          >
+            {/* Eyebrow */}
 
-      {/* ===============================
-          BACKGROUND DECORATION END
-      ================================ */}
+            <div className="mb-3 flex items-center gap-2">
+              <span className="h-px w-7 bg-[var(--accent)]" />
 
-      <div className="relative mx-auto max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16"
-        >
-          {/* ===============================
-              LEFT CONTENT START
-          ================================ */}
-
-          <div>
-            {/* Badge */}
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="inline-flex items-center gap-2 rounded-full border border-amber-200/50 bg-white/60 backdrop-blur-sm px-4 py-2 text-xs font-semibold text-emerald-800 shadow-sm"
-            >
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-amber-500 shadow-lg shadow-amber-400/30">
-                <Sparkles className="h-3 w-3 text-emerald-950" />
+              <span
+                className={`text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--accent)] sm:text-xs ${fonts.sub}`}
+              >
+                {ai.eyebrow}
               </span>
-              AI Powered Islamic Assistant
-            </motion.div>
+            </div>
 
             {/* Heading */}
 
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-6 max-w-xl font-serif text-3xl font-bold leading-[1.2] text-emerald-950 sm:text-4xl lg:text-5xl"
+            <h2
+              className={`hv-h2 max-w-xl text-[var(--text-dark)] ${
+                fonts.heading
+              } ${fonts.isRTL ? "" : "tracking-[-0.035em]"}`}
             >
-              Ask Islam.
-              <br />
-              <span className="bg-gradient-to-r from-amber-500 to-amber-400 bg-clip-text text-transparent">
-                Receive Authentic
-              </span>
-              <br />
-              Answers with AI.
-            </motion.h2>
+              {ai.title}
 
-            <motion.div
-              initial={{ opacity: 0, width: 0 }}
-              animate={
-                isInView ? { opacity: 1, width: 80 } : { opacity: 0, width: 0 }
-              }
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-4 h-1 rounded-full bg-gradient-to-r from-emerald-700 to-emerald-500"
-            />
+              <span className="text-[var(--primary)]"> {ai.titleHighlight}</span>
+            </h2>
 
             {/* Description */}
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-6 max-w-lg text-sm leading-7 text-emerald-900/60 sm:text-base"
+            <p
+              className={`hv-body-lg mt-4 max-w-lg text-[var(--text-muted)] ${fonts.body}`}
             >
-              AI assistance based on Quran, Hadith and authentic Islamic
-              sources. Get meaningful answers with references you can trust.
-            </motion.p>
+              {ai.description}
+            </p>
 
-            {/* Buttons */}
+            {/* Trust */}
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-8 flex flex-wrap gap-3"
-            >
-              <Link
-                href="/ai-assistant"
-                className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-6 py-3 text-sm font-semibold text-emerald-950 shadow-lg shadow-amber-400/30 transition-all hover:shadow-amber-400/50 hover:scale-105"
+            <div className="mt-5 space-y-3">
+              <div
+                className={`text-sm font-semibold text-[var(--text-dark)] ${fonts.sub}`}
               >
-                Start Asking
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-              </Link>
+                {ai.trust.title}
+              </div>
 
-              <motion.button
-                type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 rounded-full border border-emerald-200/50 bg-white/60 backdrop-blur-sm px-5 py-3 text-sm font-semibold text-emerald-800 transition-all hover:bg-white hover:shadow-md"
+              <div className="space-y-3.5">
+                {trustPoints.map(({ label, Icon }) => (
+                  <div key={label} className="flex items-start gap-2.5">
+                    <Icon
+                      className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary-soft)]"
+                      strokeWidth={1.7}
+                      aria-hidden="true"
+                    />
+                    <span
+                      className={`text-[13px] leading-5 text-[var(--text-muted)] ${fonts.body}`}
+                    >
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA */}
+
+            <div
+              className={`mt-5 flex flex-col gap-2.5 min-[480px]:flex-row min-[480px]:flex-wrap min-[480px]:items-center ${fonts.sub}`}
+            >
+              <Button
+                href={getEcosystemModuleHref("ai")}
+                variant="gold"
+              >
+                <Sparkles className="h-4 w-4" />
+
+                <span>{ai.openAssistant}</span>
+
+                <ArrowRight className="hv-btn-arrow h-4 w-4" />
+              </Button>
+
+              <Button
+                href="#ai-demo"
+                variant="secondary-outline"
               >
                 <MessageCircle className="h-4 w-4" />
-                Live Demo
-              </motion.button>
-            </motion.div>
 
-            {/* Feature Cards */}
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="mt-8 grid grid-cols-2 gap-3"
-            >
-              {features.map((item, index) => (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={
-                    isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
-                  }
-                  transition={{ duration: 0.3, delay: 0.5 + index * 0.05 }}
-                >
-                  <FeatureCard item={item} />
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* Stats */}
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="mt-6 flex flex-wrap gap-3"
-            >
-              {stats.map((item, index) => (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={
-                    isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
-                  }
-                  transition={{ duration: 0.3, delay: 0.6 + index * 0.05 }}
-                >
-                  <StatCard value={item.value} label={item.label} />
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-
-          {/* ===============================
-              LEFT CONTENT END
-          ================================ */}
-
-          {/* ===============================
-              RIGHT CHAT START
-          ================================ */}
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={
-              isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }
-            }
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="w-full"
-          >
-            <AIChatPreview />
+                <span>{ai.tryAnother}</span>
+              </Button>
+            </div>
           </motion.div>
 
-          {/* ===============================
-              RIGHT CHAT END
-          ================================ */}
-        </motion.div>
+          {/* ============================================================ */}
+          {/* RIGHT — AI CHAT CARD                                         */}
+          {/* ============================================================ */}
+
+          <motion.div
+            initial={
+              reducedMotion
+                ? false
+                : {
+                    opacity: 0,
+                    y: 24,
+                  }
+            }
+            animate={
+              isInView
+                ? {
+                    opacity: 1,
+                    y: 0,
+                  }
+                : undefined
+            }
+            transition={{
+              duration: reducedMotion ? 0 : 0.75,
+              delay: reducedMotion ? 0 : 0.1,
+              ease: "easeOut",
+            }}
+          >
+            <AIChatPreview data={ai} fonts={fonts} />
+          </motion.div>
+        </div>
       </div>
     </section>
   );
 }
-
-// ===============================
-// MAIN SECTION END
-// ===============================

@@ -1,0 +1,556 @@
+/* Canonical HudaVerse Button and IconButton foundation. */
+
+.hv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: var(--button-height-md);
+  padding-inline: var(--button-padding-x-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-button);
+  font-family: var(--hv-font-subheading);
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  transition: var(--button-transition);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.hv-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 var(--focus-ring-offset) var(--background),
+    0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset))
+      var(--focus-ring-color);
+}
+.hv-btn:disabled,
+.hv-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.hv-btn svg { flex: 0 0 auto; }
+.hv-btn-arrow { transition: transform var(--transition-normal); }
+.hv-btn:hover .hv-btn-arrow { transform: translateX(4px); }
+[dir="rtl"] .hv-btn:hover .hv-btn-arrow { transform: translateX(-4px) rotate(180deg); }
+
+/* Scale: default is the existing 44px base. */
+.hv-btn.hv-btn-sm {
+  min-height: var(--button-height-sm);
+  padding-inline: var(--button-padding-x-sm);
+}
+.hv-btn.hv-btn-lg {
+  min-height: var(--button-height-lg);
+  padding-inline: var(--button-padding-x-lg);
+  font-size: 16px;
+}
+.hv-btn-full-width { width: 100%; }
+
+/* The small visual variant is independent of the sm scale. */
+.hv-btn-small {
+  min-height: var(--button-height-sm);
+  padding-inline: var(--button-padding-x-sm);
+  border-radius: var(--radius-button);
+  background: var(--surface);
+  color: var(--text-dark);
+  box-shadow: 0 2px 6px rgba(16, 32, 30, 0.10);
+  font-size: 12.5px;
+}
+.hv-btn-small:hover {
+  box-shadow: 0 6px 14px rgba(16, 32, 30, 0.18);
+  transform: translateY(-1px);
+}
+.hv-btn-small:active { transform: translateY(0); }
+
+.hv-btn-primary {
+  border-radius: var(--radius-button);
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-on-dark);
+}
+.hv-btn-primary:hover,
+.hv-btn-primary:focus-visible {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: var(--text-on-dark);
+}
+.hv-btn-primary:active {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: scale(0.98);
+}
+
+.hv-btn-secondary {
+  border-radius: var(--radius-button);
+  background: var(--secondary);
+  border-color: transparent;
+  color: var(--text-dark);
+}
+.hv-btn-secondary:hover,
+.hv-btn-secondary:focus-visible {
+  background: var(--accent-light);
+  color: var(--text-dark);
+  border-color: transparent;
+}
+.hv-btn-secondary:active {
+  background: var(--secondary);
+  border-color: transparent;
+  color: var(--text-dark);
+  box-shadow: inset 0 2px 4px rgba(16, 32, 30, 0.12);
+  transform: translateY(0);
+}
+
+.hv-btn-primary-outline {
+  background: transparent;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.hv-btn-primary-outline:hover,
+.hv-btn-primary-outline:focus-visible {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-on-dark);
+}
+.hv-btn-primary-outline:active {
+  background: var(--primary-dark);
+  border-color: var(--primary);
+  color: var(--text-on-dark);
+}
+
+.hv-btn-on-dark {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--text-on-dark) 62%, transparent);
+  color: var(--text-on-dark);
+}
+.hv-btn-on-dark:hover,
+.hv-btn-on-dark:focus-visible {
+  background: color-mix(in srgb, var(--text-on-dark) 9%, transparent);
+  border-color: var(--text-on-dark);
+  color: var(--text-on-dark);
+}
+.hv-btn-on-dark:active {
+  background: color-mix(in srgb, var(--text-on-dark) 14%, transparent);
+  border-color: var(--text-on-dark);
+  color: var(--text-on-dark);
+}
+
+.hv-btn-secondary-outline {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: transparent;
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+.hv-btn-secondary-outline::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: var(--secondary);
+  transform: scale(0);
+  transition: transform var(--transition-normal), background-color var(--transition-normal);
+}
+.hv-btn-secondary-outline:hover::before,
+.hv-btn-secondary-outline:focus-visible::before,
+.hv-btn-secondary-outline:active::before { transform: scale(1); }
+.hv-btn-secondary-outline:hover,
+.hv-btn-secondary-outline:focus-visible {
+  background: var(--secondary);
+  border-color: var(--secondary);
+  color: var(--text-dark);
+}
+.hv-btn-secondary-outline:active {
+  background: var(--accent-light);
+  border-color: var(--secondary);
+  color: var(--text-dark);
+  transform: none;
+}
+.hv-btn-secondary-outline:active::before { background: var(--accent-light); }
+.hv-btn-primary-outline:active { transform: none; }
+
+.hv-btn-tertiary {
+  border-radius: var(--radius-button);
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 6px 16px rgba(16, 32, 30, 0.10);
+}
+.hv-btn-tertiary:hover,
+.hv-btn-tertiary:focus-visible {
+  transform: translateY(-3px);
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 18px 32px rgba(0, 48, 42, 0.18);
+}
+.hv-btn-tertiary:active { transform: translateY(-1px); }
+
+.hv-btn-ghost {
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: inherit;
+}
+.hv-btn-ghost:hover,
+.hv-btn-ghost:focus-visible {
+  background: rgba(0, 48, 42, 0.06);
+  border-color: rgba(0, 48, 42, 0.08);
+  color: inherit;
+  transform: translateY(-2px);
+}
+.hv-btn-ghost:active { transform: translateY(0); }
+
+.hv-btn-feature {
+  border-radius: var(--radius-button);
+  min-height: var(--button-height-lg);
+  padding-inline: calc(var(--button-padding-x-lg) + 6px);
+  font-family: var(--hv-font-heading);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: var(--primary-dark);
+  color: var(--text-on-dark);
+  border-bottom: 3px solid var(--accent);
+}
+.hv-btn-feature:hover,
+.hv-btn-feature:focus-visible {
+  background: var(--primary-dark);
+  color: var(--text-on-dark);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+.hv-btn-feature:active { border-bottom-width: 3px; }
+
+.hv-btn-soft {
+  border-radius: var(--radius-button);
+  background: var(--background);
+  color: var(--primary);
+  box-shadow: 5px 5px 10px rgba(0, 48, 42, 0.08), -5px -5px 10px rgba(255, 255, 255, 0.9);
+}
+.hv-btn-soft:hover,
+.hv-btn-soft:focus-visible {
+  background: var(--background);
+  color: var(--primary);
+  box-shadow: 7px 7px 14px rgba(0, 48, 42, 0.11), -7px -7px 14px rgba(255, 255, 255, 0.95);
+}
+.hv-btn-soft:active,
+.hv-btn-soft.is-pressed {
+  box-shadow: inset 3px 3px 6px rgba(0, 48, 42, 0.10), inset -3px -3px 6px rgba(255, 255, 255, 0.9);
+}
+
+.hv-btn-gold {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-button);
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: var(--primary-dark);
+  isolation: isolate;
+}
+.hv-btn-gold::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: -60%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, color-mix(in srgb, var(--surface) 55%, transparent), transparent);
+  transform: skewX(-20deg);
+  transition: left var(--transition-normal);
+}
+.hv-btn-gold:hover::after,
+.hv-btn-gold:focus-visible::after { left: 130%; }
+.hv-btn-gold:hover,
+.hv-btn-gold:focus-visible {
+  box-shadow: 0 10px 24px rgba(229, 167, 47, 0.4);
+  transform: translateY(-2px);
+}
+.hv-btn-gold:active { transform: translateY(0); }
+
+/* Inline search field and its fixed-size primary action. */
+.hv-input-action {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--button-height-md);
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: var(--radius-button);
+  position: relative;
+  overflow: hidden;
+  background: var(--primary);
+  color: var(--text-on-dark);
+  font: 600 13px var(--hv-font-subheading);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast), box-shadow var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.hv-input-action::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(229, 167, 47, 0.18), transparent);
+  transform: translateX(-110%);
+  transition: transform 0.55s ease;
+  pointer-events: none;
+}
+.hv-input-action:hover {
+  background: var(--primary-soft);
+  color: var(--text-on-dark);
+  box-shadow: 0 10px 22px rgba(0, 48, 42, 0.14);
+}
+.hv-input-action:hover::before { transform: translateX(110%); }
+.hv-input-action:active { transform: none; }
+.hv-input-action:focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+.hv-input-action > * { position: relative; z-index: 1; }
+.hv-search {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 3px 12px rgba(16, 32, 30, 0.04);
+  overflow: hidden;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.hv-search:focus-within {
+  border-color: rgba(0, 48, 42, 0.42);
+  box-shadow: 0 0 0 3px rgba(229, 167, 47, 0.14), 0 8px 20px rgba(16, 32, 30, 0.06);
+}
+.hv-search input {
+  all: unset;
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  padding: 0.78rem 0.9rem;
+  color: var(--text-dark);
+  font: 400 14px var(--hv-font-body);
+}
+.hv-search input::placeholder { color: var(--text-muted); opacity: 0.8; }
+.hv-search .hv-input-action {
+  min-height: 48px;
+  padding-inline: 1.1rem;
+  border-radius: 0;
+}
+
+/* Filter and category chips use the compact Shape 32 treatment. */
+.hv-tag {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(0, 48, 42, 0.06);
+  color: var(--primary);
+  font-family: var(--hv-font-subheading);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.hv-tag:hover,
+.hv-tag:focus-visible { background: var(--primary); color: var(--text-on-dark); }
+.hv-tag:focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+.hv-tag.is-active { background: var(--primary); color: var(--accent); }
+
+/* Loading and action feedback retained from the finalized lab. */
+.hv-spinner {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: var(--text-on-dark);
+  border-radius: 50%;
+  animation: hv-spin 0.7s linear infinite;
+}
+.hv-btn-tertiary .hv-spinner {
+  border-color: rgba(0, 48, 42, 0.25);
+  border-top-color: var(--primary);
+}
+.hv-btn-secondary .hv-spinner {
+  border-color: rgba(16, 32, 30, 0.25);
+  border-top-color: var(--text-dark);
+}
+.hv-btn-small .hv-spinner {
+  border-color: rgba(0, 48, 42, 0.25);
+  border-top-color: var(--primary);
+}
+@keyframes hv-spin { to { transform: rotate(360deg); } }
+
+.hv-btn.is-success {
+  background: var(--status-success);
+  color: var(--text-on-dark);
+}
+.hv-btn.is-success::before,
+.hv-btn.is-success::after { display: none; }
+.hv-btn.is-error {
+  background: var(--status-error);
+  color: var(--text-on-dark);
+}
+.hv-btn.is-error::before,
+.hv-btn.is-error::after { display: none; }
+
+/* Explicit destructive confirmation overrides the underlying button variant. */
+.hv-confirm {
+  color: var(--status-error);
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--status-error);
+  transition: background-color var(--transition-normal), color var(--transition-normal),
+    border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+.hv-confirm:hover,
+.hv-confirm:focus-visible,
+.hv-confirm:active {
+  background: var(--status-error);
+  color: var(--text-on-dark);
+  border-color: var(--status-error);
+  box-shadow: inset 0 0 0 2px var(--status-error), 0 10px 22px color-mix(in srgb, var(--status-error) 18%, transparent);
+  transform: none;
+}
+.hv-confirm:focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 3px;
+}
+.hv-confirm:disabled,
+.hv-confirm[disabled] {
+  background: transparent;
+  color: var(--status-error);
+  border-color: var(--status-error);
+  box-shadow: inset 0 0 0 2px var(--status-error);
+  opacity: 0.45;
+}
+
+/* Preserve the existing language font classes when Button is nested in them. */
+.font-subheading .hv-btn { font-family: var(--hv-font-subheading); }
+.font-bangla .hv-btn { font-family: var(--hv-font-bangla); }
+.font-arabic .hv-btn { font-family: var(--hv-font-arabic); }
+.font-urdu .hv-btn { font-family: var(--hv-font-urdu); }
+.font-persian .hv-btn { font-family: var(--hv-font-persian); }
+
+/* Separate icon-only control. Default remains a rounded square, with a 44px target. */
+.hv-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--button-height-md);
+  height: var(--button-height-md);
+  min-width: var(--button-height-md);
+  min-height: var(--button-height-md);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-button);
+  background: rgba(0, 48, 42, 0.05);
+  color: var(--primary);
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  transition: var(--button-transition);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.hv-icon-btn:hover,
+.hv-icon-btn:focus-visible {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+.hv-icon-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 var(--focus-ring-offset) var(--background),
+    0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset))
+      var(--focus-ring-color);
+}
+.hv-icon-btn:active { transform: translateY(0) scale(0.94); }
+.hv-icon-btn:disabled,
+.hv-icon-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.hv-icon-btn--filled { background: var(--primary); color: var(--text-on-dark); }
+.hv-icon-btn--filled:hover,
+.hv-icon-btn--filled:focus-visible {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--primary-dark);
+}
+.hv-icon-btn--gold { background: var(--accent); color: var(--primary-dark); }
+.hv-icon-btn--gold:hover,
+.hv-icon-btn--gold:focus-visible {
+  background: var(--accent-light);
+  border-color: var(--accent-light);
+}
+.hv-icon-btn--ring {
+  background: color-mix(in srgb, var(--background) 92%, transparent);
+  box-shadow: inset 0 0 0 1px rgba(0, 48, 42, 0.14);
+}
+.hv-icon-btn--ring:hover,
+.hv-icon-btn--ring:focus-visible {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px rgba(0, 48, 42, 0.2), 0 8px 18px rgba(0, 48, 42, 0.08);
+  transform: translateY(-1px);
+}
+.hv-icon-btn--ring:active { transform: translateY(0) scale(0.94); }
+.hv-icon-btn.is-active,
+.hv-icon-btn[aria-pressed="true"] { color: var(--accent); }
+.hv-icon-btn--filled.is-active,
+.hv-icon-btn--filled[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--primary-dark);
+}
+.hv-icon-btn-sm {
+  width: var(--button-height-sm);
+  height: var(--button-height-sm);
+  min-width: var(--button-height-sm);
+  min-height: var(--button-height-sm);
+}
+.hv-icon-btn-lg {
+  width: var(--button-height-lg);
+  height: var(--button-height-lg);
+  min-width: var(--button-height-lg);
+  min-height: var(--button-height-lg);
+}
+.hv-icon-btn-utility {
+  width: auto;
+  min-width: var(--button-height-md);
+  padding-inline: var(--button-padding-x-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hv-btn,
+  .hv-btn::before,
+  .hv-btn::after,
+  .hv-icon-btn {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+  .hv-btn:hover,
+  .hv-btn:active,
+  .hv-icon-btn:hover,
+  .hv-icon-btn:active,
+  .hv-btn:hover .hv-btn-arrow { transform: none; }
+  [dir="rtl"] .hv-btn:hover .hv-btn-arrow { transform: rotate(180deg); }
+}

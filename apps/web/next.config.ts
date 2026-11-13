@@ -1,11 +1,12 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
   // React
   reactStrictMode: true,
 
   // Turbopack
-  turbopack: {},
+  turbopack: { root: path.resolve(__dirname, "../..") },
 
   // Experimental
   experimental: {

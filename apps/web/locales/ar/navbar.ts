@@ -1,72 +1,83 @@
 /* ================================================================
    HUDAVERSE — NAVBAR ARABIC TRANSLATIONS
-   Language: Arabic (العربية)
 ================================================================ */
 
-export const navbar = {
-  // Main navigation
-  home: "الرئيسية",
-  features: "الميزات",
-  aiAssistant: "المساعد الذكي",
-  modules: "الوحدات",
-  about: "عن HudaVerse",
+import type { NavbarTranslations } from "../en/navbar";
 
-  // Module submenu
-  quran: "القرآن",
-  prayerTimes: "مواقيت الصلاة",
-  hadith: "الحديث",
-  zakatCalculator: "حاسبة الزكاة",
-
-  // Language
-  selectLanguage: "اختر اللغة",
-  searchLanguage: "ابحث عن لغة...",
-  noLanguagesFound: "لم يتم العثور على لغة",
-  moreLanguagesComingSoon: "المزيد من اللغات قريبًا...",
-
-  // Actions
-  actions: {
-    selectLanguage: "اختر اللغة",
-    signIn: "تسجيل الدخول",
-    downloadApp: "تحميل التطبيق",
+export const navbar: NavbarTranslations = {
+  nav: {
+    home: "الرئيسية",
+    explore: "استكشف",
+    ecosystem: "النظام المتكامل",
+    about: "حول",
+  },
+  explore: {
+    intro: "تعرّف على نظام HudaVerse المتكامل قبل أن تبدأ.",
+    ctaLabel: "استكشف كل شيء",
+    sections: {
+      ecosystem: {
+        label: "النظام المتكامل",
+        description: "المعرفة والتعلم والذكاء وأكثر في مكان واحد",
+      },
+      ai: {
+        label: "المساعد الذكي",
+        description: "اطرح أسئلة واحصل على إجابات موثقة",
+      },
+      learning: {
+        label: "التعلّم",
+        description: "كيف يعمل التعلم الموجّه",
+      },
+      knowledge: {
+        label: "المعرفة",
+        description: "تصفّح القرآن والحديث ومجالات المعرفة الأخرى",
+      },
+      personalSpace: {
+        label: "مساحتك الشخصية",
+        description: "ملفك الشخصي ومعارفك المحفوظة",
+      },
+      trust: { label: "الثقة والمصادر", description: "كيف نتحقق من كل مصدر" },
+      aDay: {
+        label: "يوم مع HudaVerse",
+        description: "شاهد استخداماً حقيقياً",
+      },
+    },
   },
 
-  // Mobile navbar
+
+
+
+  ecosystem: {
+    sections: {
+      quran: { title: "القرآن", description: "اقرأ القرآن وترجماته" },
+      hadith: { title: "الحديث", description: "تصفّح كتب الحديث ورواياته" },
+      prayer: { title: "الصلاة", description: "اطّلع على أوقات الصلاة وإرشاداتها" },
+      dua: { title: "الدعاء", description: "ابحث عن أدعية للحياة اليومية" },
+      ai: { title: "المساعد الذكي", description: "اسأل واحصل على إجابات موثقة" },
+      learning: { title: "مركز التعلم", description: "اتبع مسارات تعلم منظمة" },
+      community: { title: "المجتمع", description: "تواصل حول التعلم المشترك" },
+      tools: { title: "الأدوات الإسلامية", description: "استخدم أدوات عملية للعبادة اليومية" },
+      profile: { title: "الملف الشخصي", description: "أدر حسابك وتفضيلاتك" },
+      bookmarks: { title: "العلامات والملاحظات", description: "ارجع إلى النصوص والملاحظات المحفوظة" },
+      settings: { title: "الإعدادات والتخصيص", description: "اضبط تجربتك وإعداداتك" },
+    },
+  },
+
+  actions: {
+    search: "بحث",
+    selectLanguage: "اختر اللغة",
+    searchLanguage: "ابحث عن لغة...",
+    noLanguagesFound: "لم يتم العثور على لغات",
+    moreLanguagesComingSoon: "المزيد من اللغات قريبًا...",
+    signIn: "تسجيل الدخول",
+    getStarted: "ابدأ الآن",
+  },
+
   mobile: {
     openMenu: "فتح القائمة",
     closeMenu: "إغلاق القائمة",
-    home: "التنقل الرئيسي",
+    navLabel: "التنقل الرئيسي",
+    menuTitle: "القائمة",
   },
-
-  // Account
-  signIn: "تسجيل الدخول",
-
-  // Download
-  download: {
-    button: "تحميل التطبيق",
-    title: "احصل على HudaVerse",
-    description: "اختر المنصة التي تفضلها.",
-    safeTrusted: "تنزيل آمن وموثوق",
-    close: "إغلاق نافذة التنزيل",
-    ariaLabel: "تحميل HudaVerse",
-  },
-
-  // Download information
-  downloadHudaVerse: "حمّل HudaVerse",
-  allInOneIslamicCompanion: "رفيقك الإسلامي المتكامل",
-
-  // Download platforms
-  getItOn: "متوفر على",
-  googlePlay: "Google Play",
-  downloadOnThe: "حمّله من",
-  appStore: "App Store",
-  downloadApk: "تحميل APK",
-  comingSoon: "قريبًا",
-  new: "جديد",
-
-  // Trust
-  safeSecureTrusted: "آمن وموثوق ويحظى بثقة الملايين",
-} as const;
-
-export type NavbarTranslations = typeof navbar;
+};
 
 export default navbar;

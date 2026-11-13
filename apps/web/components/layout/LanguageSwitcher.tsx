@@ -19,8 +19,10 @@ import { useLanguage } from "../../hooks/useLanguage";
 
 export default function LanguageSwitcher({
   variant = "desktop",
+  light = false,
 }: {
   variant?: "desktop" | "mobile";
+  light?: boolean;
 }) {
   const { currentLang, currentLanguage, selectLanguage, availableLanguages } =
     useLanguage();
@@ -174,47 +176,13 @@ export default function LanguageSwitcher({
         aria-label="Change language"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className="
-          flex
-          h-10
-          items-center
-          justify-center
-          gap-1.5
-          whitespace-nowrap
-          rounded-xl
-          border
-          border-white/15
-          bg-white/[0.03]
-          px-2.5
-          text-sm
-          font-medium
-          text-white/90
-          outline-none
-          transition-all
-          duration-200
-          hover:border-amber-400/40
-          hover:bg-white/[0.06]
-          hover:text-amber-200
-          focus-visible:ring-2
-          focus-visible:ring-amber-400
-          active:scale-95
-          sm:h-11
-          sm:px-3
-        "
+        className={`flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border px-2.5 text-sm font-medium outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-95 sm:h-11 sm:px-3 ${light ? "border-[var(--border-light)] bg-[var(--surface)]/70 text-[var(--text-dark)] hover:border-[var(--primary)] hover:bg-[var(--background)]" : "border-white/15 bg-white/[0.03] text-white/90 hover:border-amber-400/40 hover:bg-white/[0.06] hover:text-amber-200"}`}
       >
         <Globe aria-hidden="true" className="h-4 w-4 shrink-0" />
-
         <span className="uppercase">{currentLanguage.code}</span>
-
         <ChevronDown
           aria-hidden="true"
-          className={`
-            h-3.5
-            w-3.5
-            transition-transform
-            duration-200
-            ${isOpen ? "rotate-180" : ""}
-          `}
+          className={`h-3.5 w-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -237,7 +205,7 @@ export default function LanguageSwitcher({
             rounded-2xl
             border
             border-white/10
-            bg-[#05261F]
+            bg-[var(--primary-dark)]
             shadow-2xl
             shadow-black/50
 
@@ -331,11 +299,11 @@ export default function LanguageSwitcher({
                       outline-none
                       transition-colors
                       focus-visible:ring-2
-                      focus-visible:ring-amber-400
+                      focus-visible:ring-[var(--accent)]
 
                       ${
                         active
-                          ? "bg-amber-400/10 text-amber-300"
+                          ? "bg-[var(--accent)]/10 text-[var(--accent-light)]"
                           : "text-white/80 hover:bg-white/5 hover:text-white"
                       }
                     `}
@@ -394,7 +362,7 @@ export default function LanguageSwitcher({
                           h-4
                           w-4
                           shrink-0
-                          text-amber-400
+                          text-[var(--accent)]
                         "
                       />
                     )}

@@ -13,14 +13,14 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
 import {
+  BookOpen,
   ChevronRight,
-  Download,
+  Compass,
+  GraduationCap,
   Home,
   Info,
   Layers,
-  LayoutGrid,
   Menu,
-  Sparkles,
   User,
   X,
 } from "lucide-react";
@@ -38,12 +38,15 @@ import {
 } from "./navbar.config";
 
 import { useLanguage } from "../../../hooks/useLanguage";
+import { Button } from "@/components/ui/Button";
+import { isRTL } from "@/lib/language";
+import {
+  ECOSYSTEM_MODULE_EVENT,
+  isEcosystemModuleId,
+} from "@/lib/ecosystem-navigation";
 
 /* ================================================================
    LOCALE IMPORTS
-   ---------------------------------------------------------------
-   All mobile navbar UI text comes from:
-   locales/{language}/navbar.ts
 ================================================================ */
 
 import enNavbar from "../../../locales/en/navbar";
@@ -53,40 +56,9 @@ import urNavbar from "../../../locales/ur/navbar";
 import faNavbar from "../../../locales/fa/navbar";
 import trNavbar from "../../../locales/tr/navbar";
 
-/* ================================================================
-   TYPES
-================================================================ */
+import type { NavbarTranslations } from "../../../locales/en/navbar";
 
-type NavbarLocale = {
-  signIn: string;
-
-  download: {
-    button: string;
-    title: string;
-    description: string;
-    safeTrusted: string;
-    close: string;
-    ariaLabel: string;
-  };
-
-  actions: {
-    selectLanguage: string;
-    signIn: string;
-    downloadApp: string;
-  };
-
-  mobile: {
-    openMenu: string;
-    closeMenu: string;
-    home: string;
-  };
-};
-
-/* ================================================================
-   NAVBAR LOCALES
-================================================================ */
-
-const NAVBAR_LOCALES: Record<string, NavbarLocale> = {
+const NAVBAR_LOCALES: Record<string, NavbarTranslations> = {
   en: enNavbar,
   bn: bnNavbar,
   ar: arNavbar,
@@ -95,22 +67,13 @@ const NAVBAR_LOCALES: Record<string, NavbarLocale> = {
   tr: trNavbar,
 };
 
-/* ================================================================
-   DEFAULT LANGUAGE
-================================================================ */
-
 const DEFAULT_LANGUAGE = "en";
 
-/* ================================================================
-   CONFIG
-================================================================ */
-
 const SWIPE_CLOSE_THRESHOLD = 80;
-
 const MOBILE_DRAWER_ID = "mobile-navigation-drawer";
 
 /* ================================================================
-   ICON MAP
+   ICON MAP — matches the locked primary nav keys
 ================================================================ */
 
 const MENU_ICON_MAP: Record<
@@ -118,9 +81,10 @@ const MENU_ICON_MAP: Record<
   React.ComponentType<{ className?: string }>
 > = {
   home: Home,
-  features: LayoutGrid,
-  "ai-assistant": Sparkles,
-  modules: Layers,
+  explore: Compass,
+  ecosystem: Layers,
+  learning: GraduationCap,
+  knowledge: BookOpen,
   about: Info,
 };
 
@@ -130,158 +94,116 @@ const MENU_ICON_MAP: Record<
 
 export const MobileNavbar = React.memo(function MobileNavbar() {
   const pathname = usePathname();
-
-  /* ==============================================================
-     GLOBAL LANGUAGE
-  ============================================================== */
-
   const { currentLang } = useLanguage();
+  const [currentHash, setCurrentHash] = useState("");
 
-  /* ==============================================================
-     CURRENT NAVBAR LOCALE
-  ============================================================== */
-
-  const translations = useMemo<NavbarLocale>(() => {
+  const translations = useMemo<NavbarTranslations>(() => {
     return NAVBAR_LOCALES[currentLang] ?? NAVBAR_LOCALES[DEFAULT_LANGUAGE];
   }, [currentLang]);
 
-  /* ==============================================================
-     SCROLL
-  ============================================================== */
-
   const isScrolled = useIsScrolled(SCROLL_THRESHOLD);
-
-  /* ==============================================================
-     DRAWER STATE
-  ============================================================== */
+  const lightHero = pathname === "/about" && !isScrolled;
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-
-  /* ==============================================================
-     REFS
-  ============================================================== */
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
 
   const drawerRef = useRef<HTMLElement>(null);
-
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const touchStartX = useRef<number | null>(null);
-
   const touchStartY = useRef<number | null>(null);
 
-  /* ==============================================================
-     NAVIGATION
-  ============================================================== */
-
-  const navItems = useMemo(() => {
-    return getNavItems(currentLang);
-  }, [currentLang]);
-
-  /* ==============================================================
-     LANGUAGE CODE
-  ============================================================== */
+  const navItems = useMemo(() => getNavItems(translations), [translations]);
 
   const languageCode = currentLang;
+  const rtl = isRTL(languageCode);
 
-  /* ==============================================================
-     CLOSE DRAWER
-  ============================================================== */
-
-  const closeDrawer = useCallback(() => {
+  const closeDrawer = useCallback((restoreFocus = true) => {
     setIsDrawerOpen(false);
-    setOpenSubmenu(null);
+    setOpenAccordion(null);
+    if (restoreFocus) {
+      requestAnimationFrame(() => menuButtonRef.current?.focus());
+    }
   }, []);
-
-  /* ==============================================================
-     OPEN DRAWER
-  ============================================================== */
-
-  /* ==============================================================
-     TOGGLE DRAWER
-  ============================================================== */
 
   const toggleDrawer = useCallback(() => {
     setIsDrawerOpen((current) => {
       if (current) {
-        setOpenSubmenu(null);
+        setOpenAccordion(null);
       }
-
       return !current;
     });
   }, []);
 
-  /* ==============================================================
-     ESCAPE
-  ============================================================== */
-
   useEscapeKey(closeDrawer, isDrawerOpen);
-
-  /* ==============================================================
-     BODY SCROLL LOCK
-  ============================================================== */
-
   useLockBodyScroll(isDrawerOpen);
 
-  /* ==============================================================
-     ROUTE CHANGE
-  ============================================================== */
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+    requestAnimationFrame(() => {
+      drawerRef.current
+        ?.querySelector<HTMLElement>('a[href], button:not([disabled])')
+        ?.focus();
+    });
+  }, [isDrawerOpen]);
 
   useEffect(() => {
-    closeDrawer();
+    closeDrawer(false);
   }, [pathname, closeDrawer]);
 
-  /* ==============================================================
-     ACTIVE ROUTE
-  ============================================================== */
+  useEffect(() => {
+    const updateHash = () => setCurrentHash(window.location.hash);
+    updateHash();
+    window.addEventListener("hashchange", updateHash);
+    return () => window.removeEventListener("hashchange", updateHash);
+  }, [pathname]);
 
   const isActive = useCallback(
     (href: string) => {
       if (href === "/") {
         return pathname === "/";
       }
-
-      return pathname?.startsWith(href) ?? false;
+      const [path, fragment] = href.split("#");
+      if (fragment) {
+        return pathname === path && currentHash === `#${fragment}`;
+      }
+      return pathname?.startsWith(path) ?? false;
     },
-    [pathname],
+    [pathname, currentHash],
   );
 
-  /* ==============================================================
-     NAVIGATION
-  ============================================================== */
-
   const handleNavigation = useCallback(() => {
-    closeDrawer();
+    closeDrawer(false);
   }, [closeDrawer]);
 
-  /* ==============================================================
-     SUBMENU
-  ============================================================== */
+  const handleChildNavigation = useCallback(
+    (parentKey: string, childKey: string) => {
+      if (parentKey === "ecosystem" && isEcosystemModuleId(childKey)) {
+        window.dispatchEvent(
+          new CustomEvent(ECOSYSTEM_MODULE_EVENT, {
+            detail: { moduleId: childKey },
+          }),
+        );
+      }
+      closeDrawer(false);
+    },
+    [closeDrawer],
+  );
 
-  const toggleSubmenu = useCallback((key: string) => {
-    setOpenSubmenu((current) => (current === key ? null : key));
+  const toggleAccordion = useCallback((key: string) => {
+    setOpenAccordion((current) => (current === key ? null : key));
   }, []);
-
-  /* ==============================================================
-     TOUCH START
-  ============================================================== */
 
   const handleTouchStart = useCallback(
     (event: React.TouchEvent<HTMLElement>) => {
       const touch = event.touches[0];
-
       if (!touch) {
         return;
       }
-
       touchStartX.current = touch.clientX;
       touchStartY.current = touch.clientY;
     },
     [],
   );
-
-  /* ==============================================================
-     TOUCH END
-  ============================================================== */
 
   const handleTouchEnd = useCallback(
     (event: React.TouchEvent<HTMLElement>) => {
@@ -290,7 +212,6 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
       }
 
       const touch = event.changedTouches[0];
-
       if (!touch) {
         touchStartX.current = null;
         touchStartY.current = null;
@@ -298,24 +219,25 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
       }
 
       const deltaX = touch.clientX - touchStartX.current;
-
       const deltaY = Math.abs(touch.clientY - touchStartY.current);
-
       const horizontalSwipe = Math.abs(deltaX) > deltaY * 1.25;
 
-      if (deltaX > SWIPE_CLOSE_THRESHOLD && horizontalSwipe) {
+      if (
+        (rtl ? deltaX < -SWIPE_CLOSE_THRESHOLD : deltaX > SWIPE_CLOSE_THRESHOLD) &&
+        horizontalSwipe
+      ) {
         closeDrawer();
       }
 
       touchStartX.current = null;
       touchStartY.current = null;
     },
-    [closeDrawer],
+    [closeDrawer, rtl],
   );
 
-  /* ==============================================================
+  /* ================================================================
      RENDER
-  ============================================================== */
+  ================================================================= */
 
   return (
     <header
@@ -336,29 +258,23 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
       =========================================================== */}
 
       <motion.nav
-        aria-label={translations.mobile.home}
+        aria-label={translations.mobile.navLabel}
         initial={false}
         animate={{
           backgroundColor: isScrolled
-            ? "rgba(2, 24, 18, 0.94)"
-            : "rgba(2, 24, 18, 0)",
-
+            ? "var(--primary-dark)"
+            : "rgba(0, 0, 0, 0)",
+          boxShadow: isScrolled ? "var(--shadow-navbar)" : "0 0 0 rgba(0,0,0,0)",
           borderBottomColor: isScrolled
             ? "rgba(255,255,255,0.08)"
             : "rgba(255,255,255,0)",
-
-          boxShadow: isScrolled
-            ? "0 10px 30px -18px rgba(0,0,0,0.55)"
-            : "0 0 0 rgba(0,0,0,0)",
-
           backdropFilter: isScrolled ? "blur(18px)" : "blur(0px)",
         }}
-        transition={{
-          duration: 0.3,
-          ease: [0.22, 1, 0.36, 1],
-        }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         style={{
+          paddingInline: "var(--layout-gutter)",
           WebkitBackdropFilter: isScrolled ? "blur(18px)" : "blur(0px)",
+          backgroundImage: lightHero ? "none" : "linear-gradient(to bottom, color-mix(in srgb, var(--primary-dark) 70%, transparent), transparent)",
         }}
         className="
           pointer-events-auto
@@ -370,22 +286,16 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
           items-center
           justify-between
           border-b
-          px-3
           sm:h-16
-          sm:px-5
         "
       >
-        {/* ========================================================
-            LOGO
-        ========================================================= */}
-
         <Link
           href="/"
           aria-label="HudaVerse"
           className="
             flex
             min-w-0
-            max-w-[65%]
+            max-w-[55%]
             shrink
             items-center
             overflow-hidden
@@ -393,35 +303,17 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
             touch-manipulation
             outline-none
             focus-visible:ring-2
-            focus-visible:ring-amber-400
+            focus-visible:ring-[var(--accent)]
           "
         >
-          <Logo compact={false} />
+          <Logo compact={false} tone={lightHero ? "dark" : "light"} />
         </Link>
 
-        {/* ========================================================
-            RIGHT ACTIONS
-        ========================================================= */}
-
-        <div
-          className="
-            flex
-            shrink-0
-            items-center
-            gap-1
-          "
-        >
-          {/* ======================================================
-              GLOBAL LANGUAGE SWITCHER
-          ======================================================= */}
-
-          <LanguageSwitcher variant="mobile" />
-
-          {/* ======================================================
-              MENU BUTTON
-          ======================================================= */}
+        <div className="flex shrink-0 items-center gap-1">
+          <LanguageSwitcher variant="mobile" light={lightHero} />
 
           <button
+            ref={menuButtonRef}
             type="button"
             aria-label={
               isDrawerOpen
@@ -432,7 +324,7 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
             aria-expanded={isDrawerOpen}
             aria-controls={MOBILE_DRAWER_ID}
             onClick={toggleDrawer}
-            className="
+            className={`
               relative
               z-[10001]
               flex
@@ -443,41 +335,25 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
               items-center
               justify-center
               rounded-xl
-              text-white/90
+              ${lightHero ? "text-[var(--text-dark)] hover:bg-[var(--background)] hover:text-[var(--primary)]" : "text-white/90 hover:bg-white/10 hover:text-[var(--accent-light)]"}
               outline-none
               transition-all
               duration-200
-              hover:bg-white/10
-              hover:text-amber-300
               focus-visible:ring-2
-              focus-visible:ring-amber-400
+              focus-visible:ring-[var(--accent)]
               active:scale-95
               sm:h-11
               sm:w-11
-            "
+            `}
           >
             <AnimatePresence mode="wait" initial={false}>
               {isDrawerOpen ? (
                 <motion.span
                   key="close"
-                  initial={{
-                    opacity: 0,
-                    rotate: -90,
-                    scale: 0.7,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    rotate: 0,
-                    scale: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    rotate: 90,
-                    scale: 0.7,
-                  }}
-                  transition={{
-                    duration: 0.16,
-                  }}
+                  initial={{ opacity: 0, rotate: -90, scale: 0.7 }}
+                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                  exit={{ opacity: 0, rotate: 90, scale: 0.7 }}
+                  transition={{ duration: 0.16 }}
                   className="flex"
                 >
                   <X aria-hidden="true" className="h-5 w-5" />
@@ -485,24 +361,10 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
               ) : (
                 <motion.span
                   key="menu"
-                  initial={{
-                    opacity: 0,
-                    rotate: 90,
-                    scale: 0.7,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    rotate: 0,
-                    scale: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    rotate: -90,
-                    scale: 0.7,
-                  }}
-                  transition={{
-                    duration: 0.16,
-                  }}
+                  initial={{ opacity: 0, rotate: 90, scale: 0.7 }}
+                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                  exit={{ opacity: 0, rotate: -90, scale: 0.7 }}
+                  transition={{ duration: 0.16 }}
                   className="flex"
                 >
                   <Menu aria-hidden="true" className="h-5 w-5" />
@@ -520,26 +382,14 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
       <AnimatePresence>
         {isDrawerOpen && (
           <>
-            {/* ====================================================
-                BACKDROP
-            ===================================================== */}
-
             <motion.button
               type="button"
               aria-label={translations.mobile.closeMenu}
-              initial={{
-                opacity: 0,
-              }}
-              animate={{
-                opacity: 1,
-              }}
-              exit={{
-                opacity: 0,
-              }}
-              transition={{
-                duration: 0.2,
-              }}
-              onClick={closeDrawer}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => closeDrawer()}
               className="
                 pointer-events-auto
                 fixed
@@ -556,86 +406,64 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
               "
             />
 
-            {/* ====================================================
-                DRAWER
-            ===================================================== */}
-
             <motion.aside
               id={MOBILE_DRAWER_ID}
               ref={drawerRef}
+              dir={rtl ? "rtl" : "ltr"}
               role="dialog"
               aria-modal="true"
-              aria-label={translations.mobile.openMenu}
-              initial={{
-                x: "100%",
-              }}
-              animate={{
-                x: 0,
-              }}
-              exit={{
-                x: "100%",
-              }}
-              transition={{
-                duration: 0.32,
-                ease: [0.22, 1, 0.36, 1],
-              }}
+              aria-label={translations.mobile.menuTitle}
+              initial={{ x: rtl ? "-100%" : "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: rtl ? "-100%" : "100%" }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
-              style={{
-                maxWidth: DRAWER_MAX_WIDTH,
-                touchAction: "pan-y",
+              onKeyDown={(event) => {
+                if (event.key !== "Tab") return;
+                const focusable = Array.from(
+                  event.currentTarget.querySelectorAll<HTMLElement>(
+                    'a[href], button:not([disabled])',
+                  ),
+                ).filter((element) => element.offsetParent !== null);
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (!first || !last) return;
+                if (event.shiftKey && document.activeElement === first) {
+                  event.preventDefault();
+                  last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                  event.preventDefault();
+                  first.focus();
+                }
               }}
+              style={{ maxWidth: DRAWER_MAX_WIDTH, touchAction: "pan-y" }}
               tabIndex={-1}
               className="
                 pointer-events-auto
                 fixed
                 inset-y-0
-                right-0
+                end-0
                 z-[9500]
                 flex
                 w-[86vw]
                 max-w-[380px]
                 flex-col
                 overflow-hidden
-                border-l
+                border-s
                 border-white/10
-                bg-[#03251E]
+                bg-[var(--primary)]
                 shadow-2xl
                 shadow-black/50
               "
             >
-              {/* ==================================================
-                  DRAWER HEADER
-              =================================================== */}
-
-              <div
-                className="
-                  flex
-                  h-14
-                  shrink-0
-                  items-center
-                  justify-between
-                  border-b
-                  border-white/10
-                  px-4
-                  sm:h-16
-                  sm:px-5
-                "
-              >
+              {/* HEADER */}
+              <div className="flex h-14 shrink-0 items-center justify-between border-b border-white/10 px-4 sm:h-16 sm:px-5">
                 <Link
                   href="/"
                   onClick={handleNavigation}
                   aria-label="HudaVerse"
-                  className="
-                    flex
-                    min-w-0
-                    max-w-[70%]
-                    overflow-hidden
-                    rounded-lg
-                    outline-none
-                    focus-visible:ring-2
-                    focus-visible:ring-amber-400
-                  "
+                  className="flex min-w-0 max-w-[70%] overflow-hidden rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                 >
                   <Logo compact={false} />
                 </Link>
@@ -643,7 +471,7 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
                 <button
                   type="button"
                   aria-label={translations.mobile.closeMenu}
-                  onClick={closeDrawer}
+                  onClick={() => closeDrawer()}
                   className="
                     flex
                     h-10
@@ -659,7 +487,7 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
                     hover:bg-white/10
                     hover:text-white
                     focus-visible:ring-2
-                    focus-visible:ring-amber-400
+                    focus-visible:ring-[var(--accent)]
                     active:scale-95
                     sm:h-11
                     sm:w-11
@@ -669,161 +497,120 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
                 </button>
               </div>
 
-              {/* ==================================================
-                  NAVIGATION
-              =================================================== */}
-
+              {/* NAVIGATION */}
               <nav
-                aria-label={translations.mobile.openMenu}
-                className="
-                  min-h-0
-                  flex-1
-                  overflow-x-hidden
-                  overflow-y-auto
-                  overscroll-contain
-                  px-3
-                  py-4
-                  sm:py-5
-                "
+                aria-label={translations.mobile.menuTitle}
+                className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-3 py-4 sm:py-5"
               >
                 <ul className="space-y-1">
                   {navItems.map((item) => {
-                    const Icon = MENU_ICON_MAP[item.key] ?? Home;
-
+                    const Icon = MENU_ICON_MAP[item.key] ?? Compass;
                     const active = isActive(item.href);
-
-                    const submenuOpen = openSubmenu === item.key;
+                    const expanded = openAccordion === item.key;
 
                     return (
                       <li key={item.key}>
                         {item.children ? (
                           <>
-                            <button
-                              type="button"
-                              aria-expanded={submenuOpen}
-                              aria-controls={`mobile-submenu-${item.key}`}
-                              onClick={() => toggleSubmenu(item.key)}
-                              className={`
-                                group
-                                flex
-                                min-h-12
-                                w-full
-                                touch-manipulation
-                                items-center
-                                gap-3
-                                rounded-xl
-                                px-3
-                                text-left
-                                text-sm
-                                font-medium
-                                outline-none
-                                transition-all
-                                focus-visible:ring-2
-                                focus-visible:ring-amber-400
-
-                                ${
-                                  active || submenuOpen
-                                    ? "bg-amber-400/10 text-amber-300"
-                                    : "text-white/80 hover:bg-white/5 hover:text-white"
-                                }
-                              `}
+                            <div
+                              className={`flex min-h-12 w-full items-center rounded-xl text-sm font-medium transition-all ${
+                                active || expanded
+                                  ? "bg-[var(--accent)]/10 text-[var(--accent)]"
+                                  : "text-white/80 hover:bg-white/5 hover:text-white"
+                              }`}
                             >
-                              <Icon
-                                aria-hidden="true"
-                                className="
-                                  h-5
-                                  w-5
-                                  shrink-0
-                                "
-                              />
-
-                              <span
-                                className="
-                                  min-w-0
-                                  flex-1
-                                  truncate
-                                "
+                              <Link
+                                href={item.href}
+                                onClick={handleNavigation}
+                                aria-current={active ? "page" : undefined}
+                                className="group flex min-h-12 min-w-0 flex-1 touch-manipulation items-center gap-3 rounded-s-xl px-3 text-start outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                               >
-                                {item.label}
-                              </span>
-
-                              <ChevronRight
-                                aria-hidden="true"
-                                className={`
-                                  h-4
-                                  w-4
-                                  shrink-0
-                                  text-white/40
-                                  transition-transform
-                                  duration-200
-
-                                  ${
-                                    submenuOpen
-                                      ? "rotate-90 text-amber-300"
-                                      : ""
-                                  }
-                                `}
-                              />
-                            </button>
+                                <Icon aria-hidden="true" className="h-5 w-5 shrink-0" />
+                                <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                              </Link>
+                              <button
+                                type="button"
+                                aria-label={`${expanded ? translations.mobile.closeMenu : translations.mobile.openMenu}: ${item.label}`}
+                                aria-expanded={expanded}
+                                aria-controls={`mobile-accordion-${item.key}`}
+                                onClick={() => toggleAccordion(item.key)}
+                                className="flex h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-e-xl outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                              >
+                                <ChevronRight
+                                  aria-hidden="true"
+                                  className={`h-4 w-4 text-white/40 transition-transform duration-200 ${
+                                    rtl ? "-scale-x-100 " : ""
+                                  }${expanded ? "rotate-90 text-[var(--accent)]" : ""}`}
+                                />
+                              </button>
+                            </div>
 
                             <AnimatePresence initial={false}>
-                              {submenuOpen && (
-                                <motion.ul
-                                  id={`mobile-submenu-${item.key}`}
-                                  initial={{
-                                    height: 0,
-                                    opacity: 0,
-                                  }}
-                                  animate={{
-                                    height: "auto",
-                                    opacity: 1,
-                                  }}
-                                  exit={{
-                                    height: 0,
-                                    opacity: 0,
-                                  }}
+                              {expanded && (
+                                <motion.div
+                                  id={`mobile-accordion-${item.key}`}
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
                                   transition={{
                                     duration: 0.22,
                                     ease: [0.22, 1, 0.36, 1],
                                   }}
-                                  className="
-                                    ml-4
-                                    overflow-hidden
-                                    border-l
-                                    border-amber-400/15
-                                    pl-2
-                                    sm:ml-6
-                                    sm:pl-3
-                                  "
+                                  className="ms-4 overflow-hidden border-s border-[var(--accent)]/15 ps-2 sm:ms-6 sm:ps-3"
                                 >
-                                  {item.children.map((child) => (
-                                    <li key={child.key}>
-                                      <Link
-                                        href={child.href}
-                                        onClick={handleNavigation}
-                                        className="
-                                            block
-                                            min-h-10
+                                  {item.panelIntro && (
+                                    <p className="px-3 pb-2 pt-2 text-xs leading-relaxed text-white/45">
+                                      {item.panelIntro}
+                                    </p>
+                                  )}
+
+                                  <ul>
+                                    {item.children.map((child) => (
+                                      <li key={child.key}>
+                                        <Link
+                                          href={child.href}
+                                          onClick={() =>
+                                            handleChildNavigation(item.key, child.key)
+                                          }
+                                          className="
+                                            flex
+                                            min-h-14
+                                            flex-col
+                                            justify-center
                                             touch-manipulation
-                                            truncate
                                             rounded-lg
                                             px-3
                                             py-2.5
-                                            text-sm
-                                            text-white/60
                                             outline-none
                                             transition-colors
                                             hover:bg-white/5
-                                            hover:text-amber-200
                                             focus-visible:ring-2
-                                            focus-visible:ring-amber-400
+                                            focus-visible:ring-[var(--accent)]
                                           "
-                                      >
-                                        {child.label}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </motion.ul>
+                                        >
+                                          <span className="line-clamp-2 text-sm text-white/80">
+                                            {child.title}
+                                          </span>
+                                          {child.description && (
+                                            <span className="line-clamp-2 text-xs text-white/55">
+                                              {child.description}
+                                            </span>
+                                          )}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+
+                                  {item.panelCtaHref && item.panelCtaLabel && (
+                                    <Link
+                                      href={item.panelCtaHref}
+                                      onClick={handleNavigation}
+                                      className="block px-3 pb-1 pt-2 text-sm font-semibold text-[var(--accent)]"
+                                    >
+                                      {item.panelCtaLabel}
+                                    </Link>
+                                  )}
+                                </motion.div>
                               )}
                             </AnimatePresence>
                           </>
@@ -846,24 +633,18 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
                               outline-none
                               transition-all
                               focus-visible:ring-2
-                              focus-visible:ring-amber-400
-
+                              focus-visible:ring-[var(--accent)]
                               ${
                                 active
-                                  ? "bg-amber-400/10 text-amber-300"
+                                  ? "bg-[var(--accent)]/10 text-[var(--accent)]"
                                   : "text-white/80 hover:bg-white/5 hover:text-white"
                               }
                             `}
                           >
                             <Icon
                               aria-hidden="true"
-                              className="
-                                h-5
-                                w-5
-                                shrink-0
-                              "
+                              className="h-5 w-5 shrink-0"
                             />
-
                             <span className="min-w-0 truncate">
                               {item.label}
                             </span>
@@ -875,132 +656,35 @@ export const MobileNavbar = React.memo(function MobileNavbar() {
                 </ul>
               </nav>
 
-              {/* ==================================================
-                  DRAWER FOOTER
-              =================================================== */}
-
-              <div
-                className="
-                  shrink-0
-                  space-y-3
-                  border-t
-                  border-white/10
-                  bg-[#03251E]
-                  px-3
-                  py-3
-                  sm:px-4
-                  sm:py-4
-                "
-              >
-                {/* =================================================
-                    CURRENT LANGUAGE
-                ================================================== */}
-
-                <div
-                  className="
-                    flex
-                    items-center
-                    justify-between
-                    rounded-xl
-                    border
-                    border-white/10
-                    bg-white/[0.03]
-                    px-3
-                    py-2.5
-                  "
-                >
-                  <span
-                    className="
-                      text-xs
-                      font-medium
-                      text-white/45
-                    "
-                  >
+              {/* FOOTER */}
+              <div className="shrink-0 space-y-3 border-t border-white/10 bg-[var(--primary)] px-3 py-3 sm:px-4 sm:py-4">
+                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
+                  <span className="text-xs font-medium text-white/45">
                     {translations.actions.selectLanguage}
                   </span>
-
-                  <span
-                    className="
-                      text-xs
-                      font-semibold
-                      text-amber-300
-                    "
-                  >
+                  <span className="text-xs font-semibold text-[var(--accent)]">
                     {languageCode.toUpperCase()}
                   </span>
                 </div>
 
-                {/* =================================================
-                    SIGN IN
-                ================================================== */}
-
-                <Link
-                  href="/sign-in"
+                <Button
+                  href="/login"
                   onClick={handleNavigation}
-                  className="
-                    flex
-                    min-h-12
-                    touch-manipulation
-                    items-center
-                    justify-center
-                    gap-2
-                    rounded-xl
-                    border
-                    border-amber-400/30
-                    px-4
-                    text-sm
-                    font-medium
-                    text-white
-                    outline-none
-                    transition-all
-                    hover:border-amber-400/50
-                    hover:bg-amber-400/10
-                    focus-visible:ring-2
-                    focus-visible:ring-amber-400
-                    active:scale-[0.98]
-                  "
+                  variant="primary"
+                  fullWidth
                 >
                   <User aria-hidden="true" className="h-4 w-4" />
-
                   {translations.actions.signIn}
-                </Link>
+                </Button>
 
-                {/* =================================================
-                    DOWNLOAD
-                ================================================== */}
-
-                <Link
-                  href="#download"
+                <Button
+                  href="/get-started"
                   onClick={handleNavigation}
-                  className="
-                    flex
-                    min-h-12
-                    touch-manipulation
-                    items-center
-                    justify-center
-                    gap-2
-                    rounded-xl
-                    bg-gradient-to-b
-                    from-amber-300
-                    to-amber-500
-                    px-4
-                    text-sm
-                    font-semibold
-                    text-emerald-950
-                    shadow-lg
-                    shadow-amber-900/20
-                    outline-none
-                    transition-all
-                    hover:-translate-y-0.5
-                    focus-visible:ring-2
-                    focus-visible:ring-amber-200
-                    active:scale-[0.98]
-                  "
+                  variant="secondary"
+                  fullWidth
                 >
-                  <Download aria-hidden="true" className="h-4 w-4" />
-
-                  {translations.actions.downloadApp}
-                </Link>
+                  {translations.actions.getStarted}
+                </Button>
               </div>
             </motion.aside>
           </>

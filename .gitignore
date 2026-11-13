@@ -27,3 +27,14 @@ Thumbs.db
 .idea/
 .vercel
 .env*
+
+.vercel/
+
+.turbo/
+.tmp/
+.qa-screens/
+hudaverse-files.txt
+missing-sections.txt
+packages-details.txt
+targeted-inventory.txt
+apps/web/web-structure.txt

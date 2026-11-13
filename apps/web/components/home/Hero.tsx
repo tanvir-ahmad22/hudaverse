@@ -1,341 +1,206 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
-// ===============================
-// CTA Buttons
-// ===============================
+import { useLanguage } from "@/hooks/useLanguage";
+import { Button } from "@/components/ui/Button";
 
-function DownloadButtons() {
+import { landing as en } from "@/locales/en/landing";
+import { landing as bn } from "@/locales/bn/landing";
+import { landing as ar } from "@/locales/ar/landing";
+import { landing as ur } from "@/locales/ur/landing";
+import { landing as fa } from "@/locales/fa/landing";
+import { landing as tr } from "@/locales/tr/landing";
+
+const landingTranslations = { en, bn, ar, ur, fa, tr } as const;
+
+function getFontClasses(lang: keyof typeof landingTranslations) {
+  if (lang === "bn") {
+    return { heading: "font-bangla", body: "font-bangla", sub: "font-bangla" };
+  }
+  if (lang === "ur") {
+    return { heading: "font-urdu", body: "font-urdu", sub: "font-urdu" };
+  }
+  if (lang === "fa") {
+    return { heading: "font-persian", body: "font-persian", sub: "font-persian" };
+  }
+  if (lang === "ar") {
+    return { heading: "font-arabic", body: "font-arabic", sub: "font-arabic" };
+  }
+  return { heading: "font-heading", body: "font-sans", sub: "font-subheading" };
+}
+
+function DownloadButtons({
+  exploreLabel,
+  getStartedLabel,
+  fontClass,
+}: {
+  exploreLabel: string;
+  getStartedLabel: string;
+  fontClass: string;
+}) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row">
-      <Link
-        href="/explore"
-        className="flex items-center justify-center gap-2 rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-emerald-950 transition hover:scale-105 hover:bg-amber-300"
-      >
-        Explore HudaVerse
-      </Link>
-
-      <Link
-        href="/get-started"
-        className="flex items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:scale-105 hover:bg-white/10"
-      >
-        Get Started
-      </Link>
+    <div className={`flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-center ${fontClass}`}>
+      <Button href="/explore" variant="on-dark">
+        <span className="relative z-10">{exploreLabel}</span>
+        <ArrowRight
+          className="hv-btn-arrow relative z-10 h-4 w-4"
+          aria-hidden="true"
+        />
+      </Button>
+      <Button href="/get-started" variant="secondary">
+        {getStartedLabel}
+      </Button>
     </div>
   );
 }
 
-// ===============================
-// Trust Users
-// ===============================
-
-function TrustUsers() {
+function TrustUsers({
+  builtFor,
+  worldwide,
+  fontClass,
+}: {
+  builtFor: string;
+  worldwide: string;
+  fontClass: string;
+}) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex -space-x-3">
+    <div className={`flex items-center gap-3 ${fontClass}`}>
+      <div className="flex -space-x-3 rtl:space-x-reverse" aria-hidden="true">
         {[1, 2, 3, 4].map((item) => (
-          <motion.div
+          <span
             key={item}
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: item * 0.08 }}
-            className="h-9 w-9 rounded-full border-2 border-emerald-950 bg-white/20"
+            className="h-9 w-9 rounded-full border-2 border-[var(--primary-dark)] bg-white/20"
           />
         ))}
       </div>
-
-      <div>
-        <p className="text-[11px] uppercase tracking-wider text-white/50">
-          Built For
+      <div className="text-start">
+        <p className="text-[11px] uppercase tracking-wider text-white/60">
+          {builtFor}
         </p>
-
-        <p className="text-sm font-semibold text-white">Muslims Worldwide</p>
+        <p className="text-sm font-semibold text-white">{worldwide}</p>
       </div>
     </div>
   );
 }
 
-// ===============================
-// Premium Phone Mockup
-// ===============================
-
-function PhoneMockup({ className = "" }: { className?: string }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 50, scale: 0.92 }}
-      animate={{
-        opacity: 1,
-        y: [0, -12, 0],
-        scale: 1,
-      }}
-      transition={{
-        opacity: {
-          duration: 0.8,
-        },
-        scale: {
-          duration: 0.8,
-          ease: "easeOut",
-        },
-        y: {
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        },
-      }}
-      whileHover={{ y: -18 }}
-      className={`${className} drop-shadow-[0_25px_45px_rgba(0,0,0,0.45)]`}
-    >
-      <div className="absolute inset-0 -z-10 rounded-full bg-amber-400/20 blur-3xl" />
-
-      <Image
-        src="/hero-phone.png"
-        alt="HudaVerse App Preview"
-        fill
-        priority
-        sizes="(min-width: 1280px) 21vw, (min-width: 768px) 240px, 230px"
-        className="object-contain"
-      />
-    </motion.div>
-  );
+function getHeroItemVariants(reduceMotion: boolean): Variants {
+  return {
+    hidden: { opacity: 0, y: reduceMotion ? 0 : 10 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: reduceMotion ? 0.01 : 0.42,
+        ease: "easeOut",
+      },
+    },
+  };
 }
 
-// ===============================
-// Hero
-// ===============================
+function getHeroContentVariants(reduceMotion: boolean): Variants {
+  return {
+    hidden: {},
+    show: {
+      transition: {
+        delayChildren: reduceMotion ? 0 : 0.04,
+        staggerChildren: reduceMotion ? 0 : 0.07,
+      },
+    },
+  };
+}
 
 export default function Hero() {
+  const { currentLang } = useLanguage();
+  const reduceMotion = useReducedMotion() ?? false;
+  const t = landingTranslations[currentLang] ?? landingTranslations.en;
+  const font = getFontClasses(currentLang);
+  const itemVariants = getHeroItemVariants(reduceMotion);
+  const isRTL = currentLang === "ar" || currentLang === "ur" || currentLang === "fa";
+
   return (
-    <section className="relative overflow-hidden bg-emerald-950">
-      {/* ===============================
-          Desktop
-      ================================ */}
+    <section
+      dir={isRTL ? "rtl" : "ltr"}
+      className="relative isolate overflow-hidden bg-[var(--primary-dark)] text-[var(--text-on-dark)]"
+    >
+      <div className="absolute inset-0" aria-hidden="true">
+        <Image
+          src="/hero-mosque.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[58%_center] xl:object-[60%_center]"
+        />
+      </div>
+      <div className="hv-hero-photo-scrim pointer-events-none absolute inset-0" aria-hidden="true" />
 
-      <div className="hidden xl:grid grid-cols-2 max-w-[1440px] mx-auto">
-        {/* Text */}
-
+      <div className="hv-container relative mx-auto grid min-h-[calc(100svh-5.5rem)] grid-cols-1 items-center gap-10 pb-14 pt-28 xl:min-h-[760px] xl:grid-cols-2 xl:gap-8 xl:py-20">
         <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative z-20 flex flex-col justify-center px-10 py-32"
+          variants={getHeroContentVariants(reduceMotion)}
+          initial={reduceMotion ? false : "hidden"}
+          animate="show"
+          className={`relative z-10 flex flex-col items-center text-center xl:items-start xl:text-start ${font.body}`}
         >
-          <span className="w-fit rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-amber-300 backdrop-blur">
-            THE ISLAMIC KNOWLEDGE ECOSYSTEM
-          </span>
-
-          <h1 className="mt-7 max-w-2xl font-serif text-[3rem] font-bold leading-[1.12] text-white">
-            Everything You Need to{" "}
-            <span className="text-amber-400">
-              Know, Understand & Learn Islam.
-            </span>
-          </h1>
-
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70">
-            HudaVerse is a comprehensive Islamic Knowledge, Learning, Research &
-            Scholarly Ecosystem—bringing trusted knowledge, scholarly content,
-            structured learning, research resources, and intelligent tools
-            together in one place.
-          </p>
-
-          <div className="mt-9">
-            <DownloadButtons />
-          </div>
-
-          <div className="mt-12">
-            <TrustUsers />
-          </div>
-        </motion.div>
-
-        {/* Image Area */}
-
-        <div className="relative min-h-[700px] overflow-hidden">
-          {/* Mosque Background */}
-
-          <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute inset-0"
+          <motion.span
+            variants={itemVariants}
+            className={`w-fit rounded-full border border-white/15 bg-[color-mix(in_srgb,var(--primary-dark)_58%,transparent)] px-4 py-1.5 text-xs font-medium text-[var(--accent-light)] backdrop-blur-sm ${font.sub}`}
           >
-            <Image
-              src="/hero-mosque.png"
-              alt="HudaVerse Islamic Knowledge Ecosystem"
-              fill
-              priority
-              loading="eager"
-              sizes="(min-width: 1280px) 50vw, 0px"
-              className="object-cover object-[48%_center]"
+            {t.hero.eyebrow}
+          </motion.span>
+
+          <motion.h1
+            variants={itemVariants}
+            className={`mt-6 max-w-3xl ${font.heading} text-3xl font-bold leading-[1.15] text-white sm:text-5xl xl:mt-7 xl:text-[3.25rem]`}
+          >
+            {t.hero.title.before}{" "}
+            <span className="text-[var(--accent-light)]">
+              {t.hero.title.highlight}
+            </span>
+          </motion.h1>
+
+          <motion.p
+            variants={itemVariants}
+            className="mt-5 max-w-[52ch] text-sm leading-7 text-white/80 sm:text-base sm:leading-8 xl:mt-6"
+          >
+            {t.hero.description}
+          </motion.p>
+
+          <motion.div variants={itemVariants} className="mt-7 w-full sm:mt-8 md:w-auto">
+            <DownloadButtons
+              exploreLabel={t.hero.exploreButton}
+              getStartedLabel={t.hero.getStartedButton}
+              fontClass={font.sub}
             />
           </motion.div>
 
-          {/* Smooth Blend */}
-
-          <div className="absolute inset-y-0 left-0 w-[40%] bg-gradient-to-r from-emerald-950 via-emerald-950/50 to-transparent" />
-
-          {/* Top Fade */}
-
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-emerald-950/50 to-transparent" />
-
-          {/* Phone Glow */}
-
-          <div className="absolute bottom-16 right-16 h-48 w-48 rounded-full bg-amber-400/20 blur-3xl" />
-
-          {/* Phone */}
-
-          <PhoneMockup className="absolute bottom-8 right-12 z-10 h-[78%] w-[42%]" />
-        </div>
-      </div>
-
-      {/* ===============================
-          Tablet
-      ================================ */}
-
-      <div className="hidden md:flex relative min-h-[850px] items-center justify-center overflow-hidden xl:hidden">
-        {/* Background */}
-
-        <motion.div
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute inset-0"
-        >
-          <Image
-            src="/hero-mosque.png"
-            alt="HudaVerse Islamic Knowledge Ecosystem"
-            fill
-            sizes="(min-width: 768px) 100vw, 0px"
-            className="object-cover object-center opacity-40"
-          />
+          <motion.div variants={itemVariants} className="mt-8 sm:mt-10">
+            <TrustUsers
+              builtFor={t.hero.builtFor}
+              worldwide={t.hero.worldwide}
+              fontClass={font.sub}
+            />
+          </motion.div>
         </motion.div>
 
-        {/* Overlay */}
-
-        <div className="absolute inset-0 bg-emerald-950/75" />
-
-        {/* Content */}
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative z-10 flex flex-col items-center px-8 text-center"
-        >
-          <span className="rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-amber-300 backdrop-blur">
-            THE ISLAMIC KNOWLEDGE ECOSYSTEM
-          </span>
-
-          <h1 className="mt-6 max-w-3xl font-serif text-5xl font-bold leading-tight text-white">
-            Everything You Need to{" "}
-            <span className="text-amber-400">
-              Know, Understand & Learn Islam.
-            </span>
-          </h1>
-
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/70">
-            A comprehensive Islamic Knowledge, Learning, Research & Scholarly
-            Ecosystem—bringing trusted knowledge, scholarly content, structured
-            learning, research resources, and intelligent tools together in one
-            place.
-          </p>
-
-          <div className="mt-8">
-            <DownloadButtons />
-          </div>
-
-          {/* Tablet Phone */}
-
-          <PhoneMockup className="relative mt-10 h-[390px] w-[240px]" />
-
-          <div className="mt-8">
-            <TrustUsers />
-          </div>
-        </motion.div>
-      </div>
-
-      {/* ===============================
-          Mobile
-      ================================ */}
-
-      <div className="flex md:hidden relative min-h-[850px] flex-col items-center overflow-hidden px-5 pt-24 pb-12 text-center">
-        {/* Mobile Background */}
-
-        <motion.div
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute inset-0"
-        >
-          <Image
-            src="/hero-mosque.png"
-            alt="HudaVerse Islamic Knowledge Ecosystem"
-            fill
-            sizes="100vw"
-            className="object-cover object-center opacity-25"
-          />
-        </motion.div>
-
-        {/* Dark Overlay */}
-
-        <div className="absolute inset-0 bg-emerald-950/85" />
-
-        {/* Bottom Glow */}
-
-        <div className="absolute bottom-0 left-0 right-0 h-72 bg-gradient-to-t from-emerald-950 to-transparent" />
-
-        {/* Mobile Content */}
-
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="relative z-10 flex flex-col items-center"
-        >
-          <span className="rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-medium text-amber-300 backdrop-blur">
-            THE ISLAMIC KNOWLEDGE ECOSYSTEM
-          </span>
-
-          <h1 className="mt-5 max-w-sm font-serif text-3xl font-bold leading-tight text-white">
-            Everything You Need to{" "}
-            <span className="text-amber-400">
-              Know, Understand & Learn Islam.
-            </span>
-          </h1>
-
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
-            A comprehensive Islamic Knowledge, Learning, Research & Scholarly
-            Ecosystem—bringing trusted knowledge, structured learning, scholarly
-            resources, and intelligent tools together in one place.
-          </p>
-
-          <div className="mt-7 w-full">
-            <DownloadButtons />
-          </div>
-        </motion.div>
-
-        {/* Mobile Phone Showcase */}
-
-        <div className="relative z-10 mt-10 h-[360px] w-[230px]">
-          {/* Phone Glow */}
-
-          <div className="absolute bottom-8 left-1/2 h-36 w-36 -translate-x-1/2 rounded-full bg-amber-400/30 blur-3xl" />
-
-          <PhoneMockup className="relative h-full w-full" />
-        </div>
-
-        <div className="relative z-10 mt-8">
-          <TrustUsers />
+        <div className="relative z-10 flex min-h-0 items-center justify-center py-2 xl:min-h-[600px] xl:py-0">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: reduceMotion ? 0.01 : 0.65, ease: "easeOut" }}
+            className="relative h-[420px] w-[280px] sm:h-[500px] sm:w-[333px] xl:h-[590px] xl:w-[393px]"
+          >
+            <Image
+              src="/hero-phone.png"
+              alt={t.hero.phoneAlt}
+              fill
+              priority
+              sizes="(min-width: 1280px) 393px, (min-width: 640px) 333px, 280px"
+              className="object-contain"
+            />
+          </motion.div>
         </div>
       </div>
     </section>

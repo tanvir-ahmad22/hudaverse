@@ -19,6 +19,9 @@ interface LogoProps {
    */
   compact?: boolean;
 
+  /** Render the wordmark for a light surface. */
+  tone?: "light" | "dark";
+
   /** Optional custom classes for the logo wrapper. */
   className?: string;
 }
@@ -61,6 +64,7 @@ const RESTART_DELAY = 700;
 
 export const Logo = React.memo(function Logo({
   compact = false,
+  tone = "light",
   className = "",
 }: LogoProps) {
   const [typedText, setTypedText] = useState("");
@@ -99,9 +103,6 @@ export const Logo = React.memo(function Logo({
     /**
      * When navbar is compact/scrolled,
      * stop the animation and hide the tagline.
-     *
-     * We intentionally keep typedText in state so that
-     * returning to normal mode can restart cleanly.
      */
     if (compact) {
       setIsTyping(false);
@@ -257,7 +258,7 @@ export const Logo = React.memo(function Logo({
         <span
           className="
             whitespace-nowrap
-            font-serif
+            font-subheading
             text-xl
             font-bold
             leading-none
@@ -268,13 +269,7 @@ export const Logo = React.memo(function Logo({
           {/* Huda */}
 
           <span
-            className="
-              text-white
-              [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]
-              transition-colors
-              duration-300
-              group-hover:text-slate-50
-            "
+            className={`[text-shadow:0_1px_2px_rgba(0,0,0,0.12)] transition-colors duration-300 ${tone === "light" ? "text-white group-hover:text-[var(--surface)]" : "text-[var(--primary)] group-hover:text-[var(--primary-soft)]"}`}
           >
             Huda
           </span>
@@ -282,19 +277,9 @@ export const Logo = React.memo(function Logo({
           {/* Verse */}
 
           <span
-            className="
-              bg-gradient-to-b
-              from-amber-300
-              via-amber-400
-              to-amber-600
-              bg-clip-text
-              text-transparent
-              transition-all
-              duration-300
-              group-hover:from-amber-200
-              group-hover:via-amber-300
-              group-hover:to-amber-500
-            "
+            className={tone === "light"
+              ? "bg-gradient-to-b from-[var(--accent-light)] via-[var(--accent)] to-[var(--accent)] bg-clip-text text-transparent transition-all duration-300 group-hover:from-[var(--accent-light)] group-hover:via-[var(--accent-light)] group-hover:to-[var(--accent-light)]"
+              : "text-[var(--primary)] transition-colors duration-300 group-hover:text-[var(--primary-soft)]"}
           >
             Verse
           </span>
@@ -302,6 +287,16 @@ export const Logo = React.memo(function Logo({
 
         {/* ====================================================
             TAGLINE
+            ----------------------------------------------------
+            LAYOUT-SHIFT FIX:
+            • The outer span keeps a reserved fixed width
+              equal to the fully-typed tagline.
+            • A hidden "ghost" copy of the full tagline sits in
+              normal flow and reserves that width.
+            • The animated typed text is absolutely positioned
+              on top and never affects layout.
+            • Visual design (size, tracking, color, cursor)
+              is unchanged.
         ==================================================== */}
 
         <AnimatePresence initial={false}>
@@ -335,46 +330,64 @@ export const Logo = React.memo(function Logo({
               "
             >
               <span
-                className="
-                  flex
-                  h-[17px]
-                  items-center
-                  whitespace-nowrap
-                  text-[10px]
-                  font-medium
-                  leading-none
-                  tracking-[0.075em]
-                  text-slate-300/85
-                "
+                className={`relative flex h-[17px] items-center whitespace-nowrap text-[10px] font-medium leading-none tracking-[0.075em] ${tone === "light" ? "text-[var(--text-on-dark-muted)]/85" : "text-[var(--text-muted)]"}`}
                 aria-label={TAGLINE}
               >
-                {/* Typed text */}
+                {/* --------------------------------------------------
+                    GHOST LAYER
+                    Reserves the full tagline width. Invisible.
+                -------------------------------------------------- */}
 
-                <span>{typedText}</span>
+                <span
+                  aria-hidden="true"
+                  className="invisible whitespace-nowrap"
+                >
+                  {TAGLINE}
+                </span>
 
-                {/* ==================================================
-                    TYPEWRITER CURSOR
-                ================================================== */}
+                {/* --------------------------------------------------
+                    ANIMATED LAYER
+                    Absolutely positioned so its width never
+                    affects the parent layout.
+                -------------------------------------------------- */}
 
-                <motion.span
-                  animate={{
-                    opacity: [0.25, 1, 0.25],
-                  }}
-                  transition={{
-                    duration: 0.75,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
+                <span
                   aria-hidden="true"
                   className="
-                    ml-[3px]
-                    inline-block
-                    h-[10px]
-                    w-px
-                    shrink-0
-                    bg-amber-400/90
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    flex
+                    items-center
+                    whitespace-nowrap
                   "
-                />
+                >
+                  <span>{typedText}</span>
+
+                  {/* ==================================================
+                      TYPEWRITER CURSOR
+                  ================================================== */}
+
+                  <motion.span
+                    animate={{
+                      opacity: [0.25, 1, 0.25],
+                    }}
+                    transition={{
+                      duration: 0.75,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    aria-hidden="true"
+                    className="
+                      ml-[3px]
+                      inline-block
+                      h-[10px]
+                      w-px
+                      shrink-0
+                      bg-[var(--accent)]/90
+                    "
+                  />
+                </span>
               </span>
             </motion.div>
           )}

@@ -20,10 +20,13 @@ interface LogoProps {
   compact?: boolean;
 
   /** Render the wordmark for a light surface. */
-  tone?: "light" | "dark";
+  tone?: "light" | "dark" | "brand";
 
   /** Optional custom classes for the logo wrapper. */
   className?: string;
+  size?: "default" | "large";
+  taglineTestId?: string;
+  staticTagline?: boolean;
 }
 
 // ============================================================
@@ -66,6 +69,9 @@ export const Logo = React.memo(function Logo({
   compact = false,
   tone = "light",
   className = "",
+  size = "default",
+  taglineTestId,
+  staticTagline = false,
 }: LogoProps) {
   const [typedText, setTypedText] = useState("");
   const [, setIsTyping] = useState(false);
@@ -230,11 +236,7 @@ export const Logo = React.memo(function Logo({
           height={64}
           priority
           draggable={false}
-          className="
-            h-11
-            w-auto
-            object-contain
-          "
+          className={`${size === "large" ? "h-24" : "h-11"} w-auto object-contain`}
         />
       </div>
 
@@ -256,14 +258,7 @@ export const Logo = React.memo(function Logo({
         ==================================================== */}
 
         <span
-          className="
-            whitespace-nowrap
-            font-subheading
-            text-xl
-            font-bold
-            leading-none
-            tracking-[-0.025em]
-          "
+          className={`whitespace-nowrap font-subheading ${size === "large" ? "text-[52px]" : "text-xl"} font-bold leading-none tracking-[-0.025em]`}
           aria-label="HudaVerse"
         >
           {/* Huda */}
@@ -277,7 +272,7 @@ export const Logo = React.memo(function Logo({
           {/* Verse */}
 
           <span
-            className={tone === "light"
+            className={tone === "light" || tone === "brand"
               ? "bg-gradient-to-b from-[var(--accent-light)] via-[var(--accent)] to-[var(--accent)] bg-clip-text text-transparent transition-all duration-300 group-hover:from-[var(--accent-light)] group-hover:via-[var(--accent-light)] group-hover:to-[var(--accent-light)]"
               : "text-[var(--primary)] transition-colors duration-300 group-hover:text-[var(--primary-soft)]"}
           >
@@ -310,7 +305,7 @@ export const Logo = React.memo(function Logo({
                 y: -3,
               }}
               animate={{
-                height: 17,
+                height: size === "large" ? 30 : 17,
                 opacity: 1,
                 marginTop: 6,
                 y: 0,
@@ -330,9 +325,11 @@ export const Logo = React.memo(function Logo({
               "
             >
               <span
-                className={`relative flex h-[17px] items-center whitespace-nowrap text-[10px] font-medium leading-none tracking-[0.075em] ${tone === "light" ? "text-[var(--text-on-dark-muted)]/85" : "text-[var(--text-muted)]"}`}
+                data-testid={taglineTestId}
+                className={`relative flex items-center whitespace-nowrap font-medium leading-none tracking-[0.075em] ${size === "large" ? "h-[30px] text-base" : "h-[17px] text-[10px]"} ${tone === "light" ? "text-[var(--text-on-dark-muted)]/85" : "text-[var(--text-muted)]"}`}
                 aria-label={TAGLINE}
               >
+                {staticTagline ? <span>{TAGLINE}</span> : <>
                 {/* --------------------------------------------------
                     GHOST LAYER
                     Reserves the full tagline width. Invisible.
@@ -388,6 +385,7 @@ export const Logo = React.memo(function Logo({
                     "
                   />
                 </span>
+                </>}
               </span>
             </motion.div>
           )}

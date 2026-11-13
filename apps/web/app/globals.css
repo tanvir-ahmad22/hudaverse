@@ -1484,3 +1484,23 @@
   .hv-qa-header > .hv-h2 { font-size: 30px; }
   .hv-qa-source { padding: 20px; }
 }
+.hv-login-submit .hv-btn-lg {
+  min-height: 67px;
+  border-radius: 14px;
+}
+
+.hv-login-submit .hv-btn-primary {
+  background: linear-gradient(135deg, var(--primary-soft), var(--primary-dark));
+  box-shadow: var(--shadow-card);
+}
+
+.hv-login-submit .hv-btn-primary:hover,
+.hv-login-submit .hv-btn-primary:focus-visible {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+@media (min-width: 1024px) {
+  #login-page .hv-login-card {
+    --hv-login-card-width: calc(100% + 40px);
+  }
+}

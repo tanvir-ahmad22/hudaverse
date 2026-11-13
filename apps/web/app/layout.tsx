@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
-import Navbar from "@/components/layout/navbar/Navbar";
-import Footer from "@/components/layout/Footer";
+import RouteFrame from "@/components/layout/RouteFrame";
 import { fontVariableClasses } from "./fonts";
 
 import "./globals.css";
@@ -24,9 +23,7 @@ export default function RootLayout({
       className={`h-full antialiased ${fontVariableClasses}`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <RouteFrame>{children}</RouteFrame>
       </body>
     </html>
   );

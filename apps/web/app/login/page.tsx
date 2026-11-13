@@ -1,5 +1,5 @@
-import LoginVisualLab from "@/components/auth/LoginVisualLab";
+import LoginPageContent from "@/components/auth/LoginPage";
 
 export default function LoginPage() {
-  return <LoginVisualLab />;
+  return <LoginPageContent />;
 }

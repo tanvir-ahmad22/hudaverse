@@ -8,6 +8,7 @@
     "build": "nest build",
     "start": "nest start",
     "start:prod": "node dist/main.js",
+    "test": "jest --runInBand",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "seed": "prisma db seed"
   },

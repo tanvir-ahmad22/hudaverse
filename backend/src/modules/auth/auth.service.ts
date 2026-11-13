@@ -13,7 +13,7 @@ import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 import { PrismaService } from "../../database/prisma.service";
 import { EmailService } from "../email/email.service";
-import { TokenService } from "./token/token.service";
+import { TokenService } from "./token.service";
 import { DeviceMetadata } from "./interfaces/device-metadata.interface";
 
 import * as bcrypt from "bcrypt";
@@ -109,7 +109,6 @@ export class AuthService {
     console.log("====================================");
 
     console.log("Incoming Email:", dto.email);
-    console.log("Incoming Password:", JSON.stringify(dto.password));
 
     const user = await this.prisma.user.findUnique({
       where: {
@@ -125,7 +124,6 @@ export class AuthService {
 
     console.log("User ID:", user.id);
     console.log("Database Email:", user.email);
-    console.log("Stored Hash:", user.password);
 
     if (!user.password) {
       console.log("User has no password.");
@@ -137,7 +135,6 @@ export class AuthService {
       user.password,
     );
 
-    console.log("Password Match:", passwordMatch);
 
     if (!passwordMatch) {
       throw new UnauthorizedException("Invalid email or password");

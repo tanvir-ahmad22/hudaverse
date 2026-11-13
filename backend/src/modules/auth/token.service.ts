@@ -40,8 +40,9 @@ export class TokenService {
   // =========================
   async generateRefreshToken(
     payload: JwtPayload,
-  ): Promise<{ token: string; jti: string }> {
+  ): Promise<{ token: string; jti: string; expiresAt: Date }> {
     const jti = randomUUID();
+    const expiresAt = this.getRefreshExpiryDate();
     const token = await this.jwtService.signAsync(
       { ...payload, jti },
       {
@@ -49,7 +50,7 @@ export class TokenService {
         expiresIn: this.refreshExpiresIn,
       },
     );
-    return { token, jti };
+    return { token, jti, expiresAt };
   }
 
   async verifyRefreshToken(token: string): Promise<JwtPayload> {

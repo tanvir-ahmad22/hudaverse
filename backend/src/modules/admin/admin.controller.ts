@@ -17,6 +17,7 @@ import { RequirePermissions } from "../auth/decorators/permissions.decorator";
 
 import { UpdateUserRoleDto } from "./dto/update-user-role.dto";
 import { UpdateUserStatusDto } from "./dto/update-user-status.dto";
+import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.interface";
 
 @Controller("admin")
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -36,7 +37,7 @@ export class AdminController {
 
   @Patch("users/:id/role")
   updateRole(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param("id") id: string,
     @Body() dto: UpdateUserRoleDto,
   ) {
@@ -44,7 +45,7 @@ export class AdminController {
   }
   @Patch("users/:id/status")
   updateStatus(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param("id") id: string,
     @Body() dto: UpdateUserStatusDto,
   ) {

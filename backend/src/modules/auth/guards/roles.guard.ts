@@ -9,6 +9,7 @@ import { Role } from "@prisma/client";
 
 import { PrismaService } from "../../../database/prisma.service";
 import { ROLES_KEY } from "../decorators/roles.decorator";
+import { AuthenticatedRequest } from "../interfaces/authenticated-request.interface";
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -27,7 +28,9 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<AuthenticatedRequest>();
     const userId = request.user?.sub;
 
     if (!userId) {

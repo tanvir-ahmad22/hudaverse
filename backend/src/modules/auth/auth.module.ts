@@ -3,8 +3,9 @@ import { JwtModule } from "@nestjs/jwt";
 
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { TokenService } from "./token/token.service";
-import { JwtStrategy } from "./jwt.strategy";
+import { TokenService } from "./token.service";
+import { JwtStrategy } from "./strategies/jwt.strategy";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { CookieService } from "./cookies/cookie.service";
 
 import { DatabaseModule } from "../../database/database.module";
@@ -24,6 +25,7 @@ import { PermissionsGuard } from "./guards/permissions.guard";
   providers: [
     AuthService,
     TokenService,
+    JwtAuthGuard,
     JwtStrategy,
     CookieService,
     RolesGuard,
@@ -32,6 +34,7 @@ import { PermissionsGuard } from "./guards/permissions.guard";
   exports: [
     AuthService,
     TokenService,
+    JwtAuthGuard,
     CookieService,
     JwtModule,
     RolesGuard,

@@ -8,6 +8,7 @@ import {
   Res,
 } from "@nestjs/common";
 import { Request, Response } from "express";
+import { AuthenticatedRequest } from "./interfaces/authenticated-request.interface";
 import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
@@ -107,8 +108,11 @@ export class AuthController {
   // =========================
   @Post("logout-all")
   @UseGuards(JwtAuthGuard)
-  async logoutAllDevices(@Req() req: any, @Res() res: Response) {
-    await this.authService.logoutAllDevices(req.user.id); // Changed from req.user.sub to req.user.id
+  async logoutAllDevices(
+    @Req() req: AuthenticatedRequest,
+    @Res() res: Response,
+  ) {
+    await this.authService.logoutAllDevices(req.user.sub);
 
     this.clearRefreshCookie(res);
 
@@ -122,7 +126,7 @@ export class AuthController {
   // =========================
   @Get("profile")
   @UseGuards(JwtAuthGuard)
-  profile(@Req() req: any) {
+  profile(@Req() req: AuthenticatedRequest) {
     return {
       user: req.user,
     };
@@ -134,10 +138,10 @@ export class AuthController {
   @Get("admin-check")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.FOUNDER, Role.SUPER_ADMIN, Role.ADMIN)
-  adminCheck(@Req() req: any) {
+  adminCheck(@Req() req: AuthenticatedRequest) {
     return {
       message: "Access granted. Your role passed the RolesGuard check.",
-      userId: req.user.id, // Changed from req.user.sub
+      userId: req.user.sub,
     };
   }
 
@@ -170,10 +174,10 @@ export class AuthController {
   @Get("permission-check")
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @RequirePermissions("admin.access")
-  permissionCheck(@Req() req: any) {
+  permissionCheck(@Req() req: AuthenticatedRequest) {
     return {
       message: "Permission granted",
-      userId: req.user.id, // Changed from req.user.sub
+      userId: req.user.sub,
     };
   }
 

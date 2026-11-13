@@ -6,9 +6,10 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 
 import { ConfigService } from "@nestjs/config";
 
-import { PrismaService } from "../../database/prisma.service";
+import { PrismaService } from "../../../database/prisma.service";
 
-import { JwtPayload } from "./jwt.payload";
+import { JwtPayload } from "../jwt.payload";
+import { AuthenticatedPrincipal } from "../interfaces/authenticated-request.interface";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -26,8 +27,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
-    if (!payload.sub) {
+  async validate(payload: JwtPayload): Promise<AuthenticatedPrincipal> {
+    if (typeof payload?.sub !== "string" || payload.sub.trim().length === 0) {
       throw new UnauthorizedException("Invalid token payload");
     }
 
@@ -46,6 +47,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         avatar: true,
 
         isActive: true,
+        deletedAt: true,
       },
     });
 
@@ -53,17 +55,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException("User not found");
     }
 
-    if (!user.isActive) {
-      throw new UnauthorizedException("Account disabled");
+    if (!user.isActive || user.deletedAt) {
+      throw new UnauthorizedException("Account disabled or removed");
     }
 
     return {
-      id: user.id,
-
+      sub: user.id,
       email: user.email,
-
       name: user.name,
-
       avatar: user.avatar,
     };
   }

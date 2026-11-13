@@ -1,8 +1,9 @@
-import { PrismaClient, Role } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import * as bcrypt from "bcrypt";
 
 import { seedPermissions } from "./seeds/permissions.seed";
+import { ensureFounderAccount } from "./seeds/founder.seed";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
@@ -37,81 +38,12 @@ async function main() {
 
     const hashedPassword = await bcrypt.hash(founderPassword, SALT_ROUNDS);
 
-    const existingFounder = await tx.user.findUnique({
-      where: {
-        email: founderEmail,
-      },
-
-      include: {
-        roles: true,
-      },
-    });
-
-    if (existingFounder) {
-      await tx.user.update({
-        where: {
-          email: founderEmail,
-        },
-
-        data: {
-          password: hashedPassword,
-
-          emailVerified: true,
-
-          roles: {
-            upsert: {
-              where: {
-                userId_role: {
-                  userId: existingFounder.id,
-
-                  role: Role.FOUNDER,
-                },
-              },
-
-              update: {},
-
-              create: {
-                role: Role.FOUNDER,
-              },
-            },
-          },
-        },
-      });
-
-      console.log(`Founder account updated: ${founderEmail}`);
-    } else {
-      await tx.user.create({
-        data: {
-          email: founderEmail,
-
-          password: hashedPassword,
-
-          emailVerified: true,
-
-          profile: {
-            create: {},
-          },
-
-          userSettings: {
-            create: {},
-          },
-
-          workspaces: {
-            create: {
-              name: "Founder Workspace",
-            },
-          },
-
-          roles: {
-            create: {
-              role: Role.FOUNDER,
-            },
-          },
-        },
-      });
-
-      console.log(`Founder account created: ${founderEmail}`);
-    }
+    const founderStatus = await ensureFounderAccount(
+      tx,
+      founderEmail,
+      hashedPassword,
+    );
+    console.log(`Founder account ${founderStatus}: ${founderEmail}`);
   });
 
   console.log("Database seed completed successfully.");

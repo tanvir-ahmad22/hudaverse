@@ -10,6 +10,7 @@ import { Reflector } from "@nestjs/core";
 import { PrismaService } from "../../../database/prisma.service";
 
 import { PERMISSIONS_KEY } from "../decorators/permissions.decorator";
+import { AuthenticatedRequest } from "../interfaces/authenticated-request.interface";
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -28,7 +29,9 @@ export class PermissionsGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<AuthenticatedRequest>();
 
     const userId = request.user?.sub;
 

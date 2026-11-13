@@ -6,6 +6,10 @@ import {
   UseGuards,
   Req,
   Res,
+  Header,
+  Param,
+  HttpCode,
+  NotImplementedException,
 } from "@nestjs/common";
 import { Request, Response } from "express";
 import { AuthenticatedRequest } from "./interfaces/authenticated-request.interface";
@@ -22,11 +26,49 @@ import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { RolesGuard } from "./guards/roles.guard";
 import { Roles } from "./decorators/roles.decorator";
 import { Role } from "@prisma/client";
+import { ConfigService } from "@nestjs/config";
 import { DeviceMetadata } from "./interfaces/device-metadata.interface";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  @Get("providers")
+  @Header("Cache-Control", "public, max-age=300, stale-while-revalidate=60")
+  providers() {
+    return {
+      identifiers: ["email", "phone", "username"],
+      password: true,
+      google: false,
+      apple: false,
+      phoneOtp: false,
+      passkeys: false,
+    };
+  }
+
+  @Post("oauth/:provider")
+  @HttpCode(501)
+  unavailableOAuth(@Param("provider") provider: string): never {
+    if (provider !== "google" && provider !== "apple") {
+      throw new NotImplementedException("Sign-in method is not available yet.");
+    }
+    throw new NotImplementedException(`${provider} sign-in is not configured.`);
+  }
+
+  @Post("phone/otp")
+  @HttpCode(501)
+  unavailablePhoneOtp(): never {
+    throw new NotImplementedException("Phone sign-in is not configured.");
+  }
+
+  @Post("passkeys/authentication/options")
+  @HttpCode(501)
+  unavailablePasskeys(): never {
+    throw new NotImplementedException("Passkey sign-in is not configured.");
+  }
 
   // =========================
   // REGISTER
@@ -50,11 +92,11 @@ export class AuthController {
       this.extractDeviceMetadata(req),
     );
 
-    this.setRefreshCookie(res, result.refreshToken);
+    this.setRefreshCookie(res, result.refreshToken, result.rememberMe);
+    this.setAccessCookie(res, result.accessToken);
 
     return res.json({
       message: result.message,
-      accessToken: result.accessToken,
       user: result.user,
     });
   }
@@ -77,11 +119,11 @@ export class AuthController {
       this.extractDeviceMetadata(req),
     );
 
-    this.setRefreshCookie(res, result.refreshToken);
+    this.setRefreshCookie(res, result.refreshToken, result.rememberMe);
+    this.setAccessCookie(res, result.accessToken);
 
     return res.json({
       message: result.message,
-      accessToken: result.accessToken,
     });
   }
 
@@ -97,6 +139,7 @@ export class AuthController {
     }
 
     this.clearRefreshCookie(res);
+    this.clearAccessCookie(res);
 
     return res.json({
       message: "Logout successful",
@@ -115,6 +158,7 @@ export class AuthController {
     await this.authService.logoutAllDevices(req.user.sub);
 
     this.clearRefreshCookie(res);
+    this.clearAccessCookie(res);
 
     return res.json({
       message: "Logged out from all devices",
@@ -184,20 +228,39 @@ export class AuthController {
   // =========================
   // COOKIE HELPERS
   // =========================
-  private setRefreshCookie(res: Response, token: string) {
+  private setRefreshCookie(res: Response, token: string, rememberMe = true) {
     res.cookie("refresh_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: this.configService.get<string>("NODE_ENV") === "production",
       sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      ...(rememberMe ? { maxAge: 1000 * 60 * 60 * 24 * 30 } : {}),
     });
   }
 
   private clearRefreshCookie(res: Response) {
     res.clearCookie("refresh_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: this.configService.get<string>("NODE_ENV") === "production",
       sameSite: "lax",
+    });
+  }
+
+  private setAccessCookie(res: Response, token: string) {
+    res.cookie("access_token", token, {
+      httpOnly: true,
+      secure: this.configService.get<string>("NODE_ENV") === "production",
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 15,
+      path: "/",
+    });
+  }
+
+  private clearAccessCookie(res: Response) {
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: this.configService.get<string>("NODE_ENV") === "production",
+      sameSite: "lax",
+      path: "/",
     });
   }
 

@@ -76,6 +76,13 @@ describe("authenticated principal HTTP flow", () => {
         PermissionsGuard,
         { provide: AuthService, useValue: authService },
         { provide: PrismaService, useValue: prisma },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: (key: string) => process.env[key],
+            getOrThrow: (key: string) => process.env[key] ?? "test-refresh-secret-for-principal-flow",
+          },
+        },
       ],
     }).compile();
 

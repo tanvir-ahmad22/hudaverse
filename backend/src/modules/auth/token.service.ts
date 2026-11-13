@@ -1,25 +1,32 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService, JwtSignOptions } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 import { createHash, randomUUID } from "crypto";
 
 import { JwtPayload } from "./jwt.payload";
 
 @Injectable()
 export class TokenService {
-  private readonly accessSecret = process.env.JWT_ACCESS_SECRET!;
-  private readonly refreshSecret = process.env.JWT_REFRESH_SECRET!;
+  private readonly accessSecret: string;
+  private readonly refreshSecret: string;
 
   // Cast to JwtSignOptions["expiresIn"] because @types/jsonwebtoken types
   // this as `number | StringValue` (a branded literal type from the `ms`
   // package) rather than plain `string`, even though any valid ms-style
   // string ("15m", "7d", etc.) works fine at runtime.
-  private readonly accessExpiresIn = (process.env.JWT_ACCESS_EXPIRES_IN ||
-    "15m") as JwtSignOptions["expiresIn"];
+  private readonly accessExpiresIn: JwtSignOptions["expiresIn"];
 
-  private readonly refreshExpiresIn = (process.env.JWT_REFRESH_EXPIRES_IN ||
-    "7d") as JwtSignOptions["expiresIn"];
+  private readonly refreshExpiresIn: JwtSignOptions["expiresIn"];
 
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    configService: ConfigService,
+  ) {
+    this.accessSecret = configService.getOrThrow<string>("JWT_ACCESS_SECRET");
+    this.refreshSecret = configService.getOrThrow<string>("JWT_REFRESH_SECRET");
+    this.accessExpiresIn = (configService.get<string>("JWT_ACCESS_EXPIRES_IN") || "15m") as JwtSignOptions["expiresIn"];
+    this.refreshExpiresIn = (configService.get<string>("JWT_REFRESH_EXPIRES_IN") || "7d") as JwtSignOptions["expiresIn"];
+  }
 
   // =========================
   // ACCESS TOKEN
@@ -40,14 +47,16 @@ export class TokenService {
   // =========================
   async generateRefreshToken(
     payload: JwtPayload,
+    rememberMe = false,
   ): Promise<{ token: string; jti: string; expiresAt: Date }> {
     const jti = randomUUID();
-    const expiresAt = this.getRefreshExpiryDate();
+    const lifetime = rememberMe ? "30d" : "1d";
+    const expiresAt = new Date(Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000);
     const token = await this.jwtService.signAsync(
       { ...payload, jti },
       {
         secret: this.refreshSecret,
-        expiresIn: this.refreshExpiresIn,
+        expiresIn: lifetime as JwtSignOptions["expiresIn"],
       },
     );
     return { token, jti, expiresAt };
@@ -69,7 +78,7 @@ export class TokenService {
   // =========================
   getRefreshExpiryDate(): Date {
     const ms = this.parseExpiryToMs(
-      (process.env.JWT_REFRESH_EXPIRES_IN as string) || "7d",
+      this.refreshExpiresIn as string,
     );
     return new Date(Date.now() + ms);
   }

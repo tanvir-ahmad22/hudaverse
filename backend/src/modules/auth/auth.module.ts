@@ -12,6 +12,7 @@ import { DatabaseModule } from "../../database/database.module";
 import { EmailModule } from "../email/email.module";
 import { RolesGuard } from "./guards/roles.guard";
 import { PermissionsGuard } from "./guards/permissions.guard";
+import { LoginAbuseProtectionService } from "./login-abuse-protection.service";
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PermissionsGuard } from "./guards/permissions.guard";
     CookieService,
     RolesGuard,
     PermissionsGuard,
+    LoginAbuseProtectionService,
   ],
   exports: [
     AuthService,

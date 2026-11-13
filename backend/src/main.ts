@@ -3,9 +3,15 @@ import { AppModule } from "./app.module.js";
 
 import * as cookieParser from "cookie-parser";
 import { ValidationPipe } from "@nestjs/common";
+import type { NextFunction, Request, Response } from "express";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configuredFrontend = process.env.FRONTEND_URL?.replace(/\/$/, "");
+  const allowedOrigins = new Set([
+    ...(configuredFrontend ? [configuredFrontend] : []),
+    ...(process.env.NODE_ENV === "development" ? ["http://localhost:3000"] : []),
+  ]);
 
   app.use(cookieParser());
 
@@ -17,12 +23,24 @@ async function bootstrap() {
     }),
   );
 
+  app.use("/auth", (req: Request, res: Response, next: NextFunction) => {
+    const origin = req.headers.origin;
+    const mutating = ["POST", "PUT", "PATCH", "DELETE"].includes(req.method);
+    if (origin && !allowedOrigins.has(origin)) {
+      return res.status(403).json({ message: "Request origin is not allowed." });
+    }
+    if (mutating && req.headers.cookie && (!origin || !allowedOrigins.has(origin))) {
+      return res.status(403).json({ message: "Request origin is required for cookie-authenticated requests." });
+    }
+    next();
+  });
+
   app.enableCors({
-    origin: ["http://localhost:3000"],
+    origin: [...allowedOrigins],
     credentials: true,
   });
 
-  await app.listen(3001);
+  await app.listen(Number(process.env.PORT) || 3001);
 }
 
 bootstrap();

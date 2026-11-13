@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
@@ -15,6 +16,7 @@ import { PrismaService } from "../../database/prisma.service";
 import { EmailService } from "../email/email.service";
 import { TokenService } from "./token.service";
 import { DeviceMetadata } from "./interfaces/device-metadata.interface";
+import { LoginAbuseProtectionService } from "./login-abuse-protection.service";
 
 import * as bcrypt from "bcrypt";
 import { randomBytes, randomUUID } from "crypto";
@@ -26,6 +28,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
     private readonly emailService: EmailService,
+    private readonly loginAbuseProtection: LoginAbuseProtectionService,
+    private readonly configService: ConfigService,
   ) {}
 
   // =========================
@@ -33,8 +37,14 @@ export class AuthService {
   // =========================
 
   async register(dto: RegisterDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: dto.email.trim().toLowerCase() },
+          ...(dto.username ? [{ username: dto.username.toLowerCase() }] : []),
+          ...(dto.phone ? [{ phone: dto.phone }] : []),
+        ],
+      },
     });
 
     if (existingUser) {
@@ -46,7 +56,9 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        email: dto.email,
+        email: dto.email.trim().toLowerCase(),
+        username: dto.username?.toLowerCase(),
+        phone: dto.phone,
         password: hashedPassword,
         name: dto.name,
 
@@ -75,7 +87,7 @@ export class AuthService {
       },
     });
 
-    const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+    const verificationLink = `${this.frontendUrl()}/verify-email?token=${verificationToken}`;
 
     await this.emailService.sendMail(
       user.email,
@@ -104,49 +116,32 @@ export class AuthService {
   // =========================
 
   async login(dto: LoginDto, metadata?: DeviceMetadata) {
-    console.log("\n====================================");
-    console.log("LOGIN REQUEST");
-    console.log("====================================");
+    const identifier = (dto.identifier ?? dto.email ?? "").trim().toLowerCase();
+    const ipAddress = metadata?.ipAddress ?? "unknown";
+    await this.loginAbuseProtection.assertAllowed(identifier, ipAddress);
 
-    console.log("Incoming Email:", dto.email);
-
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: {
-        email: dto.email.trim().toLowerCase(),
+        OR: [
+          { email: identifier },
+          { username: identifier },
+          { phone: identifier },
+        ],
       },
     });
 
-    console.log("User Found:", !!user);
-
-    if (!user) {
-      throw new UnauthorizedException("Invalid email or password");
-    }
-
-    console.log("User ID:", user.id);
-    console.log("Database Email:", user.email);
-
-    if (!user.password) {
-      console.log("User has no password.");
-      throw new UnauthorizedException("Invalid email or password");
-    }
-
+    // Perform a password hash comparison even for an unknown account so the
+    // missing-account path does not immediately reveal whether it exists.
     const passwordMatch = await bcrypt.compare(
-      dto.password.trim(),
-      user.password,
+      dto.password,
+      user?.password ?? "$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
     );
 
-
-    if (!passwordMatch) {
-      throw new UnauthorizedException("Invalid email or password");
+    if (!user || !user.password || !passwordMatch || !user.emailVerified) {
+      await this.loginAbuseProtection.recordFailure(identifier, ipAddress);
+      throw new UnauthorizedException("Invalid identifier or password");
     }
-
-    console.log("Email Verified:", user.emailVerified);
-
-    if (!user.emailVerified) {
-      throw new UnauthorizedException(
-        "Please verify your email before logging in.",
-      );
-    }
+    await this.loginAbuseProtection.recordSuccess(identifier, ipAddress);
 
     // Create session id
     const sessionId = randomUUID();
@@ -159,8 +154,9 @@ export class AuthService {
 
     const accessToken = await this.tokenService.generateAccessToken(payload);
 
+    const rememberMe = dto.rememberMe === true;
     const { token: refreshToken, expiresAt } =
-      await this.tokenService.generateRefreshToken(payload);
+      await this.tokenService.generateRefreshToken(payload, rememberMe);
 
     await this.prisma.refreshToken.create({
       data: {
@@ -199,15 +195,13 @@ export class AuthService {
       },
     });
 
-    console.log("Login Success");
-    console.log("====================================\n");
-
     return {
       message: "Login successful",
 
       accessToken,
 
       refreshToken,
+      rememberMe,
 
       user: {
         id: user.id,
@@ -257,8 +251,9 @@ export class AuthService {
     };
 
     const newAccessToken = await this.tokenService.generateAccessToken(payload);
-    const { token: newRefreshToken } =
-      await this.tokenService.generateRefreshToken(payload);
+    const rememberMe = storedToken.expiresAt.getTime() - Date.now() > 24 * 60 * 60 * 1000;
+    const { token: newRefreshToken, expiresAt } =
+      await this.tokenService.generateRefreshToken(payload, rememberMe);
 
     await this.prisma.$transaction([
       // remove old session
@@ -271,7 +266,7 @@ export class AuthService {
         data: {
           token: this.tokenService.hashToken(newRefreshToken),
           userId: storedToken.user.id,
-          expiresAt: this.tokenService.getRefreshExpiryDate(),
+          expiresAt,
           deviceName: metadata?.deviceName ?? storedToken.deviceName,
           browser: metadata?.browser ?? storedToken.browser,
           operatingSystem:
@@ -286,6 +281,7 @@ export class AuthService {
       message: "Access token refreshed successfully",
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
+      rememberMe,
     };
   }
 
@@ -423,7 +419,7 @@ export class AuthService {
       },
     });
 
-    const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+    const verificationLink = `${this.frontendUrl()}/verify-email?token=${verificationToken}`;
 
     await this.emailService.sendMail(
       user.email,
@@ -449,7 +445,9 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException("User not found");
+      return {
+        message: "If an account matches that email, password reset instructions have been sent.",
+      };
     }
 
     const resetToken = randomBytes(32).toString("hex");
@@ -463,7 +461,7 @@ export class AuthService {
       },
     });
 
-    const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+    const resetLink = `${this.frontendUrl()}/reset-password?token=${resetToken}`;
 
     await this.emailService.sendMail(
       user.email,
@@ -476,7 +474,9 @@ export class AuthService {
       `,
     );
 
-    return { message: "Password reset email sent successfully" };
+    return {
+      message: "If an account matches that email, password reset instructions have been sent.",
+    };
   }
 
   // =========================
@@ -516,5 +516,9 @@ export class AuthService {
     });
 
     return { message: "Password reset successfully" };
+  }
+
+  private frontendUrl(): string {
+    return this.configService.get<string>("FRONTEND_URL")?.replace(/\/$/, "") ?? "http://localhost:3000";
   }
 }

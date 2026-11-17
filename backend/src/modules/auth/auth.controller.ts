@@ -7,7 +7,6 @@ import {
   Req,
   Res,
   Header,
-  Param,
   HttpCode,
   NotImplementedException,
 } from "@nestjs/common";
@@ -28,40 +27,57 @@ import { Roles } from "./decorators/roles.decorator";
 import { Role } from "@prisma/client";
 import { ConfigService } from "@nestjs/config";
 import { DeviceMetadata } from "./interfaces/device-metadata.interface";
+import { OAuthFlowError, OAuthService } from "./oauth.service";
+import { randomBytes, timingSafeEqual } from "crypto";
 
 @Controller("auth")
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly oauthService: OAuthService,
   ) {}
 
   @Get("providers")
-  @Header("Cache-Control", "public, max-age=300, stale-while-revalidate=60")
+  @Header("Cache-Control", "no-store")
   providers() {
     return {
-      identifiers: ["email", "phone", "username"],
+      identifiers: ["email", "username"],
       password: true,
       google: false,
-      apple: false,
-      phoneOtp: false,
+      microsoft: false,
+      facebook: this.oauthService.facebookConfigured(),
       passkeys: false,
     };
   }
 
-  @Post("oauth/:provider")
-  @HttpCode(501)
-  unavailableOAuth(@Param("provider") provider: string): never {
-    if (provider !== "google" && provider !== "apple") {
-      throw new NotImplementedException("Sign-in method is not available yet.");
-    }
-    throw new NotImplementedException(`${provider} sign-in is not configured.`);
+  @Get("oauth/facebook")
+  startFacebook(@Res() res: Response) {
+    const state = randomBytes(32).toString("hex");
+    res.cookie("facebook_oauth_state", state, { httpOnly: true, secure: this.configService.get<string>("NODE_ENV") === "production", sameSite: "lax", maxAge: 10 * 60 * 1000, path: "/auth/oauth/facebook/callback" });
+    try { return res.redirect(this.oauthService.facebookAuthorizationUrl(state)); }
+    catch { return res.redirect(`${this.frontendUrl()}/login?authError=provider-unavailable`); }
   }
 
-  @Post("phone/otp")
-  @HttpCode(501)
-  unavailablePhoneOtp(): never {
-    throw new NotImplementedException("Phone sign-in is not configured.");
+  @Get("oauth/facebook/callback")
+  async facebookCallback(@Req() req: Request, @Res() res: Response) {
+    const state = String(req.query.state ?? "");
+    const storedState = String(req.cookies?.facebook_oauth_state ?? "");
+    res.clearCookie("facebook_oauth_state", { httpOnly: true, secure: this.configService.get<string>("NODE_ENV") === "production", sameSite: "lax", path: "/auth/oauth/facebook/callback" });
+    const stateBytes = Buffer.from(state);
+    const storedStateBytes = Buffer.from(storedState);
+    if (!state || !storedState || stateBytes.length !== storedStateBytes.length || !timingSafeEqual(stateBytes, storedStateBytes)) return res.redirect(`${this.frontendUrl()}/login?authError=oauth-state`);
+    const code = String(req.query.code ?? "");
+    if (!code) return res.redirect(`${this.frontendUrl()}/login?authError=facebook-cancelled`);
+    try {
+      const user = await this.oauthService.completeFacebook(code);
+      const session = await this.authService.createOAuthSession(user, this.extractDeviceMetadata(req));
+      this.setRefreshCookie(res, session.refreshToken, true); this.setAccessCookie(res, session.accessToken);
+      return res.redirect(`${this.frontendUrl()}/login?authSuccess=1`);
+    } catch (error) {
+      const code = error instanceof OAuthFlowError ? error.code : "facebook-failed";
+      return res.redirect(`${this.frontendUrl()}/login?authError=${encodeURIComponent(code)}`);
+    }
   }
 
   @Post("passkeys/authentication/options")
@@ -74,8 +90,8 @@ export class AuthController {
   // REGISTER
   // =========================
   @Post("register")
-  register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  register(@Body() dto: RegisterDto, @Req() req: Request) {
+    return this.authService.register(dto, this.extractDeviceMetadata(req));
   }
 
   // =========================
@@ -198,13 +214,13 @@ export class AuthController {
   }
 
   @Post("resend-verification")
-  resendVerification(@Body() dto: ResendVerificationDto) {
-    return this.authService.resendVerification(dto);
+  resendVerification(@Body() dto: ResendVerificationDto, @Req() req: Request) {
+    return this.authService.resendVerification(dto, req.ip || req.connection?.remoteAddress || "unknown");
   }
 
   @Post("forgot-password")
-  forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto);
+  forgotPassword(@Body() dto: ForgotPasswordDto, @Req() req: Request) {
+    return this.authService.forgotPassword(dto, req.ip || req.connection?.remoteAddress || "unknown");
   }
 
   @Post("reset-password")
@@ -235,6 +251,10 @@ export class AuthController {
       sameSite: "lax",
       ...(rememberMe ? { maxAge: 1000 * 60 * 60 * 24 * 30 } : {}),
     });
+  }
+
+  private frontendUrl(): string {
+    return this.configService.get<string>("FRONTEND_URL")?.replace(/\/$/, "") ?? "http://localhost:3000";
   }
 
   private clearRefreshCookie(res: Response) {

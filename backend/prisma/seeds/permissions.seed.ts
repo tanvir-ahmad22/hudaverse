@@ -6,57 +6,46 @@ export async function seedPermissions(prisma: Prisma.TransactionClient) {
   const permissions = [
     {
       key: "profile.read",
-      name: "View Profile",
       description: "View user profile",
     },
     {
       key: "profile.update",
-      name: "Update Profile",
       description: "Update user profile",
     },
     {
       key: "settings.read",
-      name: "View Settings",
       description: "View user settings",
     },
     {
       key: "settings.update",
-      name: "Update Settings",
       description: "Update user settings",
     },
     {
       key: "workspace.read",
-      name: "View Workspace",
       description: "View workspace",
     },
     {
       key: "workspace.update",
-      name: "Update Workspace",
       description: "Update workspace",
     },
     {
       key: "admin.access",
-      name: "Admin Access",
       description: "Access admin panel",
     },
     {
       key: "user.manage",
-      name: "Manage Users",
       description: "Manage platform users",
     },
     {
       key: "content.manage",
-      name: "Manage Content",
       description: "Create, update and delete content",
     },
     {
       key: "audit.view",
-      name: "View Audit Logs",
       description: "View system audit logs",
     },
     {
       key: "system.manage",
-      name: "System Management",
       description: "Manage system configuration",
     },
   ] as const;
@@ -70,13 +59,11 @@ export async function seedPermissions(prisma: Prisma.TransactionClient) {
       },
 
       update: {
-        name: permission.name,
         description: permission.description,
       },
 
       create: {
         key: permission.key,
-        name: permission.name,
         description: permission.description,
       },
     });

@@ -12,6 +12,7 @@ import { TokenService } from "./token.service";
 import { PrismaService } from "../../database/prisma.service";
 import { ConfigService } from "@nestjs/config";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+import { OAuthService } from "./oauth.service";
 
 describe("authenticated principal HTTP flow", () => {
   const userId = "database-user-123";
@@ -75,6 +76,7 @@ describe("authenticated principal HTTP flow", () => {
         RolesGuard,
         PermissionsGuard,
         { provide: AuthService, useValue: authService },
+        { provide: OAuthService, useValue: { facebookConfigured: () => false } },
         { provide: PrismaService, useValue: prisma },
         {
           provide: ConfigService,

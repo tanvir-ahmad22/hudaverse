@@ -13,6 +13,8 @@ import { EmailModule } from "../email/email.module";
 import { RolesGuard } from "./guards/roles.guard";
 import { PermissionsGuard } from "./guards/permissions.guard";
 import { LoginAbuseProtectionService } from "./login-abuse-protection.service";
+import { SignupAbuseProtectionService } from "./signup-abuse-protection.service";
+import { OAuthService } from "./oauth.service";
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { LoginAbuseProtectionService } from "./login-abuse-protection.service";
     RolesGuard,
     PermissionsGuard,
     LoginAbuseProtectionService,
+    SignupAbuseProtectionService,
+    OAuthService,
   ],
   exports: [
     AuthService,

@@ -23,7 +23,7 @@ describe("AuthService login identifier contract", () => {
       hashToken: jest.fn((value: string) => `hashed:${value}`),
     };
     abuse = { assertAllowed: jest.fn().mockResolvedValue(undefined), recordFailure: jest.fn().mockResolvedValue(undefined), recordSuccess: jest.fn().mockResolvedValue(undefined) };
-    service = new AuthService(prisma as never, tokens as never, { sendMail: jest.fn() } as never, abuse as never, { get: jest.fn().mockReturnValue("http://localhost:3000") } as never);
+    service = new AuthService(prisma as never, tokens as never, { sendMail: jest.fn() } as never, abuse as never, { get: jest.fn().mockReturnValue("http://localhost:3000") } as never, { consume: jest.fn().mockResolvedValue(undefined) } as never);
     compare = jest.spyOn(bcrypt, "compare").mockResolvedValue(true as never);
     hash = jest.spyOn(bcrypt, "hash").mockResolvedValue("new-password-hash" as never);
   });
@@ -32,7 +32,7 @@ describe("AuthService login identifier contract", () => {
 
   it.each(["person@example.com", "person", "+15551234567"])("authenticates supported identifier %s", async (identifier) => {
     const result = await service.login({ identifier, password: "correct", rememberMe: false }, { ipAddress: "192.0.2.20" });
-    expect(prisma.user.findFirst).toHaveBeenCalledWith({ where: { OR: [{ email: identifier }, { username: identifier }, { phone: identifier }] } });
+    expect(prisma.user.findFirst).toHaveBeenCalledWith({ where: { OR: [{ email: identifier }, { username: identifier }] } });
     expect(result.user.email).toBe(account.email);
     expect(prisma.refreshToken.create).toHaveBeenCalledTimes(1);
     expect(abuse.recordSuccess).toHaveBeenCalledWith(identifier, "192.0.2.20");

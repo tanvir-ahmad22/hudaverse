@@ -1,4 +1,4 @@
-/* ================================================================
+﻿/* ================================================================
    HUDAVERSE — NAVBAR TURKISH TRANSLATIONS
 ================================================================ */
 
@@ -66,6 +66,7 @@ export const navbar: NavbarTranslations = {
   },
 
   actions: {
+    skipToContent: "Ana içeriğe geç",
     search: "Ara",
     selectLanguage: "Dil Seç",
     searchLanguage: "Dil ara...",

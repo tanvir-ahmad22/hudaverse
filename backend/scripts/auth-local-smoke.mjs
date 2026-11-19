@@ -17,7 +17,6 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: data
 const suffix = randomUUID().replaceAll("-", "").slice(0, 12);
 const email = `login-audit-${suffix}@example.invalid`;
 const username = `login_audit_${suffix}`;
-const phone = `+1555${Array.from(randomBytes(7), (byte) => byte % 10).join("")}`;
 const password = randomBytes(24).toString("base64url");
 const identifierHash = (value) => createHash("sha256").update(value.trim().toLowerCase()).digest("hex");
 const ipHashes = ["::1", "127.0.0.1", "::ffff:127.0.0.1"].map((ip) => `ip:${identifierHash(ip)}`);
@@ -35,7 +34,7 @@ async function login(identifier, candidatePassword, rememberMe = false) {
 try {
   previousIpWindows = await prisma.loginAttemptWindow.findMany({ where: { key: { in: ipHashes } } });
   const user = await prisma.user.create({
-    data: { email, username, phone, name: "Local Auth Audit", password: await bcrypt.hash(password, 10), emailVerified: true },
+    data: { email, username, name: "Local Auth Audit", password: await bcrypt.hash(password, 10), emailVerified: true },
     select: { id: true },
   });
   userId = user.id;
@@ -49,9 +48,6 @@ try {
 
   const usernameLogin = await login(username, password);
   if (usernameLogin.status !== 201) throw new Error(`Username login failed (${usernameLogin.status}).`);
-
-  const phoneLogin = await login(phone, password);
-  if (phoneLogin.status !== 201) throw new Error(`Phone login failed (${phoneLogin.status}).`);
 
   const rememberedLogin = await login(email, password, true);
   const rememberedCookies = rememberedLogin.headers.getSetCookie();
@@ -73,9 +69,9 @@ try {
   const resetBody = await resetRequest.json();
   if (resetRequest.status !== 201 || !resetBody.message?.startsWith("If an account matches")) throw new Error("Password reset request did not return the generic response.");
 
-  console.log("Local auth smoke passed: email, username, phone, and remember-me login; generic wrong-password response; lockout; HTTP-only SameSite cookies; generic password-reset request.");
+  console.log("Local auth smoke passed: email, username, and remember-me login; generic wrong-password response; lockout; HTTP-only SameSite cookies; generic password-reset request.");
 } finally {
-  const identifierHashes = [email, username, phone].map(identifierHash);
+  const identifierHashes = [email, username].map(identifierHash);
   const lockoutKeys = [...identifierHashes.map((hash) => `identifier:${hash}`), ...ipHashes];
   await prisma.$transaction([
     prisma.loginAttemptWindow.deleteMany({ where: { key: { in: lockoutKeys } } }),

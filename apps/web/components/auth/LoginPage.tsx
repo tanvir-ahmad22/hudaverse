@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BookOpenCheck, Brain, ChevronDown, CloudDownload, Eye, EyeOff, Fingerprint, Globe, Heart, LockKeyhole, Mail, Moon, Phone, Quote, ShieldCheck, Sun, UserRound } from "lucide-react";
+import { ArrowRight, BookOpenCheck, Brain, ChevronDown, CloudDownload, Eye, EyeOff, Fingerprint, Globe, Heart, LockKeyhole, Mail, Moon, Quote, ShieldCheck, Sun, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/layout/navbar/Logo";
 import { useLanguage } from "@/hooks/useLanguage";
 import type { LanguageCode } from "@/lib/language";
-import { requestPasskeySignIn, requestPhoneSignIn, signIn, startOAuth } from "@/modules/auth/services/auth.service";
-import { FaApple, FaGoogle } from "react-icons/fa";
+import { getAuthProviders, requestPasskeySignIn, signIn, startOAuth, type AuthProviders } from "@/modules/auth/services/auth.service";
+import { BrandMark } from "@/components/auth/BrandMark";
 import enLogin, { type LoginTranslations } from "@/locales/en/login";
 import bnLogin from "@/locales/bn/login";
 import arLogin from "@/locales/ar/login";
@@ -24,20 +24,33 @@ export default function LoginPageContent() {
   const { currentLang, currentLanguage, availableLanguages, selectLanguage } = useLanguage();
   const copy = LOGIN_LOCALES[currentLang];
   const [email, setEmail] = useState("");
-  const [identifierType, setIdentifierType] = useState<"email" | "phone" | "username">("email");
+  const [identifierType, setIdentifierType] = useState<"email" | "username">("email");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [lightTheme, setLightTheme] = useState(false);
+  const [providers, setProviders] = useState<AuthProviders | null>(null);
+  const [supportsWebAuthn, setSupportsWebAuthn] = useState(false);
+  useEffect(() => {
+    void getAuthProviders().then(setProviders).catch(() => setProviders(null));
+    window.setTimeout(() => setSupportsWebAuthn(Boolean(window.PublicKeyCredential && navigator.credentials)), 0);
+    const authError = new URLSearchParams(window.location.search).get("authError");
+    if (new URLSearchParams(window.location.search).get("authSuccess") === "1") {
+      const platformHome = process.env.NEXT_PUBLIC_PLATFORM_URL || "/dashboard";
+      window.location.assign(new URL(platformHome, window.location.origin).href);
+    } else if (authError === "facebook_email_required") window.setTimeout(() => setError(copy.facebookEmailRequired), 0);
+    else if (authError === "facebook_email_unverified") window.setTimeout(() => setError(copy.facebookEmailUnverified), 0);
+    else if (authError) window.setTimeout(() => setError(copy.unavailableNotice), 0);
+  }, [copy.facebookEmailRequired, copy.facebookEmailUnverified, copy.unavailableNotice]);
   const localeFontClass = currentLang === "bn" ? "font-bangla" : currentLang === "ar" ? "font-arabic" : currentLang === "ur" ? "font-urdu" : currentLang === "fa" ? "font-persian" : "font-sans";
-  const identifierIcon = identifierType === "email" ? Mail : identifierType === "phone" ? Phone : UserRound;
+  const identifierIcon = identifierType === "email" ? Mail : UserRound;
   const IdentifierIcon = identifierIcon;
-  const identifierField = identifierType === "email" ? copy.fields.email : identifierType === "phone" ? copy.fields.phone : copy.fields.username;
-  const identifierPlaceholder = identifierType === "email" ? copy.placeholders.email : identifierType === "phone" ? copy.placeholders.phone : copy.placeholders.username;
-  const identifierInputType = identifierType === "email" ? "email" : identifierType === "phone" ? "tel" : "text";
-  const identifierAutocomplete = identifierType === "phone" ? "tel" : identifierType === "email" ? "email" : "username";
+  const identifierField = identifierType === "email" ? copy.fields.email : copy.fields.username;
+  const identifierPlaceholder = identifierType === "email" ? copy.placeholders.email : copy.placeholders.username;
+  const identifierInputType = identifierType === "email" ? "email" : "text";
+  const identifierAutocomplete = identifierType === "email" ? "email" : "username";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -57,13 +70,14 @@ export default function LoginPageContent() {
     }
   }
 
-  async function runUnavailableAction(action: "google" | "apple" | "phone" | "passkey") {
+  async function runUnavailableAction(action: "google" | "facebook" | "microsoft" | "passkey") {
     setPending(true);
     setError("");
     try {
-      if (action === "google" || action === "apple") await startOAuth(action);
-      else if (action === "phone") await requestPhoneSignIn(email.trim());
-      else await requestPasskeySignIn();
+      if (action !== "passkey") {
+        if (!providers?.[action]) { setError(copy.unavailableNotice); return; }
+        startOAuth(action);
+      } else await requestPasskeySignIn();
       setError(copy.unavailableNotice);
     } catch {
       setError(copy.unavailableNotice);
@@ -86,8 +100,8 @@ export default function LoginPageContent() {
                 <p className="mt-2 text-base text-[var(--text-muted)] sm:text-lg lg:text-[19px]">{copy.subtitle}</p>
               </div>
 
-              <div className="mb-7 grid grid-cols-3 overflow-hidden rounded-xl border border-[var(--border-light)] bg-[var(--background)] lg:mb-9" aria-label={`${copy.methods.email}, ${copy.methods.phone}, ${copy.methods.username}`}>
-                {([{ type: "email", label: copy.methods.email, Icon: Mail, testid: "tab-email" }, { type: "phone", label: copy.methods.phone, Icon: Phone, testid: "tab-phone" }, { type: "username", label: copy.methods.username, Icon: UserRound, testid: "tab-username" }] as const).map(({ type, label, Icon, testid }) => <button key={type} data-testid={testid} type="button" aria-pressed={identifierType === type} onClick={() => { setIdentifierType(type); setError(""); }} className={`flex min-h-[65px] items-center justify-center gap-2 border-b-[3px] px-1 text-sm font-medium sm:text-base lg:text-[17px] ${identifierType === type ? "border-b-[var(--primary-soft)] text-[var(--primary)]" : "border-b-transparent text-[var(--text-muted)]"}`}><Icon aria-hidden="true" className="h-5 w-5" />{label}</button>)}
+              <div className="mb-7 grid grid-cols-2 overflow-hidden rounded-xl border border-[var(--border-light)] bg-[var(--background)] lg:mb-9" aria-label={`${copy.methods.email}, ${copy.methods.username}`}>
+                {([{ type: "email", label: copy.methods.email, Icon: Mail, testid: "tab-email" }, { type: "username", label: copy.methods.username, Icon: UserRound, testid: "tab-username" }] as const).map(({ type, label, Icon, testid }) => <button key={type} data-testid={testid} type="button" aria-pressed={identifierType === type} onClick={() => { setIdentifierType(type); setError(""); }} className={`flex min-h-[65px] items-center justify-center gap-2 border-b-[3px] px-1 text-sm font-medium sm:text-base lg:text-[17px] ${identifierType === type ? "border-b-[var(--primary-soft)] text-[var(--primary)]" : "border-b-transparent text-[var(--text-muted)]"}`}><Icon aria-hidden="true" className="h-5 w-5" />{label}</button>)}
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5 lg:space-y-[25px]">
@@ -95,7 +109,7 @@ export default function LoginPageContent() {
                   <label htmlFor="login-identifier" className="mb-2 block font-subheading text-sm font-semibold text-[var(--text-dark)] lg:text-base">{identifierField}</label>
                   <div className="relative">
                     <IdentifierIcon aria-hidden="true" className="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--text-muted)]" />
-                    <input data-testid="field-identifier" id="login-identifier" name="identifier" type={identifierInputType} inputMode={identifierType === "phone" ? "tel" : identifierType === "email" ? "email" : "text"} autoComplete={identifierAutocomplete} aria-describedby={error ? "login-error" : undefined} aria-invalid={Boolean(error)} required value={email} onChange={(event) => setEmail(event.target.value)} placeholder={identifierPlaceholder} className="min-h-[54px] w-full rounded-lg border border-[var(--border-light)] bg-[var(--surface)] ps-12 pe-4 text-start text-sm text-[var(--text-dark)] outline-none transition-shadow placeholder:text-[var(--text-muted)]/80 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--accent)]/35 sm:text-base lg:min-h-[61px]" />
+                    <input data-testid="field-identifier" id="login-identifier" name="identifier" type={identifierInputType} inputMode={identifierType === "email" ? "email" : "text"} autoComplete={identifierAutocomplete} aria-describedby={error ? "login-error" : undefined} aria-invalid={Boolean(error)} required value={email} onChange={(event) => setEmail(event.target.value)} placeholder={identifierPlaceholder} className="min-h-[54px] w-full rounded-lg border border-[var(--border-light)] bg-[var(--surface)] ps-12 pe-4 text-start text-sm text-[var(--text-dark)] outline-none transition-shadow placeholder:text-[var(--text-muted)]/80 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--accent)]/35 sm:text-base lg:min-h-[61px]" />
                   </div>
                 </div>
                 <div>
@@ -120,12 +134,10 @@ export default function LoginPageContent() {
               <>
                 <div data-testid="divider-continue" className="my-5 flex items-center gap-3 text-sm text-[var(--text-muted)]"><span className="h-px flex-1 bg-[var(--border-light)]" />{copy.continueWith}<span className="h-px flex-1 bg-[var(--border-light)]" /></div>
                 <div className="space-y-3">
-                  <button data-testid="social-google" type="button" onClick={() => void runUnavailableAction("google")} disabled={pending} className="relative flex min-h-[58px] w-full items-center justify-center rounded-lg border border-[var(--border-light)] bg-[var(--surface)] text-base text-[var(--text-dark)]"><FaGoogle aria-hidden="true" className="absolute start-5 h-5 w-5" /><span>{copy.social.google}</span></button>
-                  <button data-testid="social-apple" type="button" onClick={() => void runUnavailableAction("apple")} disabled={pending} className="relative flex min-h-[58px] w-full items-center justify-center rounded-lg border border-[var(--border-light)] bg-[var(--surface)] text-base text-[var(--text-dark)]"><FaApple aria-hidden="true" className="absolute start-5 h-5 w-5 text-black" /><span>{copy.social.apple}</span></button>
-                  <button data-testid="social-phone" type="button" onClick={() => void runUnavailableAction("phone")} disabled={pending} className="relative flex min-h-[58px] w-full items-center justify-center rounded-lg border border-[var(--border-light)] bg-[var(--surface)] text-base text-[var(--text-dark)]"><Phone aria-hidden="true" className="absolute start-5 h-5 w-5 text-[var(--primary)]" /><span>{copy.social.phone}</span></button>
+                  {(["google", "facebook", "microsoft"] as const).filter((provider) => process.env.NODE_ENV !== "production" || providers?.[provider]).map((provider) => <button key={provider} data-testid={`social-${provider}`} type="button" onClick={() => void runUnavailableAction(provider)} disabled={pending} className="relative flex min-h-[58px] w-full items-center justify-center rounded-lg border border-[var(--border-light)] bg-[var(--surface)] text-base text-[var(--text-dark)]"><BrandMark provider={provider} className="absolute start-5 h-5 w-5" /><span>{copy.social[provider]}</span></button>)}
                 </div>
                 <div data-testid="divider-login-with" className="my-5 flex items-center gap-3 text-sm text-[var(--primary)] lg:mb-10"><span className="h-px flex-1 bg-[var(--border-light)]" />{copy.loginWith}<span className="h-px flex-1 bg-[var(--border-light)]" /></div>
-                <div className="flex flex-col items-center gap-2"><button data-testid="biometrics-button" type="button" onClick={() => void runUnavailableAction("passkey")} aria-label={copy.biometrics} className="flex h-[86px] w-[86px] items-center justify-center rounded-full border border-[var(--border-light)] text-[var(--primary-soft)] shadow-[var(--shadow-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"><Fingerprint aria-hidden="true" className="h-9 w-9" /></button><span className="text-sm text-[var(--text-muted)]">{copy.biometrics}</span></div>
+                {supportsWebAuthn && <div className="flex flex-col items-center gap-2"><button data-testid="biometrics-button" type="button" onClick={() => void runUnavailableAction("passkey")} aria-label={copy.biometrics} className="flex h-[86px] w-[86px] items-center justify-center rounded-full border border-[var(--border-light)] text-[var(--primary-soft)] shadow-[var(--shadow-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"><Fingerprint aria-hidden="true" className="h-9 w-9" /></button><span className="text-sm text-[var(--text-muted)]">{copy.biometrics}</span></div>}
                 <p className="mt-5 text-center text-sm text-[var(--text-muted)] sm:text-base lg:mt-[56px]">{copy.noAccount} <Link data-testid="create-account-link" href="/get-started" className="font-semibold text-[var(--primary)] hover:underline">{copy.createAccount}</Link></p>
                 <div data-testid="encryption-note" className="mt-5 flex items-center justify-center gap-2 border-t border-[var(--border-light)] pt-4 text-sm text-[var(--text-muted)] lg:mt-[70px]"><ShieldCheck aria-hidden="true" className="h-5 w-5 text-[var(--primary)]" />{copy.encryptionNote}</div>
               </>

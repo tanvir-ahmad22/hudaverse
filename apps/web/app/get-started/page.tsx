@@ -1,2 +1,3 @@
-import AuthFlowPage from "@/components/auth/AuthFlowPage";
-export default function GetStartedPage() { return <AuthFlowPage flow="register" />; }
+import SignUpPage from "@/components/auth/SignUpPage";
+
+export default function GetStartedPage() { return <SignUpPage />; }

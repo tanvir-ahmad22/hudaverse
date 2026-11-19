@@ -3,9 +3,9 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/hooks/useLanguage";
-import { registerAccount, requestPasswordReset, resetPassword } from "@/modules/auth/services/auth.service";
+import { requestPasswordReset, resetPassword } from "@/modules/auth/services/auth.service";
 
-type Flow = "register" | "forgot" | "reset";
+type Flow = "forgot" | "reset";
 
 const labels = {
   en: { title: { register: "Create Account", forgot: "Reset your password", reset: "Choose a new password" }, name: "Full name", username: "Username", email: "Email address", password: "Password", confirm: "Confirm password", submit: { register: "Create account", forgot: "Send reset link", reset: "Save new password" }, working: "Please wait…", success: { register: "Account created. Check your email to verify your address.", forgot: "If an account matches that email, password reset instructions have been sent.", reset: "Password updated. You can sign in now." }, failure: "We couldn't complete your request. Please try again.", back: "Back to sign in", mismatch: "Passwords do not match." },
@@ -30,8 +30,7 @@ export default function AuthFlowPage({ flow }: { flow: Flow }) {
     const data = new FormData(event.currentTarget);
     setPending(true); setMessage(""); setError("");
     try {
-      if (flow === "register") await registerAccount({ name: String(data.get("name")), username: String(data.get("username")), email: String(data.get("email")), password: String(data.get("password")) });
-      else if (flow === "forgot") await requestPasswordReset(String(data.get("email")));
+      if (flow === "forgot") await requestPasswordReset(String(data.get("email")));
       else {
         const password = String(data.get("password"));
         if (password !== String(data.get("confirm"))) throw new Error(text.mismatch);
@@ -42,7 +41,7 @@ export default function AuthFlowPage({ flow }: { flow: Flow }) {
     finally { setPending(false); }
   }
 
-  const fields = flow === "register" ? [ ["name", text.name, "text", "name"], ["username", text.username, "text", "username"], ["email", text.email, "email", "email"], ["password", text.password, "password", "new-password"] ] : flow === "forgot" ? [["email", text.email, "email", "email"]] : [["password", text.password, "password", "new-password"], ["confirm", text.confirm, "password", "new-password"]];
+  const fields = flow === "forgot" ? [["email", text.email, "email", "email"]] : [["password", text.password, "password", "new-password"], ["confirm", text.confirm, "password", "new-password"]];
 
   return <main lang={currentLang} dir={currentLanguage.dir} className={`flex min-h-dvh items-center justify-center bg-[var(--background)] px-4 py-8 ${font}`}><section className="w-full max-w-xl rounded-3xl border border-[var(--border-light)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] sm:p-10"><h1 className="font-subheading text-3xl font-bold text-[var(--text-dark)]">{text.title[flow]}</h1><form onSubmit={submit} className="mt-8 space-y-5">{fields.map(([name, label, type, autocomplete]) => <div key={name}><label htmlFor={`auth-${name}`} className="mb-2 block text-sm font-semibold text-[var(--text-dark)]">{label}</label><input id={`auth-${name}`} name={name} type={type} autoComplete={autocomplete} required minLength={type === "password" ? 8 : undefined} className="min-h-12 w-full rounded-xl border border-[var(--border-light)] bg-[var(--surface)] px-4 text-[var(--text-dark)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--accent)]/35" /></div>)}<button disabled={pending} className="min-h-12 w-full rounded-xl bg-[var(--primary)] px-5 font-semibold text-white disabled:opacity-60">{pending ? text.working : text.submit[flow]}</button></form><p aria-live="polite" className="mt-4 text-sm text-[var(--primary)]">{message}</p>{error && <p role="alert" className="mt-2 text-sm text-[var(--status-error)]">{error}</p>}<Link href="/login" className="mt-5 inline-flex min-h-11 items-center font-medium text-[var(--primary)] hover:underline">{text.back}</Link></section></main>;
 }

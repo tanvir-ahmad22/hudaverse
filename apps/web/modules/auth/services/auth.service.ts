@@ -4,6 +4,10 @@ type AuthResponse = {
   message?: string;
 };
 
+export class AuthServiceError extends Error {
+  constructor(message: string, public readonly status: number) { super(message); }
+}
+
 async function postAuth<T extends AuthResponse>(path: string, body: unknown): Promise<T> {
   let response: Response;
   try {
@@ -20,7 +24,7 @@ async function postAuth<T extends AuthResponse>(path: string, body: unknown): Pr
   const result = (await response.json().catch(() => ({}))) as T & { message?: string | string[] };
   if (!response.ok) {
     const message = Array.isArray(result.message) ? result.message[0] : result.message;
-    throw new Error(message || "We couldn't complete your request. Please try again.");
+    throw new AuthServiceError(message || "We couldn't complete your request. Please try again.", response.status);
   }
   return result;
 }
@@ -37,33 +41,41 @@ export type AuthProviders = {
   identifiers: string[];
   password: boolean;
   google: boolean;
-  apple: boolean;
-  phoneOtp: boolean;
+  microsoft: boolean;
+  facebook: boolean;
   passkeys: boolean;
 };
 
 export async function getAuthProviders(): Promise<AuthProviders> {
   const response = await fetch(`${API_BASE_URL}/auth/providers`, {
     credentials: "include",
-    cache: "force-cache",
+    cache: "no-store",
   });
   if (!response.ok) throw new Error("Sign-in methods are temporarily unavailable.");
   return response.json() as Promise<AuthProviders>;
 }
 
-export function startOAuth(provider: "google" | "apple") {
-  return postAuth(`oauth/${provider}`, {});
-}
-
-export function requestPhoneSignIn(phone: string) {
-  return postAuth("phone/otp", { phone });
+export function startOAuth(provider: "google" | "facebook" | "microsoft") {
+  window.location.assign(`${API_BASE_URL}/auth/oauth/${provider}`);
 }
 
 export function requestPasskeySignIn() {
   return postAuth("passkeys/authentication/options", {});
 }
 
-export function registerAccount(input: { name: string; email: string; username: string; password: string }) {
+export type RegisterAccountInput = {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  dateOfBirth?: string;
+  country?: string;
+  interests: string[];
+  termsAccepted: true;
+  locale: string;
+};
+
+export function registerAccount(input: RegisterAccountInput) {
   return postAuth("register", input);
 }
 

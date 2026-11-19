@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
 
@@ -48,12 +48,12 @@ export interface LanguageOption {
  */
 
 export const LANGUAGES = [
-  { code: "en", label: "English", nativeLabel: "English", flag: "🇬🇧" },
-  { code: "bn", label: "Bangla", nativeLabel: "বাংলা", flag: "🇧🇩" },
-  { code: "ar", label: "Arabic", nativeLabel: "العربية", flag: "🇸🇦" },
-  { code: "fa", label: "Persian", nativeLabel: "فارسی", flag: "🇮🇷" },
-  { code: "ur", label: "Urdu", nativeLabel: "اردو", flag: "🇵🇰" },
-  { code: "tr", label: "Turkish", nativeLabel: "Türkçe", flag: "🇹🇷" },
+  { code: "en", label: "English", nativeLabel: "English", flag: "EN" },
+  { code: "bn", label: "Bangla", nativeLabel: "বাংলা", flag: "BN" },
+  { code: "ar", label: "Arabic", nativeLabel: "العربية", flag: "AR" },
+  { code: "fa", label: "Persian", nativeLabel: "فارسی", flag: "FA" },
+  { code: "ur", label: "Urdu", nativeLabel: "اردو", flag: "UR" },
+  { code: "tr", label: "Turkish", nativeLabel: "Türkçe", flag: "TR" },
 ] as const;
 
 export type LanguageCode = (typeof LANGUAGES)[number]["code"];

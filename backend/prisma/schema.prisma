@@ -18,6 +18,15 @@ enum Role {
   USER
 }
 
+enum SignupInterest {
+  QURAN
+  HADITH
+  FIQH
+  TAFSIR
+  ISLAMIC_HISTORY
+  OTHERS
+}
+
 // =========================
 // USER
 // =========================
@@ -25,13 +34,13 @@ model User {
   id       String  @id @default(uuid())
   email    String  @unique @db.VarChar(255)
   username String? @unique @db.VarChar(64)
-  phone    String? @unique @db.VarChar(32)
   password String?
 
   // =========================
   // AUTH SESSION
   // =========================
   refreshTokens RefreshToken[]
+  oauthAccounts OAuthAccount[]
 
   // =========================
   // EMAIL VERIFICATION
@@ -66,6 +75,7 @@ model User {
   // RELATIONS
   // =========================
   profile    Profile?
+  consents   ConsentRecord[]
   roles      UserRole[]
   workspaces Workspace[]
 
@@ -79,6 +89,17 @@ model User {
   @@index([isActive])
   @@index([emailVerified])
   @@index([createdAt])
+}
+
+model OAuthAccount {
+  id                String   @id @default(uuid())
+  provider          String   @db.VarChar(32)
+  providerAccountId String   @db.VarChar(255)
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 // =========================
@@ -148,9 +169,22 @@ model Profile {
   bio      String?
   language String  @default("bn") @db.VarChar(10)
   timezone String  @default("Asia/Dhaka") @db.VarChar(50)
+  dateOfBirth DateTime?
+  country String? @db.VarChar(2)
+  interests SignupInterest[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ConsentRecord {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consent    String   @db.VarChar(32)
+  version    String   @db.VarChar(32)
+  acceptedAt DateTime @default(now())
+  @@index([userId, consent, acceptedAt])
 }
 
 // =========================

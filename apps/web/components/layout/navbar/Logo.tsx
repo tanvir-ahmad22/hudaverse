@@ -27,6 +27,8 @@ interface LogoProps {
   size?: "default" | "large";
   taglineTestId?: string;
   staticTagline?: boolean;
+  taglineText?: string;
+  priority?: boolean;
 }
 
 // ============================================================
@@ -72,6 +74,8 @@ export const Logo = React.memo(function Logo({
   size = "default",
   taglineTestId,
   staticTagline = false,
+  taglineText = TAGLINE,
+  priority = true,
 }: LogoProps) {
   const [typedText, setTypedText] = useState("");
   const [, setIsTyping] = useState(false);
@@ -234,7 +238,7 @@ export const Logo = React.memo(function Logo({
           alt="HudaVerse"
           width={64}
           height={64}
-          priority
+          priority={priority}
           draggable={false}
           className={`${size === "large" ? "h-24" : "h-11"} w-auto object-contain`}
         />
@@ -327,9 +331,9 @@ export const Logo = React.memo(function Logo({
               <span
                 data-testid={taglineTestId}
                 className={`relative flex items-center whitespace-nowrap font-medium leading-none tracking-[0.075em] ${size === "large" ? "h-[30px] text-base" : "h-[17px] text-[10px]"} ${tone === "light" ? "text-[var(--text-on-dark-muted)]/85" : "text-[var(--text-muted)]"}`}
-                aria-label={TAGLINE}
+                aria-label={taglineText}
               >
-                {staticTagline ? <span>{TAGLINE}</span> : <>
+                {staticTagline ? <span>{taglineText}</span> : <>
                 {/* --------------------------------------------------
                     GHOST LAYER
                     Reserves the full tagline width. Invisible.
@@ -339,7 +343,7 @@ export const Logo = React.memo(function Logo({
                   aria-hidden="true"
                   className="invisible whitespace-nowrap"
                 >
-                  {TAGLINE}
+                  {taglineText}
                 </span>
 
                 {/* --------------------------------------------------

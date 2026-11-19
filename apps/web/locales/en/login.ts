@@ -4,18 +4,15 @@ const login = {
   subtitle: "Login to continue your spiritual journey",
   methods: {
     email: "Email",
-    phone: "Phone",
     username: "Username",
   },
   fields: {
     email: "Email Address",
-    phone: "Phone Number",
     username: "Username",
     password: "Password",
   },
   placeholders: {
     email: "Enter your email address",
-    phone: "Enter your phone number",
     username: "Enter your username",
     password: "Enter your password",
   },
@@ -26,13 +23,15 @@ const login = {
   loginWith: "or login with",
   social: {
     google: "Continue with Google",
-    apple: "Continue with Apple",
-    phone: "Continue with Phone",
+    facebook: "Continue with Facebook",
+    microsoft: "Continue with Microsoft",
   },
   noAccount: "Don't have an account?",
   createAccount: "Create Account",
   previewNotice: "This sign-in method is not available yet.",
   unavailableNotice: "This sign-in method is not available yet.",
+  facebookEmailRequired: "Facebook did not provide an email address. Please sign up with your email instead.",
+  facebookEmailUnverified: "Facebook could not verify this email for account linking. Sign in with your email and password instead.",
   forgotNotice: "If an account matches that email, password reset instructions have been sent.",
   submitting: "Signing you in…",
   genericFailure: "We couldn't complete sign-in. Please try again.",
@@ -79,19 +78,21 @@ export interface LoginTranslations {
   previewLabel: string;
   title: string;
   subtitle: string;
-  methods: { email: string; phone: string; username: string };
-  fields: { email: string; phone: string; username: string; password: string };
-  placeholders: { email: string; phone: string; username: string; password: string };
+  methods: { email: string; username: string };
+  fields: { email: string; username: string; password: string };
+  placeholders: { email: string; username: string; password: string };
   rememberMe: string;
   forgotPassword: string;
   loginButton: string;
   continueWith: string;
   loginWith: string;
-  social: { google: string; apple: string; phone: string };
+  social: { google: string; facebook: string; microsoft: string };
   noAccount: string;
   createAccount: string;
   previewNotice: string;
   unavailableNotice: string;
+  facebookEmailRequired: string;
+  facebookEmailUnverified: string;
   forgotNotice: string;
   submitting: string;
   genericFailure: string;

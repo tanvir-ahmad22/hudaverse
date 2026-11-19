@@ -1,4 +1,4 @@
-/* ================================================================
+﻿/* ================================================================
    HUDAVERSE — NAVBAR ENGLISH TRANSLATIONS
    Language: English
    Source of truth for navbar UI text (single translation system —
@@ -67,6 +67,7 @@ export const navbar = {
 
   // Bar actions
   actions: {
+    skipToContent: "Skip to main content",
     search: "Search",
     selectLanguage: "Select Language",
     searchLanguage: "Search language...",

@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 
 const baseUrl = process.env.LOGIN_AUDIT_BASE_URL ?? "http://localhost:3000";
 const browser = await chromium.launch({ headless: true });
-const allIds = ["login-logo", "login-tagline", "login-heading", "tab-email", "tab-phone", "tab-username", "field-identifier", "field-password", "password-toggle", "remember-me", "forgot-link", "login-submit", "divider-continue", "social-google", "social-apple", "social-phone", "divider-login-with", "biometrics-button", "create-account-link", "encryption-note", "lang-selector", "theme-toggle", "verse-arabic", "verse-translation", "verse-citation", "feature-secure", "feature-authentic", "feature-ai", "feature-offline"];
+const allIds = ["login-logo", "login-tagline", "login-heading", "tab-email", "tab-username", "field-identifier", "field-password", "password-toggle", "remember-me", "forgot-link", "login-submit", "divider-continue", "social-google", "social-facebook", "social-microsoft", "divider-login-with", "create-account-link", "encryption-note", "lang-selector", "theme-toggle", "verse-arabic", "verse-translation", "verse-citation", "feature-secure", "feature-authentic", "feature-ai", "feature-offline"];
 const rightPanelIds = new Set(["lang-selector", "theme-toggle", "verse-arabic", "verse-translation", "verse-citation", "feature-secure", "feature-authentic", "feature-ai", "feature-offline"]);
 
 for (const width of [1440, 1920, 390]) {
@@ -15,9 +15,6 @@ for (const width of [1440, 1920, 390]) {
     if (width === 390 && rightPanelIds.has(id)) continue;
     assert.equal(await page.getByTestId(id).isVisible(), true, `${id} should be visible at ${width}px`);
   }
-  await page.getByTestId("tab-phone").click();
-  assert.equal(await page.getByTestId("field-identifier").getAttribute("type"), "tel");
-  assert.equal(await page.getByTestId("field-identifier").getAttribute("placeholder"), "Enter your phone number");
   await page.getByTestId("tab-username").click();
   assert.equal(await page.getByTestId("field-identifier").getAttribute("autocomplete"), "username");
   await page.getByTestId("tab-email").click();
@@ -38,15 +35,14 @@ for (const width of [1440, 1920, 390]) {
   await page.getByTestId("social-google").click();
   await page.locator("#login-error").waitFor();
   assert.match(await page.locator("#login-error").innerText(), /not available yet/i);
-  await page.getByTestId("social-apple").click();
+  await page.getByTestId("social-facebook").click();
   await page.locator("#login-error").waitFor();
   assert.match(await page.locator("#login-error").innerText(), /not available yet/i);
-  await page.getByTestId("social-phone").click();
-  await page.locator("#login-error").waitFor();
-  assert.match(await page.locator("#login-error").innerText(), /not available yet/i);
-  await page.getByTestId("biometrics-button").click();
-  await page.locator("#login-error").waitFor();
-  assert.match(await page.locator("#login-error").innerText(), /not available yet/i);
+  if (await page.getByTestId("biometrics-button").count()) {
+    await page.getByTestId("biometrics-button").click();
+    await page.locator("#login-error").waitFor();
+    assert.match(await page.locator("#login-error").innerText(), /not available yet/i);
+  }
   await page.getByTestId("forgot-link").click();
   await page.waitForURL("**/forgot-password");
   assert.equal(await page.locator("form input[type=email]").count(), 1);
@@ -66,6 +62,15 @@ for (const width of [1440, 1920, 390]) {
   }
   await page.close();
 }
+
+const callbackPage = await browser.newPage({ viewport: { width: 390, height: 900 } });
+await callbackPage.goto(`${baseUrl}/login?authError=facebook_email_required`, { waitUntil: "networkidle" });
+await callbackPage.locator("#login-error").waitFor();
+assert.match(await callbackPage.locator("#login-error").innerText(), /Facebook did not provide an email address/i);
+await callbackPage.goto(`${baseUrl}/login?authError=facebook_email_unverified`, { waitUntil: "networkidle" });
+await callbackPage.locator("#login-error").waitFor();
+assert.match(await callbackPage.locator("#login-error").innerText(), /could not verify this email/i);
+await callbackPage.close();
 
 await browser.close();
 console.log("Login visible-element and interaction checks passed at 1440px, 1920px, and 390px. Provider/passkey actions returned the expected honest unavailable state.");

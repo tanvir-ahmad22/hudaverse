@@ -1499,6 +1499,12 @@
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
 }
 
+.hv-signup-submit .hv-btn-gold {
+  min-height: 54px;
+  width: 100%;
+  border-radius: 999px;
+}
+
 @media (min-width: 1024px) {
   #login-page .hv-login-card {
     --hv-login-card-width: calc(100% + 40px);
